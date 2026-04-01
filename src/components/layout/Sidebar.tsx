@@ -5,27 +5,47 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, Building2, Users, Layers, FileText,
-  CreditCard, Receipt, BarChart3, Settings,
-  ChevronLeft, ChevronRight,
+  CreditCard, Receipt, BarChart3, Settings, UserCog,
+  ChevronLeft, ChevronRight, ChevronDown,
 } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
 
-const navItems = [
-  { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', exact: true },
-  { href: '/dashboard/units', icon: Building2, label: 'Unidades' },
-  { href: '/dashboard/tenants', icon: Users, label: 'Inquilinos' },
-  { href: '/dashboard/groups', icon: Layers, label: 'Grupos' },
-  { href: '/dashboard/contracts', icon: FileText, label: 'Contratos' },
-  { href: '/dashboard/payments', icon: CreditCard, label: 'Pagos' },
-  { href: '/dashboard/expenses', icon: Receipt, label: 'Gastos' },
-  { href: '/dashboard/reports', icon: BarChart3, label: 'Reportes' },
-  { href: '/dashboard/settings', icon: Settings, label: 'Configuración' },
+type NavItem = {
+  href: string
+  icon: React.ElementType
+  label: string
+  exact?: boolean
+  children?: { href: string; icon: React.ElementType; label: string }[]
+}
+
+const navItems: NavItem[] = [
+  { href: '/', icon: LayoutDashboard, label: 'Dashboard', exact: true },
+  { href: '/units', icon: Building2, label: 'Unidades' },
+  { href: '/tenants', icon: Users, label: 'Inquilinos' },
+  { href: '/groups', icon: Layers, label: 'Grupos' },
+  { href: '/contracts', icon: FileText, label: 'Contratos' },
+  { href: '/payments', icon: CreditCard, label: 'Pagos' },
+  { href: '/expenses', icon: Receipt, label: 'Gastos' },
+  { href: '/reports', icon: BarChart3, label: 'Reportes' },
+  {
+    href: '/settings',
+    icon: Settings,
+    label: 'Configuración',
+    children: [
+      { href: '/settings/users', icon: UserCog, label: 'Usuarios' },
+    ],
+  },
 ]
 
 export function Sidebar() {
   const [collapsed, setCollapsed] = useState(false)
   const pathname = usePathname()
+
+  // Keep settings open if any child is active
+  const [settingsOpen, setSettingsOpen] = useState(
+    () => pathname.startsWith('/settings')
+  )
 
   return (
     <aside
@@ -56,6 +76,101 @@ export function Sidebar() {
             ? pathname === item.href
             : pathname.startsWith(item.href)
 
+          // Item with children (collapsible group)
+          if (item.children) {
+            const trigger = (
+              <button
+                onClick={() => !collapsed && setSettingsOpen((o) => !o)}
+                className={cn(
+                  'flex h-9 w-full items-center gap-2.5 rounded-md px-2.5 text-sm transition-colors',
+                  collapsed && 'justify-center px-0',
+                  isActive
+                    ? 'bg-primary/10 text-primary font-medium'
+                    : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                )}
+              >
+                <item.icon className="h-4 w-4 shrink-0" />
+                {!collapsed && (
+                  <>
+                    <span className="flex-1 text-left">{item.label}</span>
+                    <ChevronDown
+                      className={cn(
+                        'h-3.5 w-3.5 shrink-0 transition-transform duration-200',
+                        settingsOpen && 'rotate-180'
+                      )}
+                    />
+                  </>
+                )}
+              </button>
+            )
+
+            return (
+              <div key={item.href}>
+                {collapsed ? (
+                  <Tooltip>
+                    <TooltipTrigger asChild>{trigger}</TooltipTrigger>
+                    <TooltipContent side="right">{item.label}</TooltipContent>
+                  </Tooltip>
+                ) : (
+                  trigger
+                )}
+
+                {/* Children */}
+                {!collapsed && settingsOpen && (
+                  <div className="mt-0.5 ml-3 space-y-0.5 border-l border-border pl-3">
+                    {item.children.map((child) => {
+                      const childActive = pathname.startsWith(child.href)
+                      return (
+                        <Link
+                          key={child.href}
+                          href={child.href}
+                          className={cn(
+                            'flex h-8 items-center gap-2 rounded-md px-2 text-sm transition-colors',
+                            childActive
+                              ? 'bg-primary/10 text-primary font-medium'
+                              : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                          )}
+                        >
+                          <child.icon className="h-3.5 w-3.5 shrink-0" />
+                          <span>{child.label}</span>
+                        </Link>
+                      )
+                    })}
+                  </div>
+                )}
+
+                {/* Collapsed: show children as tooltips */}
+                {collapsed && (
+                  <div className="mt-0.5 space-y-0.5">
+                    {item.children.map((child) => {
+                      const childActive = pathname.startsWith(child.href)
+                      const childLink = (
+                        <Link
+                          href={child.href}
+                          className={cn(
+                            'flex h-9 items-center justify-center rounded-md px-0 text-sm transition-colors',
+                            childActive
+                              ? 'bg-primary/10 text-primary'
+                              : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                          )}
+                        >
+                          <child.icon className="h-4 w-4 shrink-0" />
+                        </Link>
+                      )
+                      return (
+                        <Tooltip key={child.href}>
+                          <TooltipTrigger asChild>{childLink}</TooltipTrigger>
+                          <TooltipContent side="right">{child.label}</TooltipContent>
+                        </Tooltip>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+            )
+          }
+
+          // Regular item
           const link = (
             <Link
               href={item.href}
@@ -88,7 +203,7 @@ export function Sidebar() {
       {/* Collapse toggle */}
       <button
         onClick={() => setCollapsed((c) => !c)}
-        className="absolute -right-3 top-[3.75rem] z-10 flex h-6 w-6 items-center justify-center rounded-full border border-border bg-background text-muted-foreground shadow-sm transition-colors hover:text-foreground"
+        className="absolute -right-3 top-15 z-10 flex h-6 w-6 items-center justify-center rounded-full border border-border bg-background text-muted-foreground shadow-sm transition-colors hover:text-foreground"
         aria-label={collapsed ? 'Expandir sidebar' : 'Colapsar sidebar'}
       >
         {collapsed ? (

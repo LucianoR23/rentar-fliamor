@@ -65,7 +65,7 @@ export function TenantForm({ defaultValues, tenantId }: TenantFormProps) {
     }
 
     const tenant = await res.json() as { id: string }
-    router.push(`/dashboard/tenants/${tenant.id}`)
+    router.push(`/tenants/${tenant.id}`)
     router.refresh()
   }
 

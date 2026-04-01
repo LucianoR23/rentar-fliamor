@@ -30,13 +30,13 @@ export default async function TenantDetailPage({ params }: Props) {
         description={`DNI ${tenant.dni}`}
       >
         <Button asChild variant="ghost" size="sm">
-          <Link href="/dashboard/tenants">
+          <Link href="/tenants">
             <ArrowLeft className="h-4 w-4" />
             Volver
           </Link>
         </Button>
         <Button asChild size="sm">
-          <Link href={`/dashboard/tenants/${tenant.id}/edit`}>
+          <Link href={`/tenants/${tenant.id}/edit`}>
             <Pencil className="h-4 w-4" />
             Editar
           </Link>

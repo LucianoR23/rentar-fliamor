@@ -18,7 +18,7 @@ export default async function TenantsPage() {
         description={`${allTenants.length} registrado${allTenants.length !== 1 ? 's' : ''}`}
       >
         <Button asChild size="sm">
-          <Link href="/dashboard/tenants/new">
+          <Link href="/tenants/new">
             <Plus className="h-4 w-4" />
             Nuevo inquilino
           </Link>
@@ -32,7 +32,7 @@ export default async function TenantsPage() {
           description="Agregá tu primer inquilino para empezar."
         >
           <Button asChild size="sm">
-            <Link href="/dashboard/tenants/new">
+            <Link href="/tenants/new">
               <Plus className="h-4 w-4" />
               Nuevo inquilino
             </Link>
