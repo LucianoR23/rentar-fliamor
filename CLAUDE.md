@@ -63,7 +63,7 @@ Light: background #FAFAFA, surface #FFFFFF, border #E4E4E7, primary #6D28D9, acc
 |----------|-------------|
 | `DATABASE_URL` | Supabase PostgreSQL connection string (Transaction Pooler) |
 | `NEXT_PUBLIC_SUPABASE_URL` | URL del proyecto Supabase |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon/public key |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY` | Supabase anon/public key |
 | `SUPABASE_SERVICE_ROLE_KEY` | Supabase service role key (solo server-side) |
 | `R2_ACCOUNT_ID` | Cloudflare Account ID |
 | `R2_ACCESS_KEY_ID` | R2 access key |
