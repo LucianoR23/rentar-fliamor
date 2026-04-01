@@ -7,10 +7,17 @@ import { type ColumnDef } from '@tanstack/react-table'
 import { Eye, Pencil, Trash2 } from 'lucide-react'
 import { DataTable } from '@/components/shared/DataTable'
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
+import { UnitStatusBadge } from './UnitStatusBadge'
 import { Button } from '@/components/ui/button'
-import type { Tenant } from '@/types'
+import { UNIT_TYPE_LABELS } from '@/lib/validations/unit'
+import type { Unit, Group } from '@/types'
 
-export function TenantsTable({ data }: { data: Tenant[] }) {
+export type UnitRow = Unit & {
+  group: Group | null
+  hasActiveContract: boolean
+}
+
+export function UnitsTable({ data }: { data: UnitRow[] }) {
   const router = useRouter()
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
@@ -18,41 +25,50 @@ export function TenantsTable({ data }: { data: Tenant[] }) {
   async function handleDelete() {
     if (!deleteId) return
     setDeleting(true)
-    await fetch(`/api/tenants/${deleteId}`, { method: 'DELETE' })
+    await fetch(`/api/units/${deleteId}`, { method: 'DELETE' })
     setDeleting(false)
     setDeleteId(null)
     router.refresh()
   }
 
-  const columns: ColumnDef<Tenant>[] = [
+  const columns: ColumnDef<UnitRow>[] = [
     {
-      id: 'name',
-      accessorFn: (row) => `${row.lastName} ${row.firstName}`,
-      header: 'Nombre',
-      cell: ({ row }) => (
-        <span className="font-medium">
-          {row.original.lastName}, {row.original.firstName}
-        </span>
-      ),
-    },
-    {
-      accessorKey: 'dni',
-      header: 'DNI',
+      accessorKey: 'identifier',
+      header: 'Identificador',
       cell: ({ getValue }) => (
-        <span className="font-mono tabular-nums">{getValue<string>()}</span>
+        <span className="font-medium font-mono tabular-nums">{getValue<string>()}</span>
       ),
     },
     {
-      accessorKey: 'phone',
-      header: 'Teléfono',
+      accessorKey: 'type',
+      header: 'Tipo',
+      cell: ({ getValue }) => {
+        const v = getValue<string>()
+        return UNIT_TYPE_LABELS[v as keyof typeof UNIT_TYPE_LABELS] ?? v
+      },
     },
     {
-      accessorKey: 'email',
-      header: 'Email',
-      cell: ({ getValue }) => {
-        const v = getValue<string | null>()
-        return v ? v : <span className="text-muted-foreground">—</span>
-      },
+      id: 'group',
+      header: 'Grupo',
+      accessorFn: (row) => row.group?.name ?? '',
+      cell: ({ row }) =>
+        row.original.group ? (
+          <Link
+            href={`/groups/${row.original.group.id}`}
+            className="text-primary hover:underline"
+          >
+            {row.original.group.name}
+          </Link>
+        ) : (
+          <span className="text-muted-foreground">—</span>
+        ),
+    },
+    {
+      id: 'status',
+      header: 'Estado',
+      cell: ({ row }) => (
+        <UnitStatusBadge hasActiveContract={row.original.hasActiveContract} />
+      ),
     },
     {
       id: 'actions',
@@ -60,12 +76,12 @@ export function TenantsTable({ data }: { data: Tenant[] }) {
       cell: ({ row }) => (
         <div className="flex items-center gap-0.5 justify-end">
           <Button variant="ghost" size="icon-sm" asChild>
-            <Link href={`/tenants/${row.original.id}`}>
+            <Link href={`/units/${row.original.id}`}>
               <Eye className="h-4 w-4" />
             </Link>
           </Button>
           <Button variant="ghost" size="icon-sm" asChild>
-            <Link href={`/tenants/${row.original.id}/edit`}>
+            <Link href={`/units/${row.original.id}/edit`}>
               <Pencil className="h-4 w-4" />
             </Link>
           </Button>
@@ -87,13 +103,13 @@ export function TenantsTable({ data }: { data: Tenant[] }) {
       <DataTable
         columns={columns}
         data={data}
-        searchPlaceholder="Buscar por nombre, DNI..."
+        searchPlaceholder="Buscar por identificador, tipo..."
       />
       <ConfirmDialog
         open={!!deleteId}
         onOpenChange={(open) => !open && setDeleteId(null)}
-        title="Eliminar inquilino"
-        description="Esta acción no se puede deshacer. El inquilino será eliminado permanentemente."
+        title="Eliminar unidad"
+        description="Esta acción no se puede deshacer. La unidad será eliminada permanentemente."
         onConfirm={handleDelete}
         loading={deleting}
       />

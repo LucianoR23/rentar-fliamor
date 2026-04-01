@@ -8,9 +8,11 @@ import { Eye, Pencil, Trash2 } from 'lucide-react'
 import { DataTable } from '@/components/shared/DataTable'
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 import { Button } from '@/components/ui/button'
-import type { Tenant } from '@/types'
+import type { Group } from '@/types'
 
-export function TenantsTable({ data }: { data: Tenant[] }) {
+export type GroupRow = Group & { unitCount: number }
+
+export function GroupsTable({ data }: { data: GroupRow[] }) {
   const router = useRouter()
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
@@ -18,41 +20,34 @@ export function TenantsTable({ data }: { data: Tenant[] }) {
   async function handleDelete() {
     if (!deleteId) return
     setDeleting(true)
-    await fetch(`/api/tenants/${deleteId}`, { method: 'DELETE' })
+    await fetch(`/api/groups/${deleteId}`, { method: 'DELETE' })
     setDeleting(false)
     setDeleteId(null)
     router.refresh()
   }
 
-  const columns: ColumnDef<Tenant>[] = [
+  const columns: ColumnDef<GroupRow>[] = [
     {
-      id: 'name',
-      accessorFn: (row) => `${row.lastName} ${row.firstName}`,
+      accessorKey: 'name',
       header: 'Nombre',
-      cell: ({ row }) => (
-        <span className="font-medium">
-          {row.original.lastName}, {row.original.firstName}
-        </span>
-      ),
-    },
-    {
-      accessorKey: 'dni',
-      header: 'DNI',
       cell: ({ getValue }) => (
-        <span className="font-mono tabular-nums">{getValue<string>()}</span>
+        <span className="font-medium">{getValue<string>()}</span>
       ),
     },
     {
-      accessorKey: 'phone',
-      header: 'Teléfono',
+      accessorKey: 'address',
+      header: 'Dirección',
+      cell: ({ getValue }) => (
+        <span className="text-muted-foreground text-sm">{getValue<string>()}</span>
+      ),
     },
     {
-      accessorKey: 'email',
-      header: 'Email',
-      cell: ({ getValue }) => {
-        const v = getValue<string | null>()
-        return v ? v : <span className="text-muted-foreground">—</span>
-      },
+      id: 'unitCount',
+      header: 'Unidades',
+      accessorFn: (row) => row.unitCount,
+      cell: ({ getValue }) => (
+        <span className="font-mono tabular-nums">{getValue<number>()}</span>
+      ),
     },
     {
       id: 'actions',
@@ -60,12 +55,12 @@ export function TenantsTable({ data }: { data: Tenant[] }) {
       cell: ({ row }) => (
         <div className="flex items-center gap-0.5 justify-end">
           <Button variant="ghost" size="icon-sm" asChild>
-            <Link href={`/tenants/${row.original.id}`}>
+            <Link href={`/groups/${row.original.id}`}>
               <Eye className="h-4 w-4" />
             </Link>
           </Button>
           <Button variant="ghost" size="icon-sm" asChild>
-            <Link href={`/tenants/${row.original.id}/edit`}>
+            <Link href={`/groups/${row.original.id}/edit`}>
               <Pencil className="h-4 w-4" />
             </Link>
           </Button>
@@ -87,13 +82,13 @@ export function TenantsTable({ data }: { data: Tenant[] }) {
       <DataTable
         columns={columns}
         data={data}
-        searchPlaceholder="Buscar por nombre, DNI..."
+        searchPlaceholder="Buscar por nombre, dirección..."
       />
       <ConfirmDialog
         open={!!deleteId}
         onOpenChange={(open) => !open && setDeleteId(null)}
-        title="Eliminar inquilino"
-        description="Esta acción no se puede deshacer. El inquilino será eliminado permanentemente."
+        title="Eliminar grupo"
+        description="Esta acción no se puede deshacer. Se eliminarán también todas las unidades asociadas."
         onConfirm={handleDelete}
         loading={deleting}
       />
