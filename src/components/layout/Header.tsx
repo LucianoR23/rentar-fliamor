@@ -81,7 +81,7 @@ export function Header({ userName, userEmail, userRole }: HeaderProps) {
       <div className="flex items-center gap-1">
         <ThemeToggle />
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
+          <DropdownMenuTrigger className='cursor-pointer' asChild>
             <button className="flex items-center gap-2 rounded-md px-2 py-1.5 transition-colors hover:bg-muted outline-none">
               <Avatar className="h-7 w-7">
                 <AvatarFallback className="text-xs bg-primary/10 text-primary font-medium">

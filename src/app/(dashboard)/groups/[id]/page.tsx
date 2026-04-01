@@ -7,6 +7,7 @@ import { groups, units, contracts, groupExpenses, groupCostConfig } from '@/lib/
 import { PageHeader } from '@/components/shared/PageHeader'
 import { Button } from '@/components/ui/button'
 import { UnitStatusBadge } from '@/components/units/UnitStatusBadge'
+import { GroupExpensesList } from '@/components/groups/GroupExpensesList'
 import { UNIT_TYPE_LABELS } from '@/lib/validations/unit'
 import { cn } from '@/lib/utils'
 
@@ -131,30 +132,18 @@ export default async function GroupDetailPage({ params, searchParams }: Props) {
       {/* Expenses tab */}
       {tab === 'expenses' && (
         <div>
-          {expenses.length === 0 ? (
-            <p className="text-sm text-muted-foreground py-8 text-center">
-              Este grupo no tiene gastos registrados.
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-sm text-muted-foreground">
+              {expenses.length} gasto{expenses.length !== 1 ? 's' : ''}
             </p>
-          ) : (
-            <div className="space-y-2">
-              {expenses.map((exp) => (
-                <div
-                  key={exp.id}
-                  className="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3"
-                >
-                  <div>
-                    <p className="text-sm font-medium">{exp.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {exp.periodMonth}/{exp.periodYear}
-                    </p>
-                  </div>
-                  <span className="font-mono tabular-nums text-sm font-semibold">
-                    ${Number(exp.amount).toLocaleString('es-AR', { minimumFractionDigits: 2 })}
-                  </span>
-                </div>
-              ))}
-            </div>
-          )}
+            <Button asChild size="sm">
+              <Link href={`/groups/${id}/expenses/new`}>
+                <Plus className="h-4 w-4" />
+                Nuevo gasto
+              </Link>
+            </Button>
+          </div>
+          <GroupExpensesList expenses={expenses} />
         </div>
       )}
 

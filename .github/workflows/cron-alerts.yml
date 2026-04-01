@@ -1,0 +1,16 @@
+name: Daily Alert Emails
+
+on:
+  schedule:
+    - cron: '0 12 * * *'   # 9:00 AM ART (UTC-3) todos los días
+  workflow_dispatch:         # disparo manual desde GitHub UI
+
+jobs:
+  send-alerts:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Disparar /api/cron/alerts
+        run: |
+          curl --fail --silent --show-error \
+            -X GET "${{ secrets.APP_URL }}/api/cron/alerts" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"

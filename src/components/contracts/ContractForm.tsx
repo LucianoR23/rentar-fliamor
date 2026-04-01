@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { contractSchema, UPDATE_TYPE_LABELS, type ContractFormData } from '@/lib/validations/contract'
 import { UNIT_TYPE_LABELS } from '@/lib/validations/unit'
 import { Input } from '@/components/ui/input'
+import { DateInput } from '@/components/ui/date-input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
 import {
@@ -82,7 +83,7 @@ export function ContractForm({ defaultValues, contractId, units, tenants }: Cont
           <Field label="Unidad *" error={errors.unitId?.message}>
             <Controller name="unitId" control={control} render={({ field }) => (
               <Select value={field.value ?? ''} onValueChange={field.onChange}>
-                <SelectTrigger><SelectValue placeholder="Seleccionar unidad" /></SelectTrigger>
+                <SelectTrigger className='cursor-pointer'><SelectValue placeholder="Seleccionar unidad" /></SelectTrigger>
                 <SelectContent>
                   {units.map((u) => (
                     <SelectItem key={u.id} value={u.id}>
@@ -97,7 +98,7 @@ export function ContractForm({ defaultValues, contractId, units, tenants }: Cont
           <Field label="Inquilino *" error={errors.tenantId?.message}>
             <Controller name="tenantId" control={control} render={({ field }) => (
               <Select value={field.value ?? ''} onValueChange={field.onChange}>
-                <SelectTrigger><SelectValue placeholder="Seleccionar inquilino" /></SelectTrigger>
+                <SelectTrigger className='cursor-pointer'><SelectValue placeholder="Seleccionar inquilino" /></SelectTrigger>
                 <SelectContent>
                   {tenants.map((t) => (
                     <SelectItem key={t.id} value={t.id}>
@@ -116,10 +117,10 @@ export function ContractForm({ defaultValues, contractId, units, tenants }: Cont
         <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Vigencia</h2>
         <div className="grid grid-cols-2 gap-4">
           <Field label="Fecha de inicio *" error={errors.startDate?.message}>
-            <Input {...register('startDate')} type="date" />
+            <DateInput {...register('startDate')} />
           </Field>
           <Field label="Fecha de fin *" error={errors.endDate?.message}>
-            <Input {...register('endDate')} type="date" />
+            <DateInput {...register('endDate')} />
           </Field>
         </div>
       </section>
@@ -144,7 +145,7 @@ export function ContractForm({ defaultValues, contractId, units, tenants }: Cont
           <Field label="Tipo de actualización *" error={errors.updateType?.message}>
             <Controller name="updateType" control={control} render={({ field }) => (
               <Select value={field.value} onValueChange={field.onChange}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectTrigger className='cursor-pointer'><SelectValue /></SelectTrigger>
                 <SelectContent>
                   {Object.entries(UPDATE_TYPE_LABELS).map(([value, label]) => (
                     <SelectItem key={value} value={value}>{label}</SelectItem>
@@ -190,10 +191,10 @@ export function ContractForm({ defaultValues, contractId, units, tenants }: Cont
       )}
 
       <div className="flex gap-3">
-        <Button type="submit" disabled={isSubmitting}>
+        <Button className='cursor-pointer' type="submit" disabled={isSubmitting}>
           {isSubmitting ? 'Guardando...' : isEdit ? 'Guardar cambios' : 'Crear contrato'}
         </Button>
-        <Button type="button" variant="ghost" onClick={() => router.back()}>Cancelar</Button>
+        <Button className='cursor-pointer' type="button" variant="ghost" onClick={() => router.back()}>Cancelar</Button>
       </div>
     </form>
   )
