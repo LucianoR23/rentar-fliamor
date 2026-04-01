@@ -831,7 +831,7 @@ export function createClient() {
   const cookieStore = cookies()
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY!,
     { cookies: { getAll: () => cookieStore.getAll(), setAll: (c) => c.forEach(({ name, value, options }) => cookieStore.set(name, value, options)) } }
   )
 }
@@ -882,7 +882,7 @@ export async function middleware(request: NextRequest) {
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY!,
     {
       cookies: {
         getAll: () => request.cookies.getAll(),
@@ -1088,7 +1088,7 @@ Configurar `tailwind.config.ts` con tokens de color custom, `globals.css` con CS
 |----------|-------------|---------------|
 | `DATABASE_URL` | Supabase PostgreSQL connection string | Supabase → Settings → Database → Transaction pooler URI |
 | `NEXT_PUBLIC_SUPABASE_URL` | URL del proyecto Supabase | Supabase → Settings → API → Project URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon/public key | Supabase → Settings → API → Project API keys |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY` | Supabase anon/public key | Supabase → Settings → API → Project API keys |
 | `SUPABASE_SERVICE_ROLE_KEY` | Service role key (solo server) | Supabase → Settings → API → Project API keys |
 | `R2_ACCOUNT_ID` | Cloudflare Account ID | CF Dashboard |
 | `R2_ACCESS_KEY_ID` | R2 Access Key | CF → R2 → Manage API tokens |
