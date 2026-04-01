@@ -150,10 +150,10 @@ export function TenantForm({ defaultValues, tenantId }: TenantFormProps) {
       )}
 
       <div className="flex gap-3">
-        <Button type="submit" disabled={isSubmitting}>
+        <Button className='cursor-pointer' type="submit" disabled={isSubmitting}>
           {isSubmitting ? 'Guardando...' : isEdit ? 'Guardar cambios' : 'Crear inquilino'}
         </Button>
-        <Button type="button" variant="ghost" onClick={() => router.back()}>
+        <Button className='cursor-pointer' type="button" variant="ghost" onClick={() => router.back()}>
           Cancelar
         </Button>
       </div>

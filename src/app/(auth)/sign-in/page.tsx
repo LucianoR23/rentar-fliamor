@@ -155,7 +155,7 @@ export default function SignInPage() {
             <button
               type="submit"
               disabled={isSubmitting}
-              className="mt-2 w-full rounded-lg py-2.5 text-sm font-medium text-white transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+              className="mt-2 w-full rounded-lg py-2.5 text-sm font-medium cursor-pointer text-white transition-all disabled:opacity-60 disabled:cursor-not-allowed"
               style={{
                 background: isSubmitting
                   ? 'rgba(109,40,217,0.6)'

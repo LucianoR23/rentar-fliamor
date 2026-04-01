@@ -92,7 +92,7 @@ export function UnitForm({ defaultValues, unitId, groups }: UnitFormProps) {
               control={control}
               render={({ field }) => (
                 <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger>
+                  <SelectTrigger className='cursor-pointer'>
                     <SelectValue placeholder="Seleccionar tipo" />
                   </SelectTrigger>
                   <SelectContent>
@@ -122,7 +122,7 @@ export function UnitForm({ defaultValues, unitId, groups }: UnitFormProps) {
                   value={field.value ?? 'none'}
                   onValueChange={(v) => field.onChange(v === 'none' ? '' : v)}
                 >
-                  <SelectTrigger>
+                  <SelectTrigger className='cursor-pointer'>
                     <SelectValue placeholder="Sin grupo" />
                   </SelectTrigger>
                   <SelectContent>
@@ -159,10 +159,10 @@ export function UnitForm({ defaultValues, unitId, groups }: UnitFormProps) {
       )}
 
       <div className="flex gap-3">
-        <Button type="submit" disabled={isSubmitting}>
+        <Button className='cursor-pointer' type="submit" disabled={isSubmitting}>
           {isSubmitting ? 'Guardando...' : isEdit ? 'Guardar cambios' : 'Crear unidad'}
         </Button>
-        <Button type="button" variant="ghost" onClick={() => router.back()}>
+        <Button className='cursor-pointer' type="button" variant="ghost" onClick={() => router.back()}>
           Cancelar
         </Button>
       </div>

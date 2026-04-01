@@ -92,7 +92,7 @@ export function CreateUserForm() {
             control={control}
             render={({ field }) => (
               <Select value={field.value} onValueChange={field.onChange}>
-                <SelectTrigger>
+                <SelectTrigger className='cursor-pointer'>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -117,7 +117,7 @@ export function CreateUserForm() {
         </div>
       )}
 
-      <Button type="submit" disabled={isSubmitting} size="sm">
+      <Button className='cursor-pointer' type="submit" disabled={isSubmitting} size="sm">
         {isSubmitting ? 'Creando...' : 'Crear usuario'}
       </Button>
     </form>

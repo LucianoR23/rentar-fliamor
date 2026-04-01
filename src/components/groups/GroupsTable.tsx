@@ -67,7 +67,7 @@ export function GroupsTable({ data }: { data: GroupRow[] }) {
           <Button
             variant="ghost"
             size="icon-sm"
-            className="text-muted-foreground hover:text-destructive"
+            className="cursor-pointer text-muted-foreground hover:text-destructive"
             onClick={() => setDeleteId(row.original.id)}
           >
             <Trash2 className="h-4 w-4" />
