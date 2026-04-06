@@ -1,4 +1,3 @@
-import { getICL, getIPC, iclVariation, compoundIpc } from './indices'
 import { calculateRentUpdate } from './rent-calculator'
 import type { Contract } from '@/types'
 
@@ -10,12 +9,24 @@ export interface CalculationPreview {
   percentageChange: number
   updateType: 'icl' | 'ipc' | 'fixed_amount' | 'fixed_percentage'
   periodMonths: number
-  iclToday?: { value: number; date: string }
-  iclBase?: { value: number; date: string }
-  ipcVariations?: { date: string; variation: number }[]
   indexVariation?: number
   updateValue?: number
   nextUpdateDate: string
+  /** Full schedule returned by the Arquiler API (ICL/IPC only) */
+  schedule?: ArquilerPeriod[]
+}
+
+interface ArquilerPeriod {
+  date: string
+  value: number
+  estimated: boolean
+  dif: number
+  amount: number
+}
+
+interface ArquilerResponse {
+  success: boolean
+  data: ArquilerPeriod[]
 }
 
 export function addMonths(dateStr: string, months: number): string {
@@ -25,8 +36,36 @@ export function addMonths(dateStr: string, months: number): string {
 }
 
 /**
+ * Calls the Arquiler RapidAPI to calculate ICL/IPC rent updates.
+ * Returns the full schedule of update periods.
+ */
+async function fetchArquilerCalculation(
+  amount: number,
+  date: string,
+  months: number,
+  rate: 'icl' | 'ipc'
+): Promise<ArquilerResponse> {
+  const res = await fetch('https://arquilerapi1.p.rapidapi.com/calculate', {
+    method: 'POST',
+    headers: {
+      'x-rapidapi-key': process.env.RAPIDAPI_KEY!,
+      'x-rapidapi-host': 'arquilerapi1.p.rapidapi.com',
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ amount, date, months, rate }),
+  })
+
+  if (!res.ok) {
+    throw new Error(`Arquiler API error: ${res.status}`)
+  }
+
+  return res.json() as Promise<ArquilerResponse>
+}
+
+/**
  * Computes the rent update preview for a contract.
- * Fetches ICL/IPC indices as needed (cached via Redis).
+ * For ICL/IPC: uses the Arquiler RapidAPI which does the full calculation.
+ * For fixed_amount/fixed_percentage: calculates locally.
  * Does NOT mutate the database.
  */
 export async function computeContractUpdate(contract: Contract): Promise<CalculationPreview> {
@@ -34,61 +73,56 @@ export async function computeContractUpdate(contract: Contract): Promise<Calcula
   const periodMonths = contract.updateFrequencyMonths
   const updateValue = contract.updateValue != null ? Number(contract.updateValue) : undefined
 
-  if (contract.updateType === 'icl') {
-    const baseDate = addMonths(contract.nextUpdateDate, -periodMonths)
-    const [iclToday, iclBase] = await Promise.all([getICL(), getICL(baseDate)])
-    const indexVariation = iclVariation(iclToday, iclBase)
-    const result = calculateRentUpdate({ currentPrice, updateType: 'icl', indexValue: indexVariation })
+  if (contract.updateType === 'icl' || contract.updateType === 'ipc') {
+    const arquiler = await fetchArquilerCalculation(
+      Number(contract.firstMonthPrice),
+      contract.startDate,
+      periodMonths,
+      contract.updateType
+    )
+
+    if (!arquiler.success || arquiler.data.length < 2) {
+      throw new Error('No update data returned from Arquiler API')
+    }
+
+    // Find the next update period — the first period after the current nextUpdateDate
+    // or fall back to the last calculated period
+    const nextPeriod = arquiler.data.find(
+      (p) => p.date >= contract.nextUpdateDate
+    ) ?? arquiler.data[arquiler.data.length - 1]
+
+    const newPrice = Math.round(nextPeriod.amount * 100) / 100
+
     return {
       contractId: contract.id,
       currentPrice,
-      ...result,
-      updateType: 'icl',
+      newPrice,
+      difference: Math.round((newPrice - currentPrice) * 100) / 100,
+      percentageChange: nextPeriod.dif
+        ? Math.round(nextPeriod.dif * 100) / 100
+        : currentPrice > 0
+          ? Math.round(((newPrice - currentPrice) / currentPrice) * 10000) / 100
+          : 0,
+      updateType: contract.updateType,
       periodMonths,
-      iclToday,
-      iclBase,
-      indexVariation,
+      indexVariation: nextPeriod.dif ? Math.round(nextPeriod.dif * 100) / 100 : undefined,
       nextUpdateDate: addMonths(contract.nextUpdateDate, periodMonths),
+      schedule: arquiler.data,
     }
   }
 
-  if (contract.updateType === 'ipc') {
-    const allVariations = await getIPC(periodMonths + 1)
-    const periodVariations = allVariations.slice(0, periodMonths)
-    const indexVariation = compoundIpc(periodVariations)
-    const result = calculateRentUpdate({ currentPrice, updateType: 'ipc', indexValue: indexVariation })
-    return {
-      contractId: contract.id,
-      currentPrice,
-      ...result,
-      updateType: 'ipc',
-      periodMonths,
-      ipcVariations: periodVariations,
-      indexVariation,
-      nextUpdateDate: addMonths(contract.nextUpdateDate, periodMonths),
-    }
-  }
+  // fixed_amount / fixed_percentage — local calculation
+  const result = calculateRentUpdate({
+    currentPrice,
+    updateType: contract.updateType,
+    updateValue,
+  })
 
-  if (contract.updateType === 'fixed_amount') {
-    const result = calculateRentUpdate({ currentPrice, updateType: 'fixed_amount', updateValue })
-    return {
-      contractId: contract.id,
-      currentPrice,
-      ...result,
-      updateType: 'fixed_amount',
-      periodMonths,
-      updateValue,
-      nextUpdateDate: addMonths(contract.nextUpdateDate, periodMonths),
-    }
-  }
-
-  // fixed_percentage
-  const result = calculateRentUpdate({ currentPrice, updateType: 'fixed_percentage', updateValue })
   return {
     contractId: contract.id,
     currentPrice,
     ...result,
-    updateType: 'fixed_percentage',
+    updateType: contract.updateType,
     periodMonths,
     updateValue,
     nextUpdateDate: addMonths(contract.nextUpdateDate, periodMonths),
