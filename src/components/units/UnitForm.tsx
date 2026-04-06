@@ -91,7 +91,7 @@ export function UnitForm({ defaultValues, unitId, groups }: UnitFormProps) {
               name="type"
               control={control}
               render={({ field }) => (
-                <Select value={field.value} onValueChange={field.onChange}>
+                <Select value={field.value ?? ''} onValueChange={field.onChange}>
                   <SelectTrigger className='cursor-pointer'>
                     <SelectValue placeholder="Seleccionar tipo" />
                   </SelectTrigger>
