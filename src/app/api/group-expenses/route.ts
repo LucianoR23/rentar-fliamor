@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { db } from '@/lib/db'
-import { groupExpenses } from '@/lib/schema'
+import { groupExpenses, groupExpenseUnits } from '@/lib/schema'
 import { requireRole } from '@/lib/auth'
 import { groupExpenseSchema } from '@/lib/validations/group-expense'
 
@@ -21,6 +21,16 @@ export async function POST(request: NextRequest) {
         notes: data.notes ?? null,
       })
       .returning()
+
+    // If specific units were selected, save the associations
+    if (data.unitIds && data.unitIds.length > 0) {
+      await db.insert(groupExpenseUnits).values(
+        data.unitIds.map((unitId) => ({
+          groupExpenseId: created.id,
+          unitId,
+        }))
+      )
+    }
 
     return NextResponse.json(created, { status: 201 })
   } catch (e) {

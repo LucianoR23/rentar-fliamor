@@ -39,7 +39,7 @@ export function IncomeChart({ data, className }: IncomeChartProps) {
       <p className="mb-4 text-sm font-medium text-muted-foreground">
         Ingresos — últimos 6 meses
       </p>
-      <ResponsiveContainer width="100%" height={240}>
+      <ResponsiveContainer width="100%" height={440}>
         <BarChart data={data} barGap={4} barCategoryGap="32%">
           <CartesianGrid vertical={false} stroke="#27272A" strokeDasharray="3 3" />
           <XAxis
@@ -73,8 +73,8 @@ export function IncomeChart({ data, className }: IncomeChartProps) {
             wrapperStyle={{ fontSize: '12px', color: '#A1A1AA', paddingTop: '8px' }}
             formatter={(value: string) => (value === 'projected' ? 'Proyectado' : 'Cobrado')}
           />
-          <Bar dataKey="projected" fill="#7C3AED" radius={[3, 3, 0, 0]} maxBarSize={28} />
-          <Bar dataKey="collected" fill="#10B981" radius={[3, 3, 0, 0]} maxBarSize={28} />
+          <Bar dataKey="projected" fill="#7C3AED" radius={[3, 3, 0, 0]} maxBarSize={44} />
+          <Bar dataKey="collected" fill="#10B981" radius={[3, 3, 0, 0]} maxBarSize={44} />
         </BarChart>
       </ResponsiveContainer>
     </div>

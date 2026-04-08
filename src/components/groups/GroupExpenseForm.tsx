@@ -3,13 +3,14 @@
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { CurrencyInput } from '@/components/ui/currency-input'
 import { CostBreakdownTable } from './CostBreakdownTable'
+import { UNIT_TYPE_LABELS } from '@/lib/validations/unit'
 import { groupExpenseSchema, type GroupExpenseFormData } from '@/lib/validations/group-expense'
 import type { DistributionUnit, DistributionConfig } from '@/lib/rent-calculator'
 
@@ -31,6 +32,9 @@ interface GroupExpenseFormProps {
 export function GroupExpenseForm({ groupId, activeUnits, costConfig }: GroupExpenseFormProps) {
   const router = useRouter()
   const [serverError, setServerError] = useState<string | null>(null)
+  const [selectedUnitIds, setSelectedUnitIds] = useState<Set<string>>(new Set())
+
+  const allSelected = selectedUnitIds.size === 0
 
   const now = new Date()
 
@@ -50,12 +54,37 @@ export function GroupExpenseForm({ groupId, activeUnits, costConfig }: GroupExpe
 
   const amount = Number(watch('amount')) || 0
 
+  const filteredUnits = useMemo(
+    () => (allSelected ? activeUnits : activeUnits.filter((u) => selectedUnitIds.has(u.id))),
+    [activeUnits, selectedUnitIds, allSelected]
+  )
+
+  function toggleUnit(unitId: string) {
+    setSelectedUnitIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(unitId)) {
+        next.delete(unitId)
+      } else {
+        next.add(unitId)
+      }
+      return next
+    })
+  }
+
+  function selectAll() {
+    setSelectedUnitIds(new Set())
+  }
+
   async function onSubmit(data: GroupExpenseFormData) {
     setServerError(null)
+    const payload = {
+      ...data,
+      unitIds: allSelected ? undefined : [...selectedUnitIds],
+    }
     const res = await fetch('/api/group-expenses', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
+      body: JSON.stringify(payload),
     })
     if (res.ok) {
       router.push(`/groups/${groupId}?tab=expenses`)
@@ -125,6 +154,43 @@ export function GroupExpenseForm({ groupId, activeUnits, costConfig }: GroupExpe
           </div>
         </div>
 
+        {/* Unit selection */}
+        <div className="space-y-2">
+          <Label>Aplica a</Label>
+          <p className="text-xs text-muted-foreground">
+            Seleccioná las unidades a las que aplica este gasto. Si no seleccionás ninguna, se divide entre todas.
+          </p>
+          <div className="rounded-lg border border-border p-3 space-y-1.5 max-h-56 overflow-y-auto">
+            <label className="flex items-center gap-2 cursor-pointer py-1 px-1 rounded hover:bg-muted/50">
+              <input
+                type="checkbox"
+                checked={allSelected}
+                onChange={selectAll}
+                className="h-4 w-4 rounded border-border accent-primary"
+              />
+              <span className="text-sm font-medium">Todas las unidades</span>
+            </label>
+            <div className="border-t border-border my-1" />
+            {activeUnits.map((unit) => (
+              <label
+                key={unit.id}
+                className="flex items-center gap-2 cursor-pointer py-1 px-1 rounded hover:bg-muted/50"
+              >
+                <input
+                  type="checkbox"
+                  checked={selectedUnitIds.has(unit.id)}
+                  onChange={() => toggleUnit(unit.id)}
+                  className="h-4 w-4 rounded border-border accent-primary"
+                />
+                <span className="text-sm font-mono tabular-nums">{unit.identifier}</span>
+                <span className="text-xs text-muted-foreground">
+                  {UNIT_TYPE_LABELS[unit.type] ?? unit.type}
+                </span>
+              </label>
+            ))}
+          </div>
+        </div>
+
         <div className="space-y-1.5">
           <Label htmlFor="notes">Notas</Label>
           <Textarea
@@ -151,9 +217,10 @@ export function GroupExpenseForm({ groupId, activeUnits, costConfig }: GroupExpe
       <div className="space-y-3">
         <h2 className="text-sm font-medium">Desglose por unidad</h2>
         <p className="text-xs text-muted-foreground">
-          {activeUnits.length} unidad{activeUnits.length !== 1 ? 'es' : ''} activa{activeUnits.length !== 1 ? 's' : ''}
+          {filteredUnits.length} unidad{filteredUnits.length !== 1 ? 'es' : ''}{' '}
+          {allSelected ? '' : `de ${activeUnits.length} seleccionada${filteredUnits.length !== 1 ? 's' : ''}`}
         </p>
-        <CostBreakdownTable amount={amount} units={activeUnits} costConfig={costConfig} />
+        <CostBreakdownTable amount={amount} units={filteredUnits} costConfig={costConfig} />
       </div>
     </div>
   )

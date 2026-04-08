@@ -6,5 +6,8 @@
       "Bash(pnpm exec:*)",
       "Bash(node:*)"
     ]
+  },
+  "enabledPlugins": {
+    "vercel@claude-plugins-official": true
   }
 }

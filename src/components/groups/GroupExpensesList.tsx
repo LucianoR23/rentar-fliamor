@@ -13,8 +13,12 @@ const MONTHS = [
   'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic',
 ]
 
+export interface GroupExpenseWithUnits extends GroupExpense {
+  scopedUnitIdentifiers?: string[]
+}
+
 interface GroupExpensesListProps {
-  expenses: GroupExpense[]
+  expenses: GroupExpenseWithUnits[]
 }
 
 export function GroupExpensesList({ expenses }: GroupExpensesListProps) {
@@ -42,33 +46,46 @@ export function GroupExpensesList({ expenses }: GroupExpensesListProps) {
   return (
     <>
       <div className="space-y-2">
-        {expenses.map((exp) => (
-          <div
-            key={exp.id}
-            className="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3"
-          >
-            <div>
-              <p className="text-sm font-medium">{exp.name}</p>
-              <p className="text-xs text-muted-foreground font-mono tabular-nums">
-                {MONTHS[exp.periodMonth]} {exp.periodYear}
-                {exp.notes ? ` · ${exp.notes}` : ''}
-              </p>
+        {expenses.map((exp) => {
+          const isScoped = exp.scopedUnitIdentifiers && exp.scopedUnitIdentifiers.length > 0
+          return (
+            <div
+              key={exp.id}
+              className="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3"
+            >
+              <div>
+                <p className="text-sm font-medium">{exp.name}</p>
+                <p className="text-xs text-muted-foreground font-mono tabular-nums">
+                  {MONTHS[exp.periodMonth]} {exp.periodYear}
+                  {exp.notes ? ` · ${exp.notes}` : ''}
+                </p>
+                {isScoped && (
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Aplica a: {exp.scopedUnitIdentifiers!.join(', ')}
+                  </p>
+                )}
+              </div>
+              <div className="flex items-center gap-3">
+                {isScoped && (
+                  <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-accent/15 text-accent">
+                    Parcial
+                  </span>
+                )}
+                <span className="font-mono tabular-nums text-sm font-semibold">
+                  {formatCurrency(exp.amount)}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  className="text-muted-foreground hover:text-destructive"
+                  onClick={() => setDeleteId(exp.id)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
             </div>
-            <div className="flex items-center gap-3">
-              <span className="font-mono tabular-nums text-sm font-semibold">
-                {formatCurrency(exp.amount)}
-              </span>
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                className="text-muted-foreground hover:text-destructive"
-                onClick={() => setDeleteId(exp.id)}
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        ))}
+          )
+        })}
       </div>
 
       <ConfirmDialog
