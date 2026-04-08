@@ -136,41 +136,31 @@ export function UpdateCalculator({ contractId }: UpdateCalculatorProps) {
             <Row label="Tipo de actualización" value={UPDATE_TYPE_LABELS[preview.updateType] ?? preview.updateType} />
             <Row label="Período" value={`${preview.periodMonths} ${preview.periodMonths === 1 ? 'mes' : 'meses'}`} />
 
-            {preview.updateType === 'icl' && preview.iclToday && preview.iclBase && (
+            {(preview.updateType === 'icl' || preview.updateType === 'ipc') && (
               <>
-                <Row label="ICL base" value={
-                  <span className="font-mono tabular-nums text-sm">
-                    {preview.iclBase.value.toFixed(4)}{' '}
-                    <span className="text-muted-foreground text-xs">({preview.iclBase.date})</span>
-                  </span>
-                } />
-                <Row label="ICL actual" value={
-                  <span className="font-mono tabular-nums text-sm">
-                    {preview.iclToday.value.toFixed(4)}{' '}
-                    <span className="text-muted-foreground text-xs">({preview.iclToday.date})</span>
-                  </span>
-                } />
-                <Row label="Variación ICL" value={
-                  <span className="font-mono tabular-nums font-medium">+{preview.indexVariation?.toFixed(2)}%</span>
-                } />
-              </>
-            )}
-
-            {preview.updateType === 'ipc' && preview.ipcVariations && (
-              <>
-                <Row label="Variación IPC acumulada" value={
-                  <span className="font-mono tabular-nums font-medium">+{preview.indexVariation?.toFixed(2)}%</span>
-                } />
-                <div className="py-2">
-                  <p className="text-xs text-muted-foreground mb-1.5">Variaciones mensuales:</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {preview.ipcVariations.map((v) => (
-                      <span key={v.date} className="rounded bg-muted px-1.5 py-0.5 font-mono tabular-nums text-xs" title={v.date}>
-                        {v.variation.toFixed(1)}%
-                      </span>
-                    ))}
+                {preview.indexVariation != null && (
+                  <Row label={`Variación ${preview.updateType.toUpperCase()}`} value={
+                    <span className="font-mono tabular-nums font-medium">+{preview.indexVariation.toFixed(2)}%</span>
+                  } />
+                )}
+                {preview.schedule && preview.schedule.length > 1 && (
+                  <div className="py-2">
+                    <p className="text-xs text-muted-foreground mb-1.5">Cronograma de actualizaciones:</p>
+                    <div className="space-y-1">
+                      {preview.schedule.map((p, i) => (
+                        <div key={p.date} className="flex items-center justify-between text-xs">
+                          <span className={cn("font-mono tabular-nums", p.estimated && "text-muted-foreground italic")}>
+                            {p.date}{p.estimated ? ' (est.)' : ''}
+                          </span>
+                          <span className="font-mono tabular-nums">
+                            ${formatARS(p.amount)}
+                            {i > 0 && <span className="text-muted-foreground ml-1.5">+{p.dif.toFixed(2)}%</span>}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
               </>
             )}
 
