@@ -91,7 +91,7 @@ export function UnitReportForm({ units }: { units: UnitOption[] }) {
           <div className="flex flex-col gap-1">
             <label className="text-xs text-muted-foreground">Unidad</label>
             <select
-              className={`${selectCls} min-w-[220px]`}
+              className={`${selectCls} min-w-55`}
               value={unitId}
               onChange={(e) => setUnitId(e.target.value)}
             >

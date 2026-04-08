@@ -15,7 +15,7 @@ Sistema de gestión de alquileres para el mercado argentino. Dashboard interno c
 
 ## Tech Stack
 
-Next.js 15 App Router + TypeScript strict + Tailwind v4 + shadcn/ui + Drizzle ORM + PostgreSQL (Supabase) + Supabase Auth + Cloudflare R2 (files) + Upstash Redis (cache) + Resend (email) + @react-pdf/renderer (PDFs) + Framer Motion
+Next.js 16 App Router + React 19 (React Compiler) + TypeScript strict + Tailwind v4 + shadcn/ui + Drizzle ORM + PostgreSQL (Supabase) + Supabase Auth + Cloudflare R2 (files) + Upstash Redis (cache) + Resend (email) + @react-pdf/renderer (PDFs) + Framer Motion
 
 ## Architecture
 

@@ -3,11 +3,11 @@ import Link from 'next/link'
 import { eq, and, desc } from 'drizzle-orm'
 import { Pencil, ArrowLeft, Plus } from 'lucide-react'
 import { db } from '@/lib/db'
-import { groups, units, contracts, groupExpenses, groupCostConfig } from '@/lib/schema'
+import { groups, units, contracts, groupExpenses, groupExpenseUnits, groupCostConfig } from '@/lib/schema'
 import { PageHeader } from '@/components/shared/PageHeader'
 import { Button } from '@/components/ui/button'
 import { UnitStatusBadge } from '@/components/units/UnitStatusBadge'
-import { GroupExpensesList } from '@/components/groups/GroupExpensesList'
+import { GroupExpensesList, type GroupExpenseWithUnits } from '@/components/groups/GroupExpensesList'
 import { UNIT_TYPE_LABELS } from '@/lib/validations/unit'
 import { cn } from '@/lib/utils'
 
@@ -40,11 +40,34 @@ export default async function GroupDetailPage({ params, searchParams }: Props) {
     .where(eq(units.groupId, id))
     .orderBy(units.identifier)
 
-  const expenses = await db
+  const expenseRows = await db
     .select()
     .from(groupExpenses)
     .where(eq(groupExpenses.groupId, id))
     .orderBy(desc(groupExpenses.createdAt))
+
+  // Load scoped unit identifiers for expenses in this group
+  const scopedRows = await db
+    .select({
+      groupExpenseId: groupExpenseUnits.groupExpenseId,
+      unitIdentifier: units.identifier,
+    })
+    .from(groupExpenseUnits)
+    .innerJoin(units, eq(groupExpenseUnits.unitId, units.id))
+    .innerJoin(groupExpenses, eq(groupExpenseUnits.groupExpenseId, groupExpenses.id))
+    .where(eq(groupExpenses.groupId, id))
+
+  const scopedMap = new Map<string, string[]>()
+  for (const row of scopedRows) {
+    const arr = scopedMap.get(row.groupExpenseId) ?? []
+    arr.push(row.unitIdentifier)
+    scopedMap.set(row.groupExpenseId, arr)
+  }
+
+  const expenses: GroupExpenseWithUnits[] = expenseRows.map((e) => ({
+    ...e,
+    scopedUnitIdentifiers: scopedMap.get(e.id),
+  }))
 
   const costConfig = await db
     .select()

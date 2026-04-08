@@ -7,6 +7,8 @@ export const groupExpenseSchema = z.object({
   periodMonth: z.coerce.number().int().min(1).max(12),
   periodYear: z.coerce.number().int().min(2000).max(2100),
   notes: z.string().max(1000).optional(),
+  /** When empty/undefined the expense applies to ALL units in the group */
+  unitIds: z.array(z.string().uuid()).optional(),
 })
 
 export type GroupExpenseFormData = z.infer<typeof groupExpenseSchema>

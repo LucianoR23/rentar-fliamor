@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, Building2, Users, Layers, FileText,
   CreditCard, Receipt, BarChart3, Settings, UserCog,
-  ChevronLeft, ChevronRight, ChevronDown,
+  Archive, ChevronLeft, ChevronRight, ChevronDown,
 } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
@@ -25,6 +25,7 @@ const navItems: NavItem[] = [
   { href: '/tenants', icon: Users, label: 'Inquilinos' },
   { href: '/groups', icon: Layers, label: 'Grupos' },
   { href: '/contracts', icon: FileText, label: 'Contratos' },
+  { href: '/historial', icon: Archive, label: 'Historial' },
   { href: '/payments', icon: CreditCard, label: 'Pagos' },
   { href: '/expenses', icon: Receipt, label: 'Gastos' },
   { href: '/reports', icon: BarChart3, label: 'Reportes' },
@@ -82,7 +83,7 @@ export function Sidebar() {
               <button
                 onClick={() => !collapsed && setSettingsOpen((o) => !o)}
                 className={cn(
-                  'flex h-9 w-full items-center gap-2.5 rounded-md px-2.5 text-sm transition-colors',
+                  'flex h-9 w-full cursor-pointer items-center gap-2.5 rounded-md px-2.5 text-sm transition-colors',
                   collapsed && 'justify-center px-0',
                   isActive
                     ? 'bg-primary/10 text-primary font-medium'

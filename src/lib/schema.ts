@@ -153,6 +153,16 @@ export const groupExpenses = pgTable('group_expenses', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
 
+export const groupExpenseUnits = pgTable('group_expense_units', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  groupExpenseId: uuid('group_expense_id')
+    .references(() => groupExpenses.id, { onDelete: 'cascade' })
+    .notNull(),
+  unitId: uuid('unit_id')
+    .references(() => units.id, { onDelete: 'cascade' })
+    .notNull(),
+})
+
 export const expenses = pgTable('expenses', {
   id: uuid('id').primaryKey().defaultRandom(),
   title: varchar('title', { length: 255 }).notNull(),
@@ -201,6 +211,12 @@ export const paymentsRelations = relations(payments, ({ one }) => ({
   contract: one(contracts, { fields: [payments.contractId], references: [contracts.id] }),
 }))
 
-export const groupExpensesRelations = relations(groupExpenses, ({ one }) => ({
+export const groupExpensesRelations = relations(groupExpenses, ({ one, many }) => ({
   group: one(groups, { fields: [groupExpenses.groupId], references: [groups.id] }),
+  scopedUnits: many(groupExpenseUnits),
+}))
+
+export const groupExpenseUnitsRelations = relations(groupExpenseUnits, ({ one }) => ({
+  groupExpense: one(groupExpenses, { fields: [groupExpenseUnits.groupExpenseId], references: [groupExpenses.id] }),
+  unit: one(units, { fields: [groupExpenseUnits.unitId], references: [units.id] }),
 }))

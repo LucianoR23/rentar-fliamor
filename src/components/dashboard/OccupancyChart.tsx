@@ -68,14 +68,14 @@ export function OccupancyChart({ data, className }: OccupancyChartProps) {
         </span>
       </p>
 
-      <ResponsiveContainer width="100%" height={200}>
+      <ResponsiveContainer width="100%" height={400}>
         <PieChart>
           <Pie
             data={pieData}
             cx="50%"
             cy="50%"
-            innerRadius={52}
-            outerRadius={80}
+            innerRadius={80}
+            outerRadius={130}
             paddingAngle={2}
             dataKey="value"
           >

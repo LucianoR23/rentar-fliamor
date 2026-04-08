@@ -10,6 +10,7 @@ import type {
   payments,
   files,
   groupExpenses,
+  groupExpenseUnits,
   expenses,
 } from '@/lib/schema'
 
@@ -24,6 +25,7 @@ export type ContractUpdate = InferSelectModel<typeof contractUpdates>
 export type Payment = InferSelectModel<typeof payments>
 export type File = InferSelectModel<typeof files>
 export type GroupExpense = InferSelectModel<typeof groupExpenses>
+export type GroupExpenseUnit = InferSelectModel<typeof groupExpenseUnits>
 export type Expense = InferSelectModel<typeof expenses>
 
 // Insert types (escritura)
@@ -37,6 +39,7 @@ export type NewContractUpdate = InferInsertModel<typeof contractUpdates>
 export type NewPayment = InferInsertModel<typeof payments>
 export type NewFile = InferInsertModel<typeof files>
 export type NewGroupExpense = InferInsertModel<typeof groupExpenses>
+export type NewGroupExpenseUnit = InferInsertModel<typeof groupExpenseUnits>
 export type NewExpense = InferInsertModel<typeof expenses>
 
 // Enum types
