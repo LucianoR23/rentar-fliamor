@@ -13,7 +13,7 @@ export const auth = betterAuth({
   },
   emailAndPassword: {
     enabled: true,
-    disableSignUp: true,
+    disableSignUp: false,
   },
   plugins: [admin()],
   trustedOrigins: [process.env.NEXT_PUBLIC_APP_URL!],
