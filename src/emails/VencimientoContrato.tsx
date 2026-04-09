@@ -1,5 +1,4 @@
 import React from 'react'
-import { renderToStaticMarkup } from 'react-dom/server'
 
 export interface VencimientoContratoProps {
   tenant: { firstName: string; lastName: string }
@@ -94,9 +93,10 @@ function VencimientoContratoEmail({ tenant, unit, endDate, daysLeft, currentPric
   )
 }
 
-export function renderVencimientoContrato(props: VencimientoContratoProps): { html: string; subject: string } {
-  return {
-    html: '<!DOCTYPE html>' + renderToStaticMarkup(<VencimientoContratoEmail {...props} />),
-    subject: `[RentAR] Contrato vence en ${props.daysLeft} días — Unidad ${props.unit.identifier}`,
-  }
+export function VencimientoContrato(props: VencimientoContratoProps) {
+  return <VencimientoContratoEmail {...props} />
+}
+
+export function vencimientoContratoSubject(props: VencimientoContratoProps): string {
+  return `[RentAR] Contrato vence en ${props.daysLeft} días — Unidad ${props.unit.identifier}`
 }

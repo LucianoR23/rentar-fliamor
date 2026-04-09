@@ -4,8 +4,9 @@ import { db } from '@/lib/db'
 import { contracts, units, tenants, users } from '@/lib/schema'
 import { resend, FROM_EMAIL } from '@/lib/resend'
 import { redis } from '@/lib/redis'
-import { renderVencimientoContrato } from '@/emails/VencimientoContrato'
-import { renderActualizacionProxima } from '@/emails/ActualizacionProxima'
+import React from 'react'
+import { VencimientoContrato, vencimientoContratoSubject } from '@/emails/VencimientoContrato'
+import { ActualizacionProxima, actualizacionProximaSubject } from '@/emails/ActualizacionProxima'
 
 export const runtime = 'nodejs'
 
@@ -15,13 +16,15 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
-  // Destinatarios: todos los superadmins con email registrado
+  const { renderToStaticMarkup } = await import('react-dom/server')
+
+  // Destinatarios: todos los usuarios con email registrado
   const adminEmails = (
-    await db.select({ email: users.email }).from(users).where(eq(users.role, 'superadmin'))
+    await db.select({ email: users.email }).from(users)
   ).map((u) => u.email)
 
   if (adminEmails.length === 0) {
-    return NextResponse.json({ ok: true, sent: 0, skipped: 0, reason: 'no superadmin emails' })
+    return NextResponse.json({ ok: true, sent: 0, skipped: 0, reason: 'no user emails' })
   }
 
   const now = new Date()
@@ -47,13 +50,15 @@ export async function GET(req: NextRequest) {
     const daysLeft = Math.max(1, Math.ceil(
       (new Date(contract.endDate).getTime() - now.getTime()) / 86_400_000
     ))
-    const { html, subject } = renderVencimientoContrato({
+    const props = {
       tenant: { firstName: tenant.firstName, lastName: tenant.lastName },
       unit: { identifier: unit.identifier, type: unit.type },
       endDate: contract.endDate,
       daysLeft,
       currentPrice: contract.currentPrice,
-    })
+    }
+    const html = '<!DOCTYPE html>' + renderToStaticMarkup(React.createElement(VencimientoContrato, props))
+    const subject = vencimientoContratoSubject(props)
 
     const { error } = await resend.emails.send({ from: FROM_EMAIL, to: adminEmails, subject, html })
     if (error) {
@@ -80,7 +85,7 @@ export async function GET(req: NextRequest) {
     const daysLeft = Math.max(1, Math.ceil(
       (new Date(contract.nextUpdateDate).getTime() - now.getTime()) / 86_400_000
     ))
-    const { html, subject } = renderActualizacionProxima({
+    const props = {
       tenant: { firstName: tenant.firstName, lastName: tenant.lastName },
       unit: { identifier: unit.identifier, type: unit.type },
       updateDate: contract.nextUpdateDate,
@@ -88,7 +93,9 @@ export async function GET(req: NextRequest) {
       currentPrice: contract.currentPrice,
       updateType: contract.updateType,
       updateValue: contract.updateValue ?? null,
-    })
+    }
+    const html = '<!DOCTYPE html>' + renderToStaticMarkup(React.createElement(ActualizacionProxima, props))
+    const subject = actualizacionProximaSubject(props)
 
     const { error } = await resend.emails.send({ from: FROM_EMAIL, to: adminEmails, subject, html })
     if (error) {
