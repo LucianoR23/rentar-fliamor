@@ -9,7 +9,7 @@ type Params = { params: Promise<{ id: string }> }
 
 export async function PUT(request: NextRequest, { params }: Params) {
   try {
-    await requireRole('superadmin')
+    await requireRole('admin')
     const { id } = await params
 
     const group = await db.query.groups.findFirst({ where: eq(groups.id, id) })

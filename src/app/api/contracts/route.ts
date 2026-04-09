@@ -25,7 +25,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    await requireRole('superadmin')
+    await requireRole('admin')
     const body: unknown = await request.json()
     const data = contractSchema.parse(body)
 

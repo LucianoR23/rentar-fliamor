@@ -1,0 +1,8 @@
+node_modules
+.next
+.git
+.env
+.env.*
+drizzle/migrations
+MIGRATION_PLAN.md
+DRAGONFLY_TEST.md

@@ -97,6 +97,7 @@ export function CreateUserForm() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="viewer">Viewer — solo lectura</SelectItem>
+                  <SelectItem value="admin">Admin — gestión sin usuarios</SelectItem>
                   <SelectItem value="superadmin">Superadmin — acceso completo</SelectItem>
                 </SelectContent>
               </Select>
