@@ -6,3 +6,9 @@ node_modules
 drizzle/migrations
 MIGRATION_PLAN.md
 DRAGONFLY_TEST.md
+CRONS.md
+DEPLOY_CHECKLIST.md
+GUIA-USUARIO.md
+rentar-admin-blueprint.md
+resend-info.md
+SECURITY-FIXES.md
