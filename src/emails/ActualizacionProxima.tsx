@@ -1,5 +1,4 @@
 import React from 'react'
-import { renderToStaticMarkup } from 'react-dom/server'
 
 export interface ActualizacionProximaProps {
   tenant: { firstName: string; lastName: string }
@@ -110,9 +109,10 @@ function ActualizacionProximaEmail({ tenant, unit, updateDate, daysLeft, current
   )
 }
 
-export function renderActualizacionProxima(props: ActualizacionProximaProps): { html: string; subject: string } {
-  return {
-    html: '<!DOCTYPE html>' + renderToStaticMarkup(<ActualizacionProximaEmail {...props} />),
-    subject: `[RentAR] Actualización de precio en ${props.daysLeft} días — Unidad ${props.unit.identifier}`,
-  }
+export function ActualizacionProxima(props: ActualizacionProximaProps) {
+  return <ActualizacionProximaEmail {...props} />
+}
+
+export function actualizacionProximaSubject(props: ActualizacionProximaProps): string {
+  return `[RentAR] Actualización de precio en ${props.daysLeft} días — Unidad ${props.unit.identifier}`
 }

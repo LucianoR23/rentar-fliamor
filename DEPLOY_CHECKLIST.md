@@ -14,12 +14,26 @@ git commit -m "migración: Supabase → Better Auth + ioredis + rol admin"
 git push
 ```
 
-### 3. Crear servicio Next.js en Coolify
-- Dashboard de Coolify → New Resource → **Application**
+### 3. Crear servicio Next.js en Coolify (proyecto separado de infrastructure)
+- Dashboard de Coolify → New Project (ej: "rentar-admin") → New Resource → **Application**
 - Source: GitHub repo `LucianoR23/rentar-fliamor` (branch `main`)
 - Build Pack: **Dockerfile**
 - Port: **3000**
-- Asegurar que esté en la misma red que PostgreSQL y Dragonfly
+
+### 3.1 Conectar a la red del proyecto "infrastructure"
+La app está en un proyecto separado de PostgreSQL y Dragonfly, hay que conectar las redes:
+
+1. Ir a Coolify → proyecto **"infrastructure"** → cualquier recurso (PostgreSQL o Dragonfly)
+2. En Settings buscar el nombre de la red Docker (algo como `coolify_infrastructure` o similar, aparece en "Docker Network")
+3. Ir al servicio Next.js (en el proyecto "rentar-admin") → Settings → **Custom Docker Networks** o **Connect to network**
+4. Agregar el nombre de la red de infrastructure
+
+**Verificar post-deploy** — abrir terminal del container Next.js en Coolify y ejecutar:
+```bash
+nc -zv d8ygplsmw84rc9epykd7vp43 5432    # PostgreSQL
+nc -zv c464eyelt3v404k48ksr9huf 6380     # Dragonfly
+```
+Si responde "open", la conexión funciona. Si falla, revisar que la red esté bien conectada.
 
 ### 4. Configurar variables de entorno en Coolify
 En el servicio Next.js → Environment Variables, agregar:
