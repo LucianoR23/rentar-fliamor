@@ -8,7 +8,7 @@ type Params = { params: Promise<{ id: string }> }
 
 export async function DELETE(_req: NextRequest, { params }: Params) {
   try {
-    await requireRole('superadmin')
+    await requireRole('admin')
     const { id } = await params
     await db.delete(expenses).where(eq(expenses.id, id))
     return new NextResponse(null, { status: 204 })

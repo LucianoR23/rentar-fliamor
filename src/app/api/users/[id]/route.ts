@@ -3,7 +3,6 @@ import { eq } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { users } from '@/lib/schema'
 import { requireRole } from '@/lib/auth'
-import { createAdminClient } from '@/lib/supabase/admin'
 import { updateRoleSchema } from '@/lib/validations/user'
 
 type Params = { params: Promise<{ id: string }> }
@@ -48,8 +47,6 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
     const target = await db.query.users.findFirst({ where: eq(users.id, id) })
     if (!target) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-    const supabase = createAdminClient()
-    await supabase.auth.admin.deleteUser(target.supabaseId)
     await db.delete(users).where(eq(users.id, id))
 
     return new NextResponse(null, { status: 204 })

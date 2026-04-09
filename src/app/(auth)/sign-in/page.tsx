@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod/v3'
 import { motion } from 'framer-motion'
-import { createClient } from '@/lib/supabase/client'
+import { authClient } from '@/lib/auth-client'
 
 const schema = z.object({
   email: z.string().email('Email inválido'),
@@ -24,7 +24,6 @@ const orbs = [
 export default function SignInPage() {
   const router = useRouter()
   const [serverError, setServerError] = useState<string | null>(null)
-  const supabase = createClient()
 
   const {
     register,
@@ -34,7 +33,7 @@ export default function SignInPage() {
 
   async function onSubmit(data: FormData) {
     setServerError(null)
-    const { error } = await supabase.auth.signInWithPassword({
+    const { error } = await authClient.signIn.email({
       email: data.email,
       password: data.password,
     })

@@ -6,7 +6,14 @@ import { Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 import { StatusBadge } from '@/components/shared/StatusBadge'
-import type { User } from '@/types'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import type { User, UserRole } from '@/types'
 
 interface UsersTableProps {
   data: User[]
@@ -19,8 +26,8 @@ export function UsersTable({ data, currentUserId }: UsersTableProps) {
   const [deleting, setDeleting] = useState(false)
   const [updatingId, setUpdatingId] = useState<string | null>(null)
 
-  async function handleRoleToggle(user: User) {
-    const newRole = user.role === 'superadmin' ? 'viewer' : 'superadmin'
+  async function handleRoleChange(user: User, newRole: UserRole) {
+    if (newRole === user.role) return
     setUpdatingId(user.id)
     await fetch(`/api/users/${user.id}`, {
       method: 'PUT',
@@ -66,26 +73,28 @@ export function UsersTable({ data, currentUserId }: UsersTableProps) {
                   <td className="px-4 py-3 text-muted-foreground">{user.email}</td>
                   <td className="px-4 py-3">
                     <StatusBadge
-                      label={user.role === 'superadmin' ? 'Superadmin' : 'Viewer'}
-                      variant={user.role === 'superadmin' ? 'primary' : 'muted'}
+                      label={user.role === 'superadmin' ? 'Superadmin' : user.role === 'admin' ? 'Admin' : 'Viewer'}
+                      variant={user.role === 'superadmin' ? 'primary' : user.role === 'admin' ? 'warning' : 'muted'}
                     />
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2 justify-end">
                       {!isSelf && (
                         <>
-                          <Button
-                            variant="outline"
-                            size="sm"
+                          <Select
+                            value={user.role}
+                            onValueChange={(value) => handleRoleChange(user, value as UserRole)}
                             disabled={updatingId === user.id}
-                            onClick={() => handleRoleToggle(user)}
                           >
-                            {updatingId === user.id
-                              ? '...'
-                              : user.role === 'superadmin'
-                              ? '→ Viewer'
-                              : '→ Superadmin'}
-                          </Button>
+                            <SelectTrigger className="w-36 cursor-pointer">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="viewer">Viewer</SelectItem>
+                              <SelectItem value="admin">Admin</SelectItem>
+                              <SelectItem value="superadmin">Superadmin</SelectItem>
+                            </SelectContent>
+                          </Select>
                           <Button
                             variant="ghost"
                             size="icon-sm"

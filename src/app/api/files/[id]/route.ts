@@ -9,7 +9,7 @@ type Params = { params: Promise<{ id: string }> }
 
 export async function DELETE(_req: NextRequest, { params }: Params) {
   try {
-    await requireRole('superadmin')
+    await requireRole('admin')
   } catch {
     return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
   }

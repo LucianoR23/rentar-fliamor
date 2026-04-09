@@ -7,7 +7,7 @@ import { registerPaymentSchema } from '@/lib/validations/payment'
 
 export async function POST(request: NextRequest) {
   try {
-    await requireRole('superadmin')
+    await requireRole('admin')
     const body: unknown = await request.json()
     const data = registerPaymentSchema.parse(body)
 

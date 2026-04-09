@@ -1,34 +1,21 @@
-import { createClient } from './supabase/server'
+import { auth } from './auth-config'
+import { headers } from 'next/headers'
 import { db } from './db'
 import { users } from './schema'
 import { eq } from 'drizzle-orm'
 
-export async function requireRole(role: 'superadmin' | 'viewer') {
-  const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+const ROLE_LEVEL = { superadmin: 3, admin: 2, viewer: 1 } as const
 
-  if (!user) throw new Error('Unauthorized')
+export async function requireRole(minRole: 'superadmin' | 'admin' | 'viewer') {
+  const session = await auth.api.getSession({ headers: await headers() })
+  if (!session) throw new Error('Unauthorized')
 
-  let dbUser = await db.query.users.findFirst({
-    where: eq(users.supabaseId, user.id),
+  const dbUser = await db.query.users.findFirst({
+    where: eq(users.id, session.user.id),
   })
+  if (!dbUser) throw new Error('Unauthorized')
 
-  if (!dbUser) {
-    const [created] = await db
-      .insert(users)
-      .values({
-        supabaseId: user.id,
-        email: user.email!,
-        name: (user.user_metadata?.full_name as string | undefined) ?? user.email!,
-        role: 'viewer',
-      })
-      .returning()
-    dbUser = created
-  }
-
-  if (role === 'superadmin' && dbUser.role !== 'superadmin') {
+  if (ROLE_LEVEL[dbUser.role] < ROLE_LEVEL[minRole]) {
     throw new Error('Forbidden')
   }
 

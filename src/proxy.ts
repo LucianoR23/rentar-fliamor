@@ -1,42 +1,28 @@
-import { createServerClient } from '@supabase/ssr'
+import { auth } from '@/lib/auth-config'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function proxy(request: NextRequest) {
-  let response = NextResponse.next({ request })
-
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY!,
-    {
-      cookies: {
-        getAll: () => request.cookies.getAll(),
-        setAll: (cookiesToSet) =>
-          cookiesToSet.forEach(({ name, value, options }) => {
-            request.cookies.set(name, value)
-            response.cookies.set(name, value, options)
-          }),
-      },
-    }
-  )
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const session = await auth.api.getSession({ headers: request.headers })
 
   const { pathname } = request.nextUrl
   const isPublic = pathname.startsWith('/sign-in')
+  const isAuthApi = pathname.startsWith('/api/auth')
+  const isCronApi = pathname.startsWith('/api/cron')
   const isProtectedApi =
-    pathname.startsWith('/api') && !pathname.startsWith('/api/indices')
+    pathname.startsWith('/api') &&
+    !pathname.startsWith('/api/indices') &&
+    !isAuthApi &&
+    !isCronApi
 
-  if ((!isPublic || isProtectedApi) && !user) {
+  if ((!isPublic || isProtectedApi) && !session) {
     return NextResponse.redirect(new URL('/sign-in', request.url))
   }
 
-  if (pathname === '/sign-in' && user) {
+  if (pathname === '/sign-in' && session) {
     return NextResponse.redirect(new URL('/', request.url))
   }
 
-  return response
+  return NextResponse.next()
 }
 
 export const config = { matcher: ['/((?!_next|.*\\..*).*)'] }

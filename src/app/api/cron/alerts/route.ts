@@ -61,7 +61,7 @@ export async function GET(req: NextRequest) {
       skipped++
       continue
     }
-    await redis.set(key, '1', { ex: 60 * 60 * 24 * 35 })
+    await redis.set(key, '1', 'EX', 60 * 60 * 24 * 35)
     sent++
   }
 
@@ -96,7 +96,7 @@ export async function GET(req: NextRequest) {
       skipped++
       continue
     }
-    await redis.set(key, '1', { ex: 60 * 60 * 24 * 10 })
+    await redis.set(key, '1', 'EX', 60 * 60 * 24 * 10)
     sent++
   }
 

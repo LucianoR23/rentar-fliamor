@@ -11,7 +11,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { ThemeToggle } from './ThemeToggle'
-import { createClient } from '@/lib/supabase/client'
+import { authClient } from '@/lib/auth-client'
 import type { UserRole } from '@/types'
 
 interface HeaderProps {
@@ -39,8 +39,6 @@ const segmentLabels: Record<string, string> = {
 export function Header({ userName, userEmail, userRole }: HeaderProps) {
   const pathname = usePathname()
   const router = useRouter()
-  const supabase = createClient()
-
   const segments = pathname.split('/').filter(Boolean)
   const breadcrumbs = segments.map((seg) => segmentLabels[seg] ?? seg)
 
@@ -52,7 +50,7 @@ export function Header({ userName, userEmail, userRole }: HeaderProps) {
     .toUpperCase()
 
   async function handleSignOut() {
-    await supabase.auth.signOut()
+    await authClient.signOut()
     router.push('/sign-in')
     router.refresh()
   }

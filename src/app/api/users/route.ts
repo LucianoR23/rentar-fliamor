@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { desc } from 'drizzle-orm'
+import { desc, eq } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { users } from '@/lib/schema'
 import { requireRole } from '@/lib/auth'
-import { createAdminClient } from '@/lib/supabase/admin'
+import { auth } from '@/lib/auth-config'
 import { createUserSchema } from '@/lib/validations/user'
 
 export async function GET() {
@@ -25,29 +25,20 @@ export async function POST(request: NextRequest) {
     const body: unknown = await request.json()
     const data = createUserSchema.parse(body)
 
-    const supabase = createAdminClient()
-
-    // Create auth user
-    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-      email: data.email,
-      password: data.password,
-      email_confirm: true,
-      user_metadata: { full_name: data.name },
+    const { user: created } = await auth.api.createUser({
+      body: {
+        email: data.email,
+        password: data.password,
+        name: data.name,
+        role: 'user',
+      },
     })
 
-    if (authError) {
-      return NextResponse.json({ error: authError.message }, { status: 400 })
-    }
-
-    // Create DB user with desired role
+    // Set our custom role in the DB
     const [dbUser] = await db
-      .insert(users)
-      .values({
-        supabaseId: authData.user.id,
-        email: data.email,
-        name: data.name,
-        role: data.role,
-      })
+      .update(users)
+      .set({ role: data.role })
+      .where(eq(users.id, created.id))
       .returning()
 
     return NextResponse.json(dbUser, { status: 201 })

@@ -30,7 +30,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
 
 export async function PUT(request: NextRequest, { params }: Params) {
   try {
-    await requireRole('superadmin')
+    await requireRole('admin')
     const { id } = await params
     const body: unknown = await request.json()
     const data = contractSchema.parse(body)
@@ -67,7 +67,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
 
 export async function DELETE(_req: NextRequest, { params }: Params) {
   try {
-    await requireRole('superadmin')
+    await requireRole('admin')
     const { id } = await params
     await db
       .update(contracts)
