@@ -95,7 +95,7 @@ export default function SignInPage() {
                 <path d="M3 5h14M3 10h14M3 15h8" stroke="white" strokeWidth="2" strokeLinecap="round" />
               </svg>
             </div>
-            <h1 className="text-xl font-semibold text-white tracking-tight">RentAR Admin</h1>
+            <h1 className="text-xl font-semibold text-white tracking-tight">RentAR Admin FLIAMOR</h1>
             <p className="text-sm text-zinc-400 mt-1">Ingresá a tu cuenta</p>
           </div>
 

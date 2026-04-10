@@ -1,7 +1,8 @@
 'use client'
 
+import { useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
-import { LogOut } from 'lucide-react'
+import { KeyRound, LogOut } from 'lucide-react'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import {
   DropdownMenu,
@@ -12,6 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { ThemeToggle } from './ThemeToggle'
 import { authClient } from '@/lib/auth-client'
+import { ChangePasswordDialog } from '@/components/shared/ChangePasswordDialog'
 import type { UserRole } from '@/types'
 
 interface HeaderProps {
@@ -37,6 +39,7 @@ const segmentLabels: Record<string, string> = {
 }
 
 export function Header({ userName, userEmail, userRole }: HeaderProps) {
+  const [passwordOpen, setPasswordOpen] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
   const isUUID = (s: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s)
@@ -104,6 +107,13 @@ export function Header({ userName, userEmail, userRole }: HeaderProps) {
             </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem
+              onClick={() => setPasswordOpen(true)}
+              className="cursor-pointer"
+            >
+              <KeyRound className="mr-2 h-4 w-4" />
+              Cambiar contraseña
+            </DropdownMenuItem>
+            <DropdownMenuItem
               onClick={handleSignOut}
               className="text-destructive focus:text-destructive cursor-pointer"
             >
@@ -112,6 +122,8 @@ export function Header({ userName, userEmail, userRole }: HeaderProps) {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+
+        <ChangePasswordDialog open={passwordOpen} onOpenChange={setPasswordOpen} />
       </div>
     </header>
   )
