@@ -8,13 +8,7 @@ export async function proxy(request: NextRequest) {
   const isPublic = pathname.startsWith('/sign-in')
   const isAuthApi = pathname.startsWith('/api/auth')
   const isCronApi = pathname.startsWith('/api/cron')
-  const isProtectedApi =
-    pathname.startsWith('/api') &&
-    !pathname.startsWith('/api/indices') &&
-    !isAuthApi &&
-    !isCronApi
-
-  if ((!isPublic || isProtectedApi) && !session) {
+  if (!isPublic && !isAuthApi && !isCronApi && !session) {
     return NextResponse.redirect(new URL('/sign-in', request.url))
   }
 
