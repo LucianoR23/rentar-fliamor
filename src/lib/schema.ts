@@ -22,7 +22,7 @@ export const paymentStatusEnum = pgEnum('payment_status', ['pending', 'paid', 'p
 export const fileEntityEnum = pgEnum('file_entity', ['unit', 'contract', 'expense', 'group_expense'])
 
 export const users = pgTable('users', {
-  id: uuid('id').primaryKey().defaultRandom(),
+  id: text('id').primaryKey(),
   role: roleEnum('role').default('viewer').notNull(),
   name: varchar('name', { length: 255 }).notNull(),
   email: varchar('email', { length: 255 }).notNull().unique(),
@@ -36,8 +36,8 @@ export const users = pgTable('users', {
 })
 
 export const sessions = pgTable('sessions', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  userId: uuid('user_id')
+  id: text('id').primaryKey(),
+  userId: text('user_id')
     .references(() => users.id, { onDelete: 'cascade' })
     .notNull(),
   token: text('token').notNull().unique(),
@@ -49,8 +49,8 @@ export const sessions = pgTable('sessions', {
 })
 
 export const accounts = pgTable('accounts', {
-  id: uuid('id').primaryKey().defaultRandom(),
-  userId: uuid('user_id')
+  id: text('id').primaryKey(),
+  userId: text('user_id')
     .references(() => users.id, { onDelete: 'cascade' })
     .notNull(),
   accountId: varchar('account_id', { length: 255 }).notNull(),
@@ -67,7 +67,7 @@ export const accounts = pgTable('accounts', {
 })
 
 export const verifications = pgTable('verifications', {
-  id: uuid('id').primaryKey().defaultRandom(),
+  id: text('id').primaryKey(),
   identifier: varchar('identifier', { length: 255 }).notNull(),
   value: text('value').notNull(),
   expiresAt: timestamp('expires_at').notNull(),
