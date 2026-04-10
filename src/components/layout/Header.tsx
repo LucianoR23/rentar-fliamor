@@ -39,8 +39,11 @@ const segmentLabels: Record<string, string> = {
 export function Header({ userName, userEmail, userRole }: HeaderProps) {
   const pathname = usePathname()
   const router = useRouter()
+  const isUUID = (s: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(s)
   const segments = pathname.split('/').filter(Boolean)
-  const breadcrumbs = segments.map((seg) => segmentLabels[seg] ?? seg)
+  const breadcrumbs = segments
+    .filter((seg) => !isUUID(seg))
+    .map((seg) => segmentLabels[seg] ?? seg)
 
   const initials = userName
     .split(' ')

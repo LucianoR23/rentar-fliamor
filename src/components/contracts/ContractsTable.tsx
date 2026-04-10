@@ -9,6 +9,7 @@ import { DataTable } from '@/components/shared/DataTable'
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 import { ContractStatusBadge } from './ContractStatusBadge'
 import { Button } from '@/components/ui/button'
+import { formatDate } from '@/lib/utils'
 import type { Contract, Unit, Tenant } from '@/types'
 
 export type ContractRow = {
@@ -73,7 +74,7 @@ export function ContractsTable({ data }: { data: ContractRow[] }) {
       accessorFn: (row) => row.contract.nextUpdateDate,
       cell: ({ row }) => (
         <span className="font-mono text-sm text-muted-foreground">
-          {row.original.contract.nextUpdateDate}
+          {formatDate(row.original.contract.nextUpdateDate)}
         </span>
       ),
     },

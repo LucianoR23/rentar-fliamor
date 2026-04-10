@@ -11,6 +11,7 @@ import { ContractStatusBadge } from '@/components/contracts/ContractStatusBadge'
 import { ContractTimeline } from '@/components/contracts/ContractTimeline'
 import { UpdateCalculator } from '@/components/contracts/UpdateCalculator'
 import { UPDATE_TYPE_LABELS } from '@/lib/validations/contract'
+import { formatDate } from '@/lib/utils'
 
 type Props = { params: Promise<{ id: string }> }
 
@@ -60,7 +61,7 @@ export default async function ContractDetailPage({ params }: Props) {
 
   return (
     <div>
-      <PageHeader title={title} description={`Contrato ${contract.startDate} → ${contract.endDate}`}>
+      <PageHeader title={title} description={`Contrato ${formatDate(contract.startDate)} → ${formatDate(contract.endDate)}`}>
         <Button asChild variant="ghost" size="sm">
           <Link href="/contracts"><ArrowLeft className="h-4 w-4" />Volver</Link>
         </Button>
@@ -69,7 +70,7 @@ export default async function ContractDetailPage({ params }: Props) {
         </Button>
       </PageHeader>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 max-w-4xl">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_380px] gap-6 max-w-6xl">
         {/* Left column */}
         <div className="space-y-4">
           {/* Details */}
@@ -111,7 +112,7 @@ export default async function ContractDetailPage({ params }: Props) {
                 />
               )}
               <Row label="Próx. actualización" value={
-                <span className="font-mono text-sm">{contract.nextUpdateDate}</span>
+                <span className="font-mono text-sm">{formatDate(contract.nextUpdateDate)}</span>
               } />
               {unit && (
                 <div className="col-span-2">
@@ -138,7 +139,14 @@ export default async function ContractDetailPage({ params }: Props) {
 
           {/* UpdateCalculator — only for active contracts */}
           {contract.status === 'active' && (
-            <UpdateCalculator contractId={contract.id} />
+            <UpdateCalculator
+              contractId={contract.id}
+              currentPrice={Number(contract.currentPrice)}
+              updateType={contract.updateType}
+              updateValue={contract.updateValue != null ? Number(contract.updateValue) : undefined}
+              updateFrequencyMonths={contract.updateFrequencyMonths}
+              nextUpdateDate={contract.nextUpdateDate}
+            />
           )}
 
           <FilesSection
