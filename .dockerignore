@@ -4,11 +4,9 @@ node_modules
 .env
 .env.*
 drizzle/migrations
-MIGRATION_PLAN.md
 DRAGONFLY_TEST.md
-CRONS.md
-DEPLOY_CHECKLIST.md
 GUIA-USUARIO.md
+MIGRATION_PLAN.md
 rentar-admin-blueprint.md
-resend-info.md
 SECURITY-FIXES.md
+SETUP_MONITORING.md
