@@ -14,7 +14,7 @@ import {
 } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
 
-export const roleEnum = pgEnum('role', ['superadmin', 'admin', 'viewer'])
+export const roleEnum = pgEnum('role', ['superadmin', 'admin', 'viewer', 'user'])
 export const unitTypeEnum = pgEnum('unit_type', ['apartment', 'local', 'land', 'house', 'other'])
 export const updateTypeEnum = pgEnum('update_type', ['icl', 'ipc', 'fixed_amount', 'fixed_percentage'])
 export const contractStatusEnum = pgEnum('contract_status', ['active', 'expired', 'terminated'])
