@@ -9,6 +9,8 @@ import {
   timestamp,
   pgEnum,
   integer,
+  boolean,
+  bigint,
 } from 'drizzle-orm/pg-core'
 import { relations } from 'drizzle-orm'
 
@@ -26,6 +28,9 @@ export const users = pgTable('users', {
   email: varchar('email', { length: 255 }).notNull().unique(),
   emailVerified: timestamp('email_verified'),
   image: text('image'),
+  banned: boolean('banned').default(false),
+  bannedReason: text('banned_reason'),
+  banExpires: bigint('ban_expires', { mode: 'number' }),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
