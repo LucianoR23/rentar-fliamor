@@ -26,7 +26,7 @@ export const users = pgTable('users', {
   role: roleEnum('role').default('viewer').notNull(),
   name: varchar('name', { length: 255 }).notNull(),
   email: varchar('email', { length: 255 }).notNull().unique(),
-  emailVerified: timestamp('email_verified'),
+  emailVerified: boolean('email_verified').default(false),
   image: text('image'),
   banned: boolean('banned').default(false),
   bannedReason: text('banned_reason'),
