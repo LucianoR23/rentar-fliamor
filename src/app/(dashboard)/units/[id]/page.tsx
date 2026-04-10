@@ -12,6 +12,7 @@ import { ContractStatusBadge } from '@/components/contracts/ContractStatusBadge'
 import { UpdateCalculator } from '@/components/contracts/UpdateCalculator'
 import { UNIT_TYPE_LABELS } from '@/lib/validations/unit'
 import { UPDATE_TYPE_LABELS } from '@/lib/validations/contract'
+import { formatDate } from '@/lib/utils'
 
 type Props = { params: Promise<{ id: string }> }
 
@@ -65,7 +66,7 @@ export default async function UnitDetailPage({ params }: Props) {
         </Button>
       </PageHeader>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-6 max-w-4xl">
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_650px] gap-6 max-w-7xl">
         {/* Left — unit info */}
         <div className="space-y-4">
           <section className="rounded-lg border border-border bg-card p-5">
@@ -122,7 +123,7 @@ export default async function UnitDetailPage({ params }: Props) {
                     </dd>
                   </div>
                 )}
-                <Row label="Vigencia" value={`${activeContract.startDate} → ${activeContract.endDate}`} />
+                <Row label="Vigencia" value={`${formatDate(activeContract.startDate)} → ${formatDate(activeContract.endDate)}`} />
                 <div className="flex flex-col gap-0.5">
                   <dt className="text-xs text-muted-foreground">Estado</dt>
                   <dd className="mt-0.5"><ContractStatusBadge status={activeContract.status} /></dd>
@@ -133,7 +134,7 @@ export default async function UnitDetailPage({ params }: Props) {
                 />
                 <Row label="Tipo actualización" value={UPDATE_TYPE_LABELS[activeContract.updateType]} />
                 <Row label="Próx. actualización" value={
-                  <span className="font-mono text-sm">{activeContract.nextUpdateDate}</span>
+                  <span className="font-mono text-sm">{formatDate(activeContract.nextUpdateDate)}</span>
                 } />
               </dl>
             </section>
@@ -158,7 +159,14 @@ export default async function UnitDetailPage({ params }: Props) {
         {/* Right — UpdateCalculator */}
         {activeContract && (
           <div>
-            <UpdateCalculator contractId={activeContract.id} />
+            <UpdateCalculator
+              contractId={activeContract.id}
+              currentPrice={Number(activeContract.currentPrice)}
+              updateType={activeContract.updateType}
+              updateValue={activeContract.updateValue != null ? Number(activeContract.updateValue) : undefined}
+              updateFrequencyMonths={activeContract.updateFrequencyMonths}
+              nextUpdateDate={activeContract.nextUpdateDate}
+            />
           </div>
         )}
       </div>

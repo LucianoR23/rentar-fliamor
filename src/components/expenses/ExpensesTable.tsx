@@ -10,13 +10,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { DateInput } from '@/components/ui/date-input'
-import { formatCurrency } from '@/lib/utils'
+import { formatCurrency, formatDate } from '@/lib/utils'
 import type { Expense } from '@/types'
-
-function fmtDate(d: string) {
-  const [y, m, day] = d.split('-')
-  return `${day}/${m}/${y}`
-}
 
 export function ExpensesTable({ data }: { data: Expense[] }) {
   const router = useRouter()
@@ -72,7 +67,7 @@ export function ExpensesTable({ data }: { data: Expense[] }) {
       accessorKey: 'expenseDate',
       cell: ({ row }) => (
         <span className="font-mono tabular-nums text-sm text-muted-foreground">
-          {fmtDate(row.original.expenseDate)}
+          {formatDate(row.original.expenseDate)}
         </span>
       ),
     },

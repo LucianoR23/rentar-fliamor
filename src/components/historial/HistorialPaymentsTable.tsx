@@ -3,7 +3,7 @@
 import { type ColumnDef } from '@tanstack/react-table'
 import { DataTable } from '@/components/shared/DataTable'
 import { StatusBadge } from '@/components/shared/StatusBadge'
-import { formatCurrency } from '@/lib/utils'
+import { formatCurrency, formatDate } from '@/lib/utils'
 import type { Payment } from '@/types'
 
 const MONTHS = [
@@ -42,7 +42,7 @@ const columns: ColumnDef<Payment>[] = [
     accessorFn: (row) => row.dueDate,
     cell: ({ row }) => (
       <span className="font-mono text-sm text-muted-foreground tabular-nums">
-        {row.original.dueDate}
+        {formatDate(row.original.dueDate)}
       </span>
     ),
   },

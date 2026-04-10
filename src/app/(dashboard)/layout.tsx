@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { requireRole } from '@/lib/auth'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { Header } from '@/components/layout/Header'
+import { RentCalculatorButton } from '@/components/shared/RentCalculatorButton'
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
   let dbUser
@@ -22,6 +23,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         />
         <main className="flex-1 overflow-auto p-6">{children}</main>
       </div>
+      <RentCalculatorButton />
     </div>
   )
 }

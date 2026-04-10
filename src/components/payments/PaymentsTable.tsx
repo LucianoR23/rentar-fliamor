@@ -8,7 +8,7 @@ import { DataTable } from '@/components/shared/DataTable'
 import { StatusBadge } from '@/components/shared/StatusBadge'
 import { RegisterPaymentDialog } from './RegisterPaymentDialog'
 import { Button } from '@/components/ui/button'
-import { formatCurrency } from '@/lib/utils'
+import { formatCurrency, formatDate } from '@/lib/utils'
 import type { Payment, Contract, Unit, Tenant } from '@/types'
 
 export type PaymentRow = {
@@ -67,7 +67,7 @@ export function PaymentsTable({ data }: { data: PaymentRow[] }) {
       accessorFn: (row) => row.payment.dueDate,
       cell: ({ row }) => (
         <span className="font-mono text-sm text-muted-foreground tabular-nums">
-          {row.original.payment.dueDate}
+          {formatDate(row.original.payment.dueDate)}
         </span>
       ),
     },
