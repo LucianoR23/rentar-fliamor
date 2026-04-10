@@ -5,7 +5,7 @@ import { Providers } from "@/components/layout/Providers";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "RentAR Admin",
+  title: "RentAR Admin FLIAMOR",
   description: "Sistema de gestión de alquileres para el mercado argentino",
 };
 

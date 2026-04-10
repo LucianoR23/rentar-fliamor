@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Trash2 } from 'lucide-react'
+import { KeyRound, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 import { StatusBadge } from '@/components/shared/StatusBadge'
@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { AdminResetPasswordDialog } from '@/components/settings/AdminResetPasswordDialog'
 import type { User, UserRole } from '@/types'
 
 interface UsersTableProps {
@@ -25,6 +26,7 @@ export function UsersTable({ data, currentUserId }: UsersTableProps) {
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
   const [updatingId, setUpdatingId] = useState<string | null>(null)
+  const [resetUser, setResetUser] = useState<{ id: string; name: string } | null>(null)
 
   async function handleRoleChange(user: User, newRole: UserRole) {
     if (newRole === user.role) return
@@ -98,6 +100,15 @@ export function UsersTable({ data, currentUserId }: UsersTableProps) {
                           <Button
                             variant="ghost"
                             size="icon-sm"
+                            className="text-muted-foreground hover:text-primary"
+                            onClick={() => setResetUser({ id: user.id, name: user.name })}
+                            title="Cambiar contraseña"
+                          >
+                            <KeyRound className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon-sm"
                             className="text-muted-foreground hover:text-destructive"
                             onClick={() => setDeleteId(user.id)}
                           >
@@ -122,6 +133,15 @@ export function UsersTable({ data, currentUserId }: UsersTableProps) {
         onConfirm={handleDelete}
         loading={deleting}
       />
+
+      {resetUser && (
+        <AdminResetPasswordDialog
+          open={!!resetUser}
+          onOpenChange={(open) => !open && setResetUser(null)}
+          userId={resetUser.id}
+          userName={resetUser.name}
+        />
+      )}
     </>
   )
 }
