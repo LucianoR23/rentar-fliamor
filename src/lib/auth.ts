@@ -4,7 +4,7 @@ import { db } from './db'
 import { users } from './schema'
 import { eq } from 'drizzle-orm'
 
-const ROLE_LEVEL = { superadmin: 3, admin: 2, viewer: 1 } as const
+const ROLE_LEVEL = { superadmin: 3, admin: 2, viewer: 1, user: 0 } as const
 
 export async function requireRole(minRole: 'superadmin' | 'admin' | 'viewer') {
   const session = await auth.api.getSession({ headers: await headers() })
