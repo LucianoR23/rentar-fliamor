@@ -3,13 +3,13 @@ import { z } from 'zod/v3'
 export const tenantSchema = z.object({
   firstName: z.string().min(1, 'Requerido'),
   lastName: z.string().min(1, 'Requerido'),
-  dni: z.string().min(7, 'DNI inválido').max(20),
-  phone: z.string().min(6, 'Teléfono inválido'),
+  cuitDni: z.string().regex(/^\d{7,11}$/, 'Debe contener entre 7 y 11 dígitos numéricos'),
+  phone: z.string().regex(/^\d{6,15}$/, 'Debe contener entre 6 y 15 dígitos numéricos'),
   email: z.string().email('Email inválido').optional().or(z.literal('')).transform((v) => v === '' ? undefined : v),
   address: z.string().optional(),
   guarantorName: z.string().optional(),
-  guarantorPhone: z.string().optional(),
-  guarantorDni: z.string().optional(),
+  guarantorPhone: z.string().regex(/^\d{6,15}$/, 'Debe contener entre 6 y 15 dígitos numéricos').optional().or(z.literal('')).transform((v) => v === '' ? undefined : v),
+  guarantorCuitDni: z.string().regex(/^\d{7,11}$/, 'Debe contener entre 7 y 11 dígitos numéricos').optional().or(z.literal('')).transform((v) => v === '' ? undefined : v),
   notes: z.string().optional(),
 })
 

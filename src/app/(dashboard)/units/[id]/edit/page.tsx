@@ -23,6 +23,7 @@ export default async function EditUnitPage({ params }: Props) {
       <PageHeader
         title="Editar unidad"
         description={`${unit.identifier} — ${UNIT_TYPE_LABELS[unit.type] ?? unit.type}`}
+        backHref={`/units/${unit.id}`}
       />
       <UnitForm
         unitId={unit.id}

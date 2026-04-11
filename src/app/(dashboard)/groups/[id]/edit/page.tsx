@@ -14,7 +14,7 @@ export default async function EditGroupPage({ params }: Props) {
 
   return (
     <div>
-      <PageHeader title="Editar grupo" description={group.name} />
+      <PageHeader title="Editar grupo" description={group.name} backHref={`/groups/${group.id}`} />
       <GroupForm
         groupId={group.id}
         defaultValues={{

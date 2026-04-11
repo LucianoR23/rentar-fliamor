@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import React, { useState } from 'react'
 import {
   useReactTable,
   getCoreRowModel,
@@ -35,12 +35,14 @@ interface DataTableProps<TData> {
   columns: ColumnDef<TData>[]
   data: TData[]
   searchPlaceholder?: string
+  renderSubRow?: (row: TData) => React.ReactNode
 }
 
 export function DataTable<TData>({
   columns,
   data,
   searchPlaceholder = 'Buscar...',
+  renderSubRow,
 }: DataTableProps<TData>) {
   const [sorting, setSorting] = useState<SortingState>([])
   const [globalFilter, setGlobalFilter] = useState('')
@@ -122,18 +124,29 @@ export function DataTable<TData>({
           </TableHeader>
           <TableBody>
             {table.getRowModel().rows.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  className="h-10 border-b border-border last:border-0 hover:bg-muted/50 transition-colors"
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id} className="py-0 text-sm">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))
+              table.getRowModel().rows.map((row) => {
+                const subContent = renderSubRow?.(row.original)
+                return (
+                  <React.Fragment key={row.id}>
+                    <TableRow
+                      className="h-10 border-b border-border last:border-0 hover:bg-muted/50 transition-colors"
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id} className="py-0 text-sm">
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                    {subContent && (
+                      <TableRow className="bg-muted/30 border-b border-border">
+                        <TableCell colSpan={columns.length} className="py-0">
+                          {subContent}
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </React.Fragment>
+                )
+              })
             ) : (
               <TableRow>
                 <TableCell

@@ -8,6 +8,8 @@ import type {
   contracts,
   contractUpdates,
   payments,
+  paymentLineItems,
+  manualCharges,
   files,
   groupExpenses,
   groupExpenseUnits,
@@ -27,6 +29,8 @@ export type File = InferSelectModel<typeof files>
 export type GroupExpense = InferSelectModel<typeof groupExpenses>
 export type GroupExpenseUnit = InferSelectModel<typeof groupExpenseUnits>
 export type Expense = InferSelectModel<typeof expenses>
+export type PaymentLineItem = InferSelectModel<typeof paymentLineItems>
+export type ManualCharge = InferSelectModel<typeof manualCharges>
 
 // Insert types (escritura)
 export type NewUser = InferInsertModel<typeof users>
@@ -41,6 +45,8 @@ export type NewFile = InferInsertModel<typeof files>
 export type NewGroupExpense = InferInsertModel<typeof groupExpenses>
 export type NewGroupExpenseUnit = InferInsertModel<typeof groupExpenseUnits>
 export type NewExpense = InferInsertModel<typeof expenses>
+export type NewPaymentLineItem = InferInsertModel<typeof paymentLineItems>
+export type NewManualCharge = InferInsertModel<typeof manualCharges>
 
 // Enum types
 export type UserRole = User['role']
@@ -49,6 +55,7 @@ export type UpdateType = Contract['updateType']
 export type ContractStatus = Contract['status']
 export type PaymentStatus = Payment['status']
 export type FileEntityType = File['entityType']
+export type PaymentLineType = PaymentLineItem['type']
 
 // Tipos con relaciones (para queries con joins)
 export type UnitWithGroup = Unit & { group: Group | null }

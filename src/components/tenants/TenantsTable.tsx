@@ -36,8 +36,8 @@ export function TenantsTable({ data }: { data: Tenant[] }) {
       ),
     },
     {
-      accessorKey: 'dni',
-      header: 'DNI',
+      accessorKey: 'cuitDni',
+      header: 'CUIT/CUIL/DNI',
       cell: ({ getValue }) => (
         <span className="font-mono tabular-nums">{getValue<string>()}</span>
       ),
@@ -87,7 +87,7 @@ export function TenantsTable({ data }: { data: Tenant[] }) {
       <DataTable
         columns={columns}
         data={data}
-        searchPlaceholder="Buscar por nombre, DNI..."
+        searchPlaceholder="Buscar por nombre, CUIT/DNI..."
       />
       <ConfirmDialog
         open={!!deleteId}

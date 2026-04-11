@@ -7,6 +7,7 @@ export default function NewTenantPage() {
       <PageHeader
         title="Nuevo inquilino"
         description="Completá los datos del inquilino"
+        backHref="/tenants"
       />
       <TenantForm />
     </div>

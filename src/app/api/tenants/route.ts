@@ -28,13 +28,13 @@ export async function POST(request: NextRequest) {
       .values({
         firstName: data.firstName,
         lastName: data.lastName,
-        dni: data.dni,
+        cuitDni: data.cuitDni,
         phone: data.phone,
         email: data.email || null,
         address: data.address || null,
         guarantorName: data.guarantorName || null,
         guarantorPhone: data.guarantorPhone || null,
-        guarantorDni: data.guarantorDni || null,
+        guarantorCuitDni: data.guarantorCuitDni || null,
         notes: data.notes || null,
       })
       .returning()

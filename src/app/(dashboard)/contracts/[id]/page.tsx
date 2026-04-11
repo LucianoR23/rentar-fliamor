@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { eq, desc, and } from 'drizzle-orm'
-import { ArrowLeft, Pencil } from 'lucide-react'
+import { Pencil } from 'lucide-react'
 import { db } from '@/lib/db'
 import { contracts, units, tenants, contractUpdates, files } from '@/lib/schema'
 import { PageHeader } from '@/components/shared/PageHeader'
@@ -61,10 +61,7 @@ export default async function ContractDetailPage({ params }: Props) {
 
   return (
     <div>
-      <PageHeader title={title} description={`Contrato ${formatDate(contract.startDate)} → ${formatDate(contract.endDate)}`}>
-        <Button asChild variant="ghost" size="sm">
-          <Link href="/contracts"><ArrowLeft className="h-4 w-4" />Volver</Link>
-        </Button>
+      <PageHeader title={title} description={`Contrato ${formatDate(contract.startDate)} → ${formatDate(contract.endDate)}`} backHref="/contracts">
         <Button asChild size="sm">
           <Link href={`/contracts/${id}/edit`}><Pencil className="h-4 w-4" />Editar</Link>
         </Button>

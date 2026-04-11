@@ -3,6 +3,7 @@ import { db } from '@/lib/db'
 import { groupExpenses, groupExpenseUnits } from '@/lib/schema'
 import { requireRole } from '@/lib/auth'
 import { groupExpenseSchema } from '@/lib/validations/group-expense'
+import { recalculatePaymentsForGroupExpense } from '@/lib/payment-generator'
 
 export async function POST(request: NextRequest) {
   try {
@@ -31,6 +32,9 @@ export async function POST(request: NextRequest) {
         }))
       )
     }
+
+    // Recalculate pending/overdue payments affected by this expense
+    await recalculatePaymentsForGroupExpense(created.id, data.groupId, data.periodMonth, data.periodYear)
 
     return NextResponse.json(created, { status: 201 })
   } catch (e) {

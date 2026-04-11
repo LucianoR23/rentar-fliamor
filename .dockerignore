@@ -5,8 +5,11 @@ node_modules
 .env.*
 drizzle/migrations
 DRAGONFLY_TEST.md
+GUIA_TESTING_IVA_COMISION.MD
 GUIA-USUARIO.md
 MIGRATION_PLAN.md
+PLAN_COMISION_INMOBILIARIA.md
+PLAN_IVA.md
 rentar-admin-blueprint.md
 SECURITY-FIXES.md
 SETUP_MONITORING.md

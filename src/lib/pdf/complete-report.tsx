@@ -7,15 +7,16 @@ const TYPE_LABEL: Record<string, string> = {
   apartment: 'Departamento', local: 'Local', land: 'Terreno', house: 'Casa', other: 'Otro',
 }
 const STATUS_LABEL: Record<string, string> = {
-  paid: 'Pagado', pending: 'Pendiente', partial: 'Parcial', overdue: 'Vencido',
+  paid: 'Pagado', pending: 'Pendiente', partial: 'Parcial', overdue: 'Vencido', cancelled: 'Cancelado',
 }
 
 export interface CompleteReportData {
   period: { month: number; year: number }
-  summary: { totalUnits: number; occupiedUnits: number; activeContracts: number; totalDue: number; totalPaid: number }
+  commissionRate: number
+  summary: { totalUnits: number; occupiedUnits: number; activeContracts: number; totalDue: number; totalPaid: number; totalVat: number; totalCommission: number; totalNet: number }
   unitsByType: Array<{ type: string; total: number; occupied: number }>
   activeContracts: Array<{ unit: string; tenant: string; currentPrice: string; nextUpdateDate: string; endDate: string }>
-  monthPayments: Array<{ unit: string; tenant: string; amountDue: string; amountPaid: string | null; status: string }>
+  monthPayments: Array<{ unit: string; tenant: string; amountDue: string; amountPaid: string | null; vatAmount: number; commissionAmount: number; netAmount: number | null; status: string }>
   groupExpenses: Array<{ groupName: string; name: string; amount: string }>
 }
 
@@ -51,6 +52,7 @@ const s = StyleSheet.create({
 
 function CompleteDoc({ data }: { data: CompleteReportData }) {
   const period = `${MONTHS[data.period.month - 1]} ${data.period.year}`
+  const hasComm = data.commissionRate > 0
   const occPct = data.summary.totalUnits > 0
     ? Math.round((data.summary.occupiedUnits / data.summary.totalUnits) * 100)
     : 0
@@ -87,10 +89,28 @@ function CompleteDoc({ data }: { data: CompleteReportData }) {
             <Text style={s.summaryLabel}>PROYECTADO</Text>
             <Text style={s.summaryValue}>{ars(data.summary.totalDue)}</Text>
           </View>
-          <View style={{ ...s.summaryBox, backgroundColor: '#F0FDF4', marginRight: 0 }}>
+          <View style={{ ...s.summaryBox, backgroundColor: '#F0FDF4' }}>
             <Text style={s.summaryLabel}>COBRADO</Text>
             <Text style={{ ...s.summaryValue, color: '#10B981' }}>{ars(data.summary.totalPaid)}</Text>
           </View>
+          {hasComm && (
+            <View style={s.summaryBox}>
+              <Text style={s.summaryLabel}>COMISIÓN</Text>
+              <Text style={{ ...s.summaryValue, color: '#F59E0B' }}>{ars(data.summary.totalCommission)}</Text>
+            </View>
+          )}
+          {hasComm && (
+            <View style={{ ...s.summaryBox, backgroundColor: '#F0FDF4' }}>
+              <Text style={s.summaryLabel}>NETO</Text>
+              <Text style={{ ...s.summaryValue, color: '#10B981' }}>{ars(data.summary.totalNet)}</Text>
+            </View>
+          )}
+          {data.summary.totalVat > 0 && (
+            <View style={{ ...s.summaryBox, marginRight: 0 }}>
+              <Text style={s.summaryLabel}>IVA</Text>
+              <Text style={{ ...s.summaryValue, color: '#71717A' }}>{ars(data.summary.totalVat)}</Text>
+            </View>
+          )}
         </View>
 
         {/* Units by type */}
@@ -134,20 +154,26 @@ function CompleteDoc({ data }: { data: CompleteReportData }) {
         {/* Monthly payments */}
         <Text style={s.sectionTitle}>PAGOS DEL PERÍODO — {period}</Text>
         <View style={s.tHead}>
-          <Text style={{ ...s.th, width: 64 }}>Unidad</Text>
-          <Text style={{ ...s.th, width: 130 }}>Inquilino</Text>
-          <Text style={{ ...s.th, width: 76, textAlign: 'right' }}>Alquiler</Text>
-          <Text style={{ ...s.th, width: 76, textAlign: 'right' }}>Cobrado</Text>
+          <Text style={{ ...s.th, width: hasComm ? 50 : 60 }}>Unidad</Text>
+          <Text style={{ ...s.th, width: hasComm ? 80 : 110 }}>Inquilino</Text>
+          <Text style={{ ...s.th, width: hasComm ? 58 : 70, textAlign: 'right' }}>Alquiler</Text>
+          <Text style={{ ...s.th, width: hasComm ? 44 : 52, textAlign: 'right' }}>IVA</Text>
+          <Text style={{ ...s.th, width: hasComm ? 58 : 70, textAlign: 'right' }}>Cobrado</Text>
+          {hasComm && <Text style={{ ...s.th, width: 44, textAlign: 'right' }}>Comisión</Text>}
+          {hasComm && <Text style={{ ...s.th, width: 56, textAlign: 'right' }}>Neto</Text>}
           <Text style={{ ...s.th, flex: 1 }}>Estado</Text>
         </View>
         {data.monthPayments.length === 0 ? (
           <Text style={{ fontSize: 8, color: '#71717A', paddingLeft: 6, paddingTop: 8 }}>Sin pagos registrados para el período.</Text>
         ) : data.monthPayments.map((row, i) => (
           <View key={i} style={i % 2 === 0 ? s.tRow : s.tRowAlt} wrap={false}>
-            <Text style={{ ...s.td, width: 64 }}>{row.unit}</Text>
-            <Text style={{ ...s.td, width: 130 }}>{row.tenant}</Text>
-            <Text style={{ ...s.td, width: 76, textAlign: 'right' }}>{ars(row.amountDue)}</Text>
-            <Text style={{ ...s.td, width: 76, textAlign: 'right' }}>{ars(row.amountPaid)}</Text>
+            <Text style={{ ...s.td, width: hasComm ? 50 : 60 }}>{row.unit}</Text>
+            <Text style={{ ...s.td, width: hasComm ? 80 : 110 }}>{row.tenant}</Text>
+            <Text style={{ ...s.td, width: hasComm ? 58 : 70, textAlign: 'right' }}>{ars(row.amountDue)}</Text>
+            <Text style={{ ...s.tdSub, width: hasComm ? 44 : 52, textAlign: 'right' }}>{row.vatAmount > 0 ? ars(row.vatAmount) : '—'}</Text>
+            <Text style={{ ...s.td, width: hasComm ? 58 : 70, textAlign: 'right' }}>{ars(row.amountPaid)}</Text>
+            {hasComm && <Text style={{ ...s.tdSub, width: 44, textAlign: 'right' }}>{row.commissionAmount > 0 ? ars(row.commissionAmount) : '—'}</Text>}
+            {hasComm && <Text style={{ ...s.td, width: 56, textAlign: 'right' }}>{row.netAmount != null ? ars(row.netAmount) : '—'}</Text>}
             <Text style={{ ...s.td, flex: 1 }}>{STATUS_LABEL[row.status] ?? row.status}</Text>
           </View>
         ))}

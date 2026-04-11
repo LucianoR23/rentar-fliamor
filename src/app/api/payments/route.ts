@@ -28,6 +28,8 @@ export async function POST(request: NextRequest) {
         amountPaid: String(data.amountPaid),
         paymentDate: data.paymentDate,
         notes: data.notes ?? null,
+        commissionRate: data.commissionRate != null ? String(data.commissionRate) : null,
+        applyCommission: data.applyCommission ?? true,
         status,
         updatedAt: new Date(),
       })

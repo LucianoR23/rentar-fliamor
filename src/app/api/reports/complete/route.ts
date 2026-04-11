@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { and, count, eq, sum } from 'drizzle-orm'
+import { and, count, eq, ne, sum } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { contracts, groupExpenses, groups, payments, tenants, units } from '@/lib/schema'
 import { requireRole } from '@/lib/auth'
+import { calculateVat } from '@/lib/vat'
+import { getCommissionRate, calculateCommission } from '@/lib/commission'
 import { generateCompleteReport, type CompleteReportData } from '@/lib/pdf/complete-report'
 
 export async function GET(req: NextRequest) {
@@ -29,7 +31,7 @@ export async function GET(req: NextRequest) {
 
       db.select({ total: sum(payments.amountDue) })
         .from(payments)
-        .where(and(eq(payments.periodMonth, month), eq(payments.periodYear, year))),
+        .where(and(eq(payments.periodMonth, month), eq(payments.periodYear, year), ne(payments.status, 'cancelled'))),
 
       db.select({ total: sum(payments.amountPaid) })
         .from(payments)
@@ -47,7 +49,7 @@ export async function GET(req: NextRequest) {
         .where(eq(contracts.status, 'active'))
         .orderBy(units.identifier),
 
-      db.select({ payment: payments, unit: units, tenant: tenants })
+      db.select({ payment: payments, contract: contracts, unit: units, tenant: tenants })
         .from(payments)
         .innerJoin(contracts, eq(payments.contractId, contracts.id))
         .innerJoin(units, eq(contracts.unitId, units.id))
@@ -63,15 +65,43 @@ export async function GET(req: NextRequest) {
     ])
 
     const unitsStats = rawUnitsStats[0] ?? { total: 0, occupied: 0 }
+    const commissionRate = await getCommissionRate()
+
+    const mappedPayments = monthPaymentRows.map(({ payment, contract, unit, tenant }) => {
+      const vat = calculateVat(Number(contract.currentPrice), contract.appliesVat, Number(contract.vatPercentage))
+      const rate = payment.commissionRate != null ? Number(payment.commissionRate) : commissionRate
+      const comm = calculateCommission(Number(contract.currentPrice), rate, payment.applyCommission)
+      const isPaid = payment.status === 'paid' || payment.status === 'partial'
+      return {
+        unit: unit.identifier,
+        tenant: `${tenant.lastName}, ${tenant.firstName}`,
+        amountDue: payment.amountDue,
+        amountPaid: payment.amountPaid ?? null,
+        vatAmount: vat.vat,
+        commissionAmount: isPaid ? comm.commission : 0,
+        netAmount: isPaid && payment.amountPaid ? comm.net : null,
+        status: payment.status,
+      }
+    })
+
+    const totalCommission = mappedPayments.reduce((acc, r) => acc + r.commissionAmount, 0)
+    const totalNet = mappedPayments.reduce((acc, r) => acc + (r.netAmount ?? 0), 0)
 
     const data: CompleteReportData = {
       period: { month, year },
+      commissionRate,
       summary: {
         totalUnits: unitsStats.total,
         occupiedUnits: unitsStats.occupied,
         activeContracts: activeContractRows.length,
         totalDue: parseFloat(rawProjected[0]?.total ?? '0'),
         totalPaid: parseFloat(rawCollected[0]?.total ?? '0'),
+        totalVat: monthPaymentRows.reduce((acc, { contract }) => {
+          const vat = calculateVat(Number(contract.currentPrice), contract.appliesVat, Number(contract.vatPercentage))
+          return acc + vat.vat
+        }, 0),
+        totalCommission,
+        totalNet,
       },
       unitsByType: occupancyByType.map((r) => ({ type: r.type, total: r.total, occupied: r.occupied })),
       activeContracts: activeContractRows.map(({ contract, unit, tenant }) => ({
@@ -81,13 +111,7 @@ export async function GET(req: NextRequest) {
         nextUpdateDate: contract.nextUpdateDate,
         endDate: contract.endDate,
       })),
-      monthPayments: monthPaymentRows.map(({ payment, unit, tenant }) => ({
-        unit: unit.identifier,
-        tenant: `${tenant.lastName}, ${tenant.firstName}`,
-        amountDue: payment.amountDue,
-        amountPaid: payment.amountPaid ?? null,
-        status: payment.status,
-      })),
+      monthPayments: mappedPayments,
       groupExpenses: groupExpenseRows.map(({ expense, group }) => ({
         groupName: group.name,
         name: expense.name,

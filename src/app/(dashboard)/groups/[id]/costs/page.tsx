@@ -1,11 +1,8 @@
 import { notFound } from 'next/navigation'
-import Link from 'next/link'
 import { eq } from 'drizzle-orm'
-import { ArrowLeft } from 'lucide-react'
 import { db } from '@/lib/db'
 import { groups, groupCostConfig } from '@/lib/schema'
 import { PageHeader } from '@/components/shared/PageHeader'
-import { Button } from '@/components/ui/button'
 import { CostDistributionForm } from '@/components/groups/CostDistributionForm'
 import type { CostDistributionFormData } from '@/lib/validations/group'
 
@@ -31,14 +28,8 @@ export default async function GroupCostsPage({ params }: Props) {
       <PageHeader
         title="Distribución de gastos"
         description={group.name}
-      >
-        <Button asChild variant="ghost" size="sm">
-          <Link href={`/groups/${id}?tab=config`}>
-            <ArrowLeft className="h-4 w-4" />
-            Volver
-          </Link>
-        </Button>
-      </PageHeader>
+        backHref={`/groups/${id}?tab=config`}
+      />
 
       <CostDistributionForm groupId={id} defaultValues={defaultValues} />
     </div>

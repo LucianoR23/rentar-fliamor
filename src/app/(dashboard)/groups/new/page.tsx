@@ -4,7 +4,7 @@ import { GroupForm } from '@/components/groups/GroupForm'
 export default function NewGroupPage() {
   return (
     <div>
-      <PageHeader title="Nuevo grupo" description="Completá los datos del grupo" />
+      <PageHeader title="Nuevo grupo" description="Completá los datos del grupo" backHref="/groups" />
       <GroupForm />
     </div>
   )

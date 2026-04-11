@@ -22,6 +22,7 @@ export default async function UsersSettingsPage() {
       <PageHeader
         title="Usuarios"
         description="Gestioná quién tiene acceso y con qué permisos."
+        backHref="/settings"
       />
 
       <section className="space-y-4">
