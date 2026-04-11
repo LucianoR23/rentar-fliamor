@@ -10,9 +10,12 @@ import { Input } from '@/components/ui/input'
 import { DateInput } from '@/components/ui/date-input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
+import { Switch } from '@/components/ui/switch'
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select'
+import { calculateVat } from '@/lib/vat'
+import { formatCurrency } from '@/lib/utils'
 
 interface UnitOption { id: string; identifier: string; type: string }
 interface TenantOption { id: string; firstName: string; lastName: string }
@@ -51,6 +54,11 @@ export function ContractForm({ defaultValues, contractId, units, tenants }: Cont
 
   const updateType = useWatch({ control, name: 'updateType' })
   const needsUpdateValue = updateType === 'fixed_amount' || updateType === 'fixed_percentage'
+
+  const appliesVat = useWatch({ control, name: 'appliesVat' })
+  const vatPercentage = useWatch({ control, name: 'vatPercentage' }) ?? 100
+  const firstMonthPrice = useWatch({ control, name: 'firstMonthPrice' })
+  const vatBreakdown = calculateVat(Number(firstMonthPrice) || 0, appliesVat ?? false, Number(vatPercentage))
 
   async function onSubmit(data: ContractFormData) {
     setServerError(null)
@@ -136,6 +144,69 @@ export function ContractForm({ defaultValues, contractId, units, tenants }: Cont
             <Input {...register('depositAmount')} type="number" min="0" step="0.01" placeholder="300000" className="font-mono" />
           </Field>
         </div>
+      </section>
+
+      {/* IVA */}
+      <section className="space-y-4">
+        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">IVA</h2>
+        <div className="flex items-center gap-3">
+          <Controller name="appliesVat" control={control} render={({ field }) => (
+            <Switch
+              checked={field.value ?? false}
+              onCheckedChange={field.onChange}
+            />
+          )} />
+          <Label className="text-sm">Aplica IVA 21%</Label>
+        </div>
+
+        {appliesVat && (
+          <>
+            <Field label="Porcentaje del alquiler gravado (%)" error={errors.vatPercentage?.message}>
+              <Input
+                {...register('vatPercentage')}
+                type="number"
+                min="1"
+                max="100"
+                step="0.01"
+                placeholder="100"
+                className="font-mono max-w-32"
+              />
+            </Field>
+
+            {Number(firstMonthPrice) > 0 && (
+              <div className="rounded-lg border border-border bg-muted/50 px-4 py-3 space-y-1 text-sm font-mono">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Alquiler:</span>
+                  <span>{formatCurrency(vatBreakdown.price)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Base gravada ({vatPercentage}%):</span>
+                  <span>{formatCurrency(vatBreakdown.vatableBase)}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">IVA 21%:</span>
+                  <span>{formatCurrency(vatBreakdown.vat)}</span>
+                </div>
+                <div className="flex justify-between font-semibold border-t border-border pt-1 mt-1">
+                  <span>Total a cobrar:</span>
+                  <span>{formatCurrency(vatBreakdown.total)}</span>
+                </div>
+              </div>
+            )}
+          </>
+        )}
+      </section>
+
+      {/* Administración */}
+      <section className="space-y-4">
+        <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Administración</h2>
+        <Field label="Administrado desde" error={errors.managedSince?.message}>
+          <DateInput {...register('managedSince')} />
+        </Field>
+        <p className="text-xs text-muted-foreground bg-muted/50 rounded-lg px-3 py-2">
+          Dejar vacío si se administra desde el inicio del contrato. Si se toma un contrato en curso,
+          indicar la fecha desde la que se administra. No se generarán pagos para meses anteriores.
+        </p>
       </section>
 
       {/* Actualización */}

@@ -23,9 +23,11 @@ const MONTHS = [
   { value: 11, label: 'Noviembre' }, { value: 12, label: 'Diciembre' },
 ]
 
+type UnitWithContract = DistributionUnit & { hasActiveContract: boolean }
+
 interface GroupExpenseFormProps {
   groupId: string
-  activeUnits: DistributionUnit[]
+  activeUnits: UnitWithContract[]
   costConfig: DistributionConfig[]
 }
 
@@ -186,6 +188,15 @@ export function GroupExpenseForm({ groupId, activeUnits, costConfig }: GroupExpe
                 <span className="text-xs text-muted-foreground">
                   {UNIT_TYPE_LABELS[unit.type] ?? unit.type}
                 </span>
+                {unit.hasActiveContract ? (
+                  <span className="ml-auto rounded-full bg-success/15 px-2 py-0.5 text-xs font-medium text-success">
+                    Ocupada
+                  </span>
+                ) : (
+                  <span className="ml-auto rounded-full bg-muted/50 px-2 py-0.5 text-xs font-medium text-muted-foreground">
+                    Vacante
+                  </span>
+                )}
               </label>
             ))}
           </div>

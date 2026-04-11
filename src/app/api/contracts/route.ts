@@ -44,6 +44,9 @@ export async function POST(request: NextRequest) {
         firstMonthPrice: String(data.firstMonthPrice),
         currentPrice: String(data.firstMonthPrice),
         depositAmount: data.depositAmount != null ? String(data.depositAmount) : null,
+        appliesVat: data.appliesVat ?? false,
+        vatPercentage: String(data.vatPercentage ?? 100),
+        managedSince: data.managedSince || null,
         nextUpdateDate,
         status: 'active',
       })

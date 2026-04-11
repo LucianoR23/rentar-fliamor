@@ -12,7 +12,7 @@ export default async function NewUnitPage() {
 
   return (
     <div>
-      <PageHeader title="Nueva unidad" description="Completá los datos de la unidad" />
+      <PageHeader title="Nueva unidad" description="Completá los datos de la unidad" backHref="/units" />
       <UnitForm groups={allGroups} />
     </div>
   )

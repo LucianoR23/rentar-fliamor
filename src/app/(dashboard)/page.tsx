@@ -1,5 +1,5 @@
-import { and, count, eq, gte, lte, sql, sum } from 'drizzle-orm'
-import { Building2, CalendarClock, CheckCircle2, TrendingUp } from 'lucide-react'
+import { and, count, eq, gte, lte, ne, sql, sum } from 'drizzle-orm'
+import { Building2, CalendarClock, CheckCircle2, TrendingUp, Percent } from 'lucide-react'
 
 import { KpiCard } from '@/components/dashboard/KpiCard'
 import { IncomeChart } from '@/components/dashboard/IncomeChart'
@@ -8,6 +8,8 @@ import { PageHeader } from '@/components/shared/PageHeader'
 import { db } from '@/lib/db'
 import { contracts, payments, units } from '@/lib/schema'
 import { formatCurrency } from '@/lib/utils'
+import { getCommissionRate, calculateCommission } from '@/lib/commission'
+import { calculateVat } from '@/lib/vat'
 
 const MONTH_LABELS = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
 
@@ -44,11 +46,11 @@ export default async function DashboardPage() {
       .from(units)
       .leftJoin(contracts, and(eq(contracts.unitId, units.id), eq(contracts.status, 'active'))),
 
-    // Current month projected income (sum of amountDue)
+    // Current month projected income (sum of amountDue, excluding cancelled)
     db
       .select({ total: sum(payments.amountDue) })
       .from(payments)
-      .where(and(eq(payments.periodMonth, currentMonth), eq(payments.periodYear, currentYear))),
+      .where(and(eq(payments.periodMonth, currentMonth), eq(payments.periodYear, currentYear), ne(payments.status, 'cancelled'))),
 
     // Current month collected (sum of amountPaid where status = 'paid')
     db
@@ -81,7 +83,7 @@ export default async function DashboardPage() {
       .leftJoin(contracts, and(eq(contracts.unitId, units.id), eq(contracts.status, 'active')))
       .groupBy(units.type),
 
-    // Last 6 months: projected vs collected per month
+    // Last 6 months: projected vs collected per month (exclude cancelled)
     db
       .select({
         month: payments.periodMonth,
@@ -91,7 +93,10 @@ export default async function DashboardPage() {
       })
       .from(payments)
       .where(
-        sql`${payments.periodYear} * 12 + ${payments.periodMonth} >= ${startYear * 12 + startMonth}`
+        and(
+          sql`${payments.periodYear} * 12 + ${payments.periodMonth} >= ${startYear * 12 + startMonth}`,
+          ne(payments.status, 'cancelled')
+        )
       )
       .groupBy(payments.periodYear, payments.periodMonth)
       .orderBy(payments.periodYear, payments.periodMonth),
@@ -101,6 +106,28 @@ export default async function DashboardPage() {
   const projectedAmount = parseFloat(rawProjected[0]?.total ?? '0')
   const collectedAmount = parseFloat(rawCollected[0]?.total ?? '0')
   const upcomingCount = rawUpcoming[0]?.total ?? 0
+
+  // Commission calculation
+  const commissionRate = await getCommissionRate()
+  let totalCommission = 0
+  if (commissionRate > 0) {
+    const paidPayments = await db
+      .select({ payment: payments, contract: contracts })
+      .from(payments)
+      .innerJoin(contracts, eq(payments.contractId, contracts.id))
+      .where(
+        and(
+          eq(payments.periodMonth, currentMonth),
+          eq(payments.periodYear, currentYear),
+          eq(payments.status, 'paid')
+        )
+      )
+    totalCommission = paidPayments.reduce((acc, { payment, contract }) => {
+      const rate = payment.commissionRate != null ? Number(payment.commissionRate) : commissionRate
+      const comm = calculateCommission(Number(contract.currentPrice), rate, payment.applyCommission)
+      return acc + comm.commission
+    }, 0)
+  }
 
   const occupancyPct =
     unitsStats.total > 0 ? Math.round((unitsStats.occupied / unitsStats.total) * 100) : 0
@@ -118,9 +145,9 @@ export default async function DashboardPage() {
 
   return (
     <div>
-      <PageHeader title="Dashboard" description="Resumen general del sistema" />
+      <PageHeader title="Inicio" description="Resumen general del sistema" />
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className={`grid gap-4 sm:grid-cols-2 ${commissionRate > 0 ? 'xl:grid-cols-5' : 'xl:grid-cols-4'}`}>
         <KpiCard
           title="Ocupación"
           value={`${occupancyPct}%`}
@@ -136,9 +163,17 @@ export default async function DashboardPage() {
         <KpiCard
           title="Cobrado"
           value={formatCurrency(collectedAmount)}
-          description="Pagos confirmados del mes"
+          description={commissionRate > 0 ? `Neto: ${formatCurrency(collectedAmount - totalCommission)}` : 'Pagos confirmados del mes'}
           icon={CheckCircle2}
         />
+        {commissionRate > 0 && (
+          <KpiCard
+            title="Comisión del mes"
+            value={formatCurrency(totalCommission)}
+            description={`${commissionRate}% sobre alquileres cobrados`}
+            icon={Percent}
+          />
+        )}
         <KpiCard
           title="Próximas actualizaciones"
           value={String(upcomingCount)}

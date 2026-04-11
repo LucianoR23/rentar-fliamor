@@ -18,7 +18,8 @@ export const roleEnum = pgEnum('role', ['superadmin', 'admin', 'viewer', 'user']
 export const unitTypeEnum = pgEnum('unit_type', ['apartment', 'local', 'land', 'house', 'other'])
 export const updateTypeEnum = pgEnum('update_type', ['icl', 'ipc', 'fixed_amount', 'fixed_percentage'])
 export const contractStatusEnum = pgEnum('contract_status', ['active', 'expired', 'terminated'])
-export const paymentStatusEnum = pgEnum('payment_status', ['pending', 'paid', 'partial', 'overdue'])
+export const paymentStatusEnum = pgEnum('payment_status', ['pending', 'paid', 'partial', 'overdue', 'cancelled'])
+export const paymentLineTypeEnum = pgEnum('payment_line_type', ['rent', 'vat', 'group_expense', 'manual_charge'])
 export const fileEntityEnum = pgEnum('file_entity', ['unit', 'contract', 'expense', 'group_expense'])
 
 export const users = pgTable('users', {
@@ -79,13 +80,13 @@ export const tenants = pgTable('tenants', {
   id: uuid('id').primaryKey().defaultRandom(),
   firstName: varchar('first_name', { length: 255 }).notNull(),
   lastName: varchar('last_name', { length: 255 }).notNull(),
-  dni: varchar('dni', { length: 20 }).notNull(),
+  cuitDni: varchar('cuit_dni', { length: 20 }).notNull(),
   phone: varchar('phone', { length: 30 }).notNull(),
   email: varchar('email', { length: 255 }),
   address: text('address'),
   guarantorName: varchar('guarantor_name', { length: 255 }),
   guarantorPhone: varchar('guarantor_phone', { length: 30 }),
-  guarantorDni: varchar('guarantor_dni', { length: 20 }),
+  guarantorCuitDni: varchar('guarantor_cuit_dni', { length: 20 }),
   notes: text('notes'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
@@ -136,6 +137,9 @@ export const contracts = pgTable('contracts', {
   firstMonthPrice: decimal('first_month_price', { precision: 12, scale: 2 }).notNull(),
   currentPrice: decimal('current_price', { precision: 12, scale: 2 }).notNull(),
   depositAmount: decimal('deposit_amount', { precision: 12, scale: 2 }),
+  appliesVat: boolean('applies_vat').default(false).notNull(),
+  vatPercentage: decimal('vat_percentage', { precision: 5, scale: 2 }).default('100.00').notNull(),
+  managedSince: date('managed_since'),
   status: contractStatusEnum('status').default('active').notNull(),
   nextUpdateDate: date('next_update_date').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
@@ -162,14 +166,27 @@ export const payments = pgTable('payments', {
     .notNull(),
   periodMonth: smallint('period_month').notNull(),
   periodYear: smallint('period_year').notNull(),
+  baseRent: decimal('base_rent', { precision: 12, scale: 2 }),
+  vatAmount: decimal('vat_amount', { precision: 12, scale: 2 }),
   amountDue: decimal('amount_due', { precision: 12, scale: 2 }).notNull(),
   amountPaid: decimal('amount_paid', { precision: 12, scale: 2 }),
   paymentDate: date('payment_date'),
   dueDate: date('due_date').notNull(),
   status: paymentStatusEnum('status').default('pending').notNull(),
+  commissionRate: decimal('commission_rate', { precision: 5, scale: 2 }),
+  applyCommission: boolean('apply_commission').default(true).notNull(),
   receiptNumber: varchar('receipt_number', { length: 50 }),
   notes: text('notes'),
+  cancelledReason: text('cancelled_reason'),
+  cancelledAt: timestamp('cancelled_at'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+})
+
+export const settings = pgTable('settings', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  key: varchar('key', { length: 100 }).notNull().unique(),
+  value: text('value').notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
 
@@ -221,6 +238,35 @@ export const expenses = pgTable('expenses', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
 
+export const manualCharges = pgTable('manual_charges', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  unitId: uuid('unit_id')
+    .references(() => units.id, { onDelete: 'cascade' })
+    .notNull(),
+  description: varchar('description', { length: 255 }).notNull(),
+  amount: decimal('amount', { precision: 12, scale: 2 }).notNull(),
+  periodMonth: smallint('period_month').notNull(),
+  periodYear: smallint('period_year').notNull(),
+  notes: text('notes'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+})
+
+export const paymentLineItems = pgTable('payment_line_items', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  paymentId: uuid('payment_id')
+    .references(() => payments.id, { onDelete: 'cascade' })
+    .notNull(),
+  type: paymentLineTypeEnum('type').notNull(),
+  description: varchar('description', { length: 255 }).notNull(),
+  amount: decimal('amount', { precision: 12, scale: 2 }).notNull(),
+  groupExpenseId: uuid('group_expense_id')
+    .references(() => groupExpenses.id, { onDelete: 'set null' }),
+  manualChargeId: uuid('manual_charge_id')
+    .references(() => manualCharges.id, { onDelete: 'set null' }),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+})
+
 // Relations
 export const usersRelations = relations(users, () => ({}))
 
@@ -241,6 +287,7 @@ export const groupCostConfigRelations = relations(groupCostConfig, ({ one }) => 
 export const unitsRelations = relations(units, ({ one, many }) => ({
   group: one(groups, { fields: [units.groupId], references: [groups.id] }),
   contracts: many(contracts),
+  manualCharges: many(manualCharges),
 }))
 
 export const contractsRelations = relations(contracts, ({ one, many }) => ({
@@ -254,8 +301,9 @@ export const contractUpdatesRelations = relations(contractUpdates, ({ one }) => 
   contract: one(contracts, { fields: [contractUpdates.contractId], references: [contracts.id] }),
 }))
 
-export const paymentsRelations = relations(payments, ({ one }) => ({
+export const paymentsRelations = relations(payments, ({ one, many }) => ({
   contract: one(contracts, { fields: [payments.contractId], references: [contracts.id] }),
+  lineItems: many(paymentLineItems),
 }))
 
 export const groupExpensesRelations = relations(groupExpenses, ({ one, many }) => ({
@@ -266,4 +314,14 @@ export const groupExpensesRelations = relations(groupExpenses, ({ one, many }) =
 export const groupExpenseUnitsRelations = relations(groupExpenseUnits, ({ one }) => ({
   groupExpense: one(groupExpenses, { fields: [groupExpenseUnits.groupExpenseId], references: [groupExpenses.id] }),
   unit: one(units, { fields: [groupExpenseUnits.unitId], references: [units.id] }),
+}))
+
+export const manualChargesRelations = relations(manualCharges, ({ one }) => ({
+  unit: one(units, { fields: [manualCharges.unitId], references: [units.id] }),
+}))
+
+export const paymentLineItemsRelations = relations(paymentLineItems, ({ one }) => ({
+  payment: one(payments, { fields: [paymentLineItems.paymentId], references: [payments.id] }),
+  groupExpense: one(groupExpenses, { fields: [paymentLineItems.groupExpenseId], references: [groupExpenses.id] }),
+  manualCharge: one(manualCharges, { fields: [paymentLineItems.manualChargeId], references: [manualCharges.id] }),
 }))

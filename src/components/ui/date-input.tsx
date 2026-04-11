@@ -1,6 +1,6 @@
 'use client'
 
-import { forwardRef, useImperativeHandle, useRef, useState } from 'react'
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { Popover } from 'radix-ui'
 import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
@@ -45,6 +45,18 @@ export const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
     const isControlled = value !== undefined
     const [internalValue, setInternalValue] = useState<string>((defaultValue as string) ?? '')
     const displayValue = isControlled ? (value as string) : internalValue
+
+    // Sync with value set via ref by react-hook-form after mount
+    useEffect(() => {
+      if (isControlled) return
+      // RHF sets defaultValue on the ref in its own useEffect, so we wait a frame
+      const id = requestAnimationFrame(() => {
+        if (hiddenRef.current?.value && hiddenRef.current.value !== internalValue) {
+          setInternalValue(hiddenRef.current.value)
+        }
+      })
+      return () => cancelAnimationFrame(id)
+    }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
     const now = new Date()
     const parsed = parseDate(displayValue)

@@ -1,14 +1,12 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { eq, and, desc, inArray } from 'drizzle-orm'
-import { ArrowLeft } from 'lucide-react'
 import { db } from '@/lib/db'
 import {
   contracts, units, tenants, contractUpdates,
   payments, files, groupExpenses, groupExpenseUnits,
 } from '@/lib/schema'
 import { PageHeader } from '@/components/shared/PageHeader'
-import { Button } from '@/components/ui/button'
 import { ContractStatusBadge } from '@/components/contracts/ContractStatusBadge'
 import { ContractTimeline } from '@/components/contracts/ContractTimeline'
 import { FilesSection } from '@/components/files/FilesSection'
@@ -93,11 +91,7 @@ export default async function HistorialDetailPage({ params }: Props) {
 
   return (
     <div>
-      <PageHeader title={title} description={`${contract.startDate} → ${contract.endDate}`}>
-        <Button asChild variant="ghost" size="sm">
-          <Link href="/historial"><ArrowLeft className="h-4 w-4" />Volver</Link>
-        </Button>
-      </PageHeader>
+      <PageHeader title={title} description={`${contract.startDate} → ${contract.endDate}`} backHref="/historial" />
 
       <div className="max-w-4xl space-y-6">
         {/* Contract details */}
@@ -163,13 +157,13 @@ export default async function HistorialDetailPage({ params }: Props) {
                   {tenant.lastName}, {tenant.firstName}
                 </Link>
               } />
-              <Row label="DNI" value={tenant.dni} />
+              <Row label="CUIT/CUIL/DNI" value={tenant.cuitDni} />
               <Row label="Teléfono" value={tenant.phone} />
               <Row label="Email" value={tenant.email} />
               {tenant.guarantorName && (
                 <>
                   <Row label="Garante" value={tenant.guarantorName} />
-                  <Row label="DNI garante" value={tenant.guarantorDni} />
+                  <Row label="CUIT/CUIL/DNI garante" value={tenant.guarantorCuitDni} />
                   <Row label="Tel. garante" value={tenant.guarantorPhone} />
                 </>
               )}

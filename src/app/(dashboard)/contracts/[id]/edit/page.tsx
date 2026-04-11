@@ -24,7 +24,7 @@ export default async function EditContractPage({ params }: Props) {
 
   return (
     <div>
-      <PageHeader title="Editar contrato" />
+      <PageHeader title="Editar contrato" backHref={`/contracts/${contract.id}`} />
       <ContractForm
         contractId={contract.id}
         units={allUnits}
@@ -39,6 +39,9 @@ export default async function EditContractPage({ params }: Props) {
           updateValue: contract.updateValue ? Number(contract.updateValue) : undefined,
           firstMonthPrice: Number(contract.firstMonthPrice),
           depositAmount: contract.depositAmount ? Number(contract.depositAmount) : undefined,
+          appliesVat: contract.appliesVat,
+          vatPercentage: Number(contract.vatPercentage),
+          managedSince: contract.managedSince ?? undefined,
         }}
       />
     </div>

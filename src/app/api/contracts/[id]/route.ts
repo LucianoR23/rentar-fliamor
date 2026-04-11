@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { eq } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
 import { db } from '@/lib/db'
-import { contracts, units, tenants } from '@/lib/schema'
+import { contracts, payments, units, tenants } from '@/lib/schema'
 import { requireRole } from '@/lib/auth'
 import { contractSchema } from '@/lib/validations/contract'
 import { addMonths } from '@/lib/compute-update'
@@ -49,6 +49,9 @@ export async function PUT(request: NextRequest, { params }: Params) {
         updateValue: data.updateValue != null ? String(data.updateValue) : null,
         firstMonthPrice: String(data.firstMonthPrice),
         depositAmount: data.depositAmount != null ? String(data.depositAmount) : null,
+        appliesVat: data.appliesVat ?? false,
+        vatPercentage: String(data.vatPercentage ?? 100),
+        managedSince: data.managedSince || null,
         nextUpdateDate,
         updatedAt: new Date(),
       })
@@ -69,6 +72,23 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
   try {
     await requireRole('admin')
     const { id } = await params
+
+    // Cancel pending payments (overdue stay for manual resolution)
+    await db
+      .update(payments)
+      .set({
+        status: 'cancelled',
+        cancelledReason: 'Contrato rescindido',
+        cancelledAt: new Date(),
+        updatedAt: new Date(),
+      })
+      .where(
+        and(
+          eq(payments.contractId, id),
+          eq(payments.status, 'pending')
+        )
+      )
+
     await db
       .update(contracts)
       .set({ status: 'terminated', updatedAt: new Date() })

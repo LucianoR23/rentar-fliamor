@@ -23,7 +23,7 @@ export default async function NewContractPage() {
 
   return (
     <div>
-      <PageHeader title="Nuevo contrato" description="Completá los datos del contrato" />
+      <PageHeader title="Nuevo contrato" description="Completá los datos del contrato" backHref="/contracts" />
       <ContractForm units={availableUnits} tenants={allTenants} />
     </div>
   )

@@ -8,6 +8,34 @@
       "when": 1775759507757,
       "tag": "0000_brave_doorman",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1775877945899,
+      "tag": "0001_stormy_hedge_knight",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1775880168707,
+      "tag": "0002_smart_hardball",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1775883718433,
+      "tag": "0003_cheerful_shinobi_shaw",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1775885919589,
+      "tag": "0004_high_wolfsbane",
+      "breakpoints": true
     }
   ]
 }

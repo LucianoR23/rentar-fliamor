@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { eq, and, desc } from 'drizzle-orm'
-import { Pencil, ArrowLeft, Plus } from 'lucide-react'
+import { Pencil, Plus } from 'lucide-react'
 import { db } from '@/lib/db'
 import { groups, units, contracts, groupExpenses, groupExpenseUnits, groupCostConfig } from '@/lib/schema'
 import { PageHeader } from '@/components/shared/PageHeader'
@@ -76,13 +76,7 @@ export default async function GroupDetailPage({ params, searchParams }: Props) {
 
   return (
     <div>
-      <PageHeader title={group.name} description={group.address}>
-        <Button asChild variant="ghost" size="sm">
-          <Link href="/groups">
-            <ArrowLeft className="h-4 w-4" />
-            Volver
-          </Link>
-        </Button>
+      <PageHeader title={group.name} description={group.address} backHref="/groups">
         <Button asChild size="sm">
           <Link href={`/groups/${id}/edit`}>
             <Pencil className="h-4 w-4" />

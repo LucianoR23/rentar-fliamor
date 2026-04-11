@@ -1,11 +1,12 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { eq, and } from 'drizzle-orm'
-import { Pencil, ArrowLeft, FileText } from 'lucide-react'
+import { Pencil, FileText } from 'lucide-react'
 import { db } from '@/lib/db'
 import { units, groups, contracts, tenants, files } from '@/lib/schema'
 import { PageHeader } from '@/components/shared/PageHeader'
 import { FilesSection } from '@/components/files/FilesSection'
+import { ManualChargesSection } from '@/components/manual-charges/ManualChargesSection'
 import { Button } from '@/components/ui/button'
 import { UnitStatusBadge } from '@/components/units/UnitStatusBadge'
 import { ContractStatusBadge } from '@/components/contracts/ContractStatusBadge'
@@ -57,10 +58,7 @@ export default async function UnitDetailPage({ params }: Props) {
 
   return (
     <div>
-      <PageHeader title={unit.identifier} description={UNIT_TYPE_LABELS[unit.type] ?? unit.type}>
-        <Button asChild variant="ghost" size="sm">
-          <Link href="/units"><ArrowLeft className="h-4 w-4" />Volver</Link>
-        </Button>
+      <PageHeader title={unit.identifier} description={UNIT_TYPE_LABELS[unit.type] ?? unit.type} backHref="/units">
         <Button asChild size="sm">
           <Link href={`/units/${unit.id}/edit`}><Pencil className="h-4 w-4" />Editar</Link>
         </Button>
@@ -146,6 +144,8 @@ export default async function UnitDetailPage({ params }: Props) {
               </Button>
             </section>
           )}
+
+          <ManualChargesSection unitId={unit.id} unitIdentifier={unit.identifier} />
 
           <FilesSection
             entityType="unit"

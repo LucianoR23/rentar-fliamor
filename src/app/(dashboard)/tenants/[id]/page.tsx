@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { eq } from 'drizzle-orm'
-import { Pencil, ArrowLeft } from 'lucide-react'
+import { Pencil } from 'lucide-react'
 import { db } from '@/lib/db'
 import { tenants } from '@/lib/schema'
 import { PageHeader } from '@/components/shared/PageHeader'
@@ -27,14 +27,9 @@ export default async function TenantDetailPage({ params }: Props) {
     <div>
       <PageHeader
         title={`${tenant.firstName} ${tenant.lastName}`}
-        description={`DNI ${tenant.dni}`}
+        description={`CUIT/CUIL/DNI ${tenant.cuitDni}`}
+        backHref="/tenants"
       >
-        <Button asChild variant="ghost" size="sm">
-          <Link href="/tenants">
-            <ArrowLeft className="h-4 w-4" />
-            Volver
-          </Link>
-        </Button>
         <Button asChild size="sm">
           <Link href={`/tenants/${tenant.id}/edit`}>
             <Pencil className="h-4 w-4" />
@@ -51,7 +46,7 @@ export default async function TenantDetailPage({ params }: Props) {
           </h2>
           <dl className="grid grid-cols-2 gap-x-8 gap-y-4">
             <Row label="Nombre completo" value={`${tenant.firstName} ${tenant.lastName}`} />
-            <Row label="DNI" value={tenant.dni} />
+            <Row label="CUIT/CUIL/DNI" value={tenant.cuitDni} />
             <Row label="Teléfono" value={tenant.phone} />
             <Row label="Email" value={tenant.email} />
             {tenant.address && (
@@ -70,7 +65,7 @@ export default async function TenantDetailPage({ params }: Props) {
             </h2>
             <dl className="grid grid-cols-2 gap-x-8 gap-y-4">
               <Row label="Nombre" value={tenant.guarantorName} />
-              <Row label="DNI" value={tenant.guarantorDni} />
+              <Row label="CUIT/CUIL/DNI" value={tenant.guarantorCuitDni} />
               <Row label="Teléfono" value={tenant.guarantorPhone} />
             </dl>
           </section>

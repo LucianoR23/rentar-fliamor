@@ -1,5 +1,6 @@
 import React from 'react'
 import { Document, Page, Text, View, StyleSheet, renderToBuffer } from '@react-pdf/renderer'
+import { calculateVat } from '@/lib/vat'
 
 const MONTHS_SHORT = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
 
@@ -7,7 +8,7 @@ const TYPE_LABEL: Record<string, string> = {
   apartment: 'Departamento', local: 'Local', land: 'Terreno', house: 'Casa', other: 'Otro',
 }
 const STATUS_LABEL: Record<string, string> = {
-  paid: 'Pagado', pending: 'Pendiente', partial: 'Parcial', overdue: 'Vencido',
+  paid: 'Pagado', pending: 'Pendiente', partial: 'Parcial', overdue: 'Vencido', cancelled: 'Cancelado',
   active: 'Activo', expired: 'Vencido', terminated: 'Rescindido',
 }
 const UPDATE_LABEL: Record<string, string> = {
@@ -17,6 +18,7 @@ const UPDATE_LABEL: Record<string, string> = {
 export interface UnitPayment {
   periodMonth: number; periodYear: number
   amountDue: string; amountPaid: string | null
+  commissionAmount: number; netAmount: number | null
   status: string; paymentDate: string | null; dueDate: string
 }
 export interface UnitPriceUpdate {
@@ -27,13 +29,15 @@ export interface UnitContractData {
   startDate: string; endDate: string; status: string
   currentPrice: string; firstMonthPrice: string
   updateType: string; updateValue: string | null
-  tenant: { firstName: string; lastName: string; dni: string; phone: string }
+  appliesVat: boolean; vatPercentage: string
+  tenant: { firstName: string; lastName: string; cuitDni: string; phone: string }
   payments: UnitPayment[]
   updates: UnitPriceUpdate[]
 }
 export interface UnitReportData {
   unit: { identifier: string; type: string; floor: string | null; description: string | null }
   group: { name: string; address: string } | null
+  commissionRate: number
   contracts: UnitContractData[]
 }
 
@@ -75,6 +79,7 @@ const s = StyleSheet.create({
 })
 
 function UnitDoc({ data }: { data: UnitReportData }) {
+  const hasComm = data.commissionRate > 0
   const unitMeta = [TYPE_LABEL[data.unit.type] ?? data.unit.type, data.unit.floor ? `Piso ${data.unit.floor}` : null].filter(Boolean).join(' · ')
   return (
     <Document title={`Historial — ${data.unit.identifier}`} author="RentAR">
@@ -111,7 +116,7 @@ function UnitDoc({ data }: { data: UnitReportData }) {
             </View>
             <View style={s.infoRow}>
               <Text style={s.infoLabel}>Inquilino:</Text>
-              <Text style={s.infoValue}>{c.tenant.lastName}, {c.tenant.firstName} — DNI {c.tenant.dni}</Text>
+              <Text style={s.infoValue}>{c.tenant.lastName}, {c.tenant.firstName} — CUIT/CUIL/DNI {c.tenant.cuitDni}</Text>
             </View>
             <View style={s.infoRow}>
               <Text style={s.infoLabel}>Precio inicial / actual:</Text>
@@ -121,26 +126,41 @@ function UnitDoc({ data }: { data: UnitReportData }) {
               <Text style={s.infoLabel}>Actualización:</Text>
               <Text style={s.infoValue}>{UPDATE_LABEL[c.updateType] ?? c.updateType}{c.updateValue ? ` (${c.updateValue})` : ''}</Text>
             </View>
+            {c.appliesVat && (() => {
+              const vat = calculateVat(Number(c.currentPrice), true, Number(c.vatPercentage))
+              return (
+                <View style={s.infoRow}>
+                  <Text style={s.infoLabel}>IVA 21%:</Text>
+                  <Text style={s.infoValue}>
+                    Sobre {c.vatPercentage}% → {ars(vat.vatableBase)} base → {ars(vat.vat)} IVA → Total {ars(vat.total)}
+                  </Text>
+                </View>
+              )
+            })()}
 
             {c.payments.length > 0 && (
               <>
                 <Text style={s.subTitle}>PAGOS ({c.payments.length})</Text>
                 <View style={s.tHead}>
-                  <Text style={{ ...s.th, width: 60 }}>Período</Text>
-                  <Text style={{ ...s.th, width: 62 }}>Vencimiento</Text>
-                  <Text style={{ ...s.th, width: 76, textAlign: 'right' }}>Alquiler</Text>
-                  <Text style={{ ...s.th, width: 76, textAlign: 'right' }}>Cobrado</Text>
-                  <Text style={{ ...s.th, width: 58 }}>Estado</Text>
-                  <Text style={{ ...s.th, width: 58 }}>Pago</Text>
+                  <Text style={{ ...s.th, width: 52 }}>Período</Text>
+                  <Text style={{ ...s.th, width: 54 }}>Vencimiento</Text>
+                  <Text style={{ ...s.th, width: 66, textAlign: 'right' }}>Alquiler</Text>
+                  <Text style={{ ...s.th, width: 66, textAlign: 'right' }}>Cobrado</Text>
+                  {hasComm && <Text style={{ ...s.th, width: 44, textAlign: 'right' }}>Comisión</Text>}
+                  {hasComm && <Text style={{ ...s.th, width: 56, textAlign: 'right' }}>Neto</Text>}
+                  <Text style={{ ...s.th, width: 50 }}>Estado</Text>
+                  <Text style={{ ...s.th, width: 50 }}>Pago</Text>
                 </View>
                 {c.payments.map((p, pi) => (
                   <View key={pi} style={pi % 2 === 0 ? s.tRow : s.tRowAlt} wrap={false}>
-                    <Text style={{ ...s.td, width: 60 }}>{fmtPeriod(p.periodMonth, p.periodYear)}</Text>
-                    <Text style={{ ...s.tdSub, width: 62 }}>{fmtDate(p.dueDate)}</Text>
-                    <Text style={{ ...s.td, width: 76, textAlign: 'right' }}>{ars(p.amountDue)}</Text>
-                    <Text style={{ ...s.td, width: 76, textAlign: 'right' }}>{ars(p.amountPaid)}</Text>
-                    <Text style={{ ...s.td, width: 58 }}>{STATUS_LABEL[p.status] ?? p.status}</Text>
-                    <Text style={{ ...s.tdSub, width: 58 }}>{fmtDate(p.paymentDate)}</Text>
+                    <Text style={{ ...s.td, width: 52 }}>{fmtPeriod(p.periodMonth, p.periodYear)}</Text>
+                    <Text style={{ ...s.tdSub, width: 54 }}>{fmtDate(p.dueDate)}</Text>
+                    <Text style={{ ...s.td, width: 66, textAlign: 'right' }}>{ars(p.amountDue)}</Text>
+                    <Text style={{ ...s.td, width: 66, textAlign: 'right' }}>{ars(p.amountPaid)}</Text>
+                    {hasComm && <Text style={{ ...s.tdSub, width: 44, textAlign: 'right' }}>{p.commissionAmount > 0 ? ars(p.commissionAmount) : '—'}</Text>}
+                    {hasComm && <Text style={{ ...s.td, width: 56, textAlign: 'right' }}>{p.netAmount != null ? ars(p.netAmount) : '—'}</Text>}
+                    <Text style={{ ...s.td, width: 50 }}>{STATUS_LABEL[p.status] ?? p.status}</Text>
+                    <Text style={{ ...s.tdSub, width: 50 }}>{fmtDate(p.paymentDate)}</Text>
                   </View>
                 ))}
               </>

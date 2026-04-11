@@ -8,7 +8,7 @@ const TYPE_SHORT: Record<string, string> = {
   apartment: 'Depto', local: 'Local', land: 'Terreno', house: 'Casa', other: 'Otro',
 }
 const STATUS_LABEL: Record<string, string> = {
-  paid: 'Pagado', pending: 'Pendiente', partial: 'Parcial', overdue: 'Vencido',
+  paid: 'Pagado', pending: 'Pendiente', partial: 'Parcial', overdue: 'Vencido', cancelled: 'Cancelado',
 }
 
 export interface MonthlyReportRow {
@@ -16,6 +16,9 @@ export interface MonthlyReportRow {
   tenant: { firstName: string; lastName: string }
   amountDue: string
   amountPaid: string | null
+  vatAmount: number
+  commissionAmount: number
+  netAmount: number | null
   status: string
   paymentDate: string | null
 }
@@ -23,7 +26,8 @@ export interface MonthlyReportRow {
 export interface MonthlyReportData {
   period: { month: number; year: number }
   rows: MonthlyReportRow[]
-  summary: { totalDue: number; totalPaid: number; paidCount: number; pendingCount: number; overdueCount: number }
+  commissionRate: number
+  summary: { totalDue: number; totalPaid: number; totalVat: number; totalCommission: number; totalNet: number; paidCount: number; pendingCount: number; overdueCount: number; cancelledCount: number }
 }
 
 const ars = (v: string | number | null) =>
@@ -57,10 +61,13 @@ const s = StyleSheet.create({
   footerText: { fontSize: 7, color: '#A1A1AA' },
 })
 
-const W = { unit: 64, tenant: 118, amtDue: 70, amtPaid: 70, status: 54, date: 52 }
-
 function MonthlyDoc({ data }: { data: MonthlyReportData }) {
   const period = `${MONTHS[data.period.month - 1]} ${data.period.year}`
+  const hasComm = data.commissionRate > 0
+  const W = hasComm
+    ? { unit: 50, tenant: 80, amtDue: 56, vat: 44, amtPaid: 56, comm: 44, net: 56, status: 42, date: 42 }
+    : { unit: 60, tenant: 100, amtDue: 66, vat: 52, amtPaid: 66, comm: 0, net: 0, status: 50, date: 48 }
+
   return (
     <Document title={`Reporte Mensual — ${period}`} author="RentAR">
       <Page size="A4" style={s.page}>
@@ -84,6 +91,18 @@ function MonthlyDoc({ data }: { data: MonthlyReportData }) {
             <Text style={s.summaryLabel}>COBRADO</Text>
             <Text style={{ ...s.summaryValue, color: '#10B981' }}>{ars(data.summary.totalPaid)}</Text>
           </View>
+          {hasComm && (
+            <View style={s.summaryBox}>
+              <Text style={s.summaryLabel}>COMISIÓN</Text>
+              <Text style={{ ...s.summaryValue, color: '#F59E0B' }}>{ars(data.summary.totalCommission)}</Text>
+            </View>
+          )}
+          {hasComm && (
+            <View style={{ ...s.summaryBox, backgroundColor: '#F0FDF4' }}>
+              <Text style={s.summaryLabel}>NETO</Text>
+              <Text style={{ ...s.summaryValue, color: '#10B981' }}>{ars(data.summary.totalNet)}</Text>
+            </View>
+          )}
           <View style={{ ...s.summaryBox, backgroundColor: '#F0FDF4' }}>
             <Text style={s.summaryLabel}>PAGADOS</Text>
             <Text style={{ ...s.summaryValue, color: '#10B981' }}>{data.summary.paidCount}</Text>
@@ -92,10 +111,22 @@ function MonthlyDoc({ data }: { data: MonthlyReportData }) {
             <Text style={s.summaryLabel}>PENDIENTES</Text>
             <Text style={{ ...s.summaryValue, color: '#F59E0B' }}>{data.summary.pendingCount}</Text>
           </View>
-          <View style={{ ...s.summaryBox, backgroundColor: '#FEF2F2', marginRight: 0 }}>
+          {data.summary.totalVat > 0 && (
+            <View style={s.summaryBox}>
+              <Text style={s.summaryLabel}>IVA</Text>
+              <Text style={{ ...s.summaryValue, color: '#71717A' }}>{ars(data.summary.totalVat)}</Text>
+            </View>
+          )}
+          <View style={{ ...s.summaryBox, backgroundColor: '#FEF2F2' }}>
             <Text style={s.summaryLabel}>VENCIDOS</Text>
             <Text style={{ ...s.summaryValue, color: '#EF4444' }}>{data.summary.overdueCount}</Text>
           </View>
+          {data.summary.cancelledCount > 0 && (
+            <View style={{ ...s.summaryBox, backgroundColor: '#F4F4F5', marginRight: 0 }}>
+              <Text style={s.summaryLabel}>CANCELADOS</Text>
+              <Text style={{ ...s.summaryValue, color: '#71717A' }}>{data.summary.cancelledCount}</Text>
+            </View>
+          )}
         </View>
 
         <Text style={s.sectionTitle}>Detalle de pagos del período</Text>
@@ -104,7 +135,10 @@ function MonthlyDoc({ data }: { data: MonthlyReportData }) {
           <Text style={{ ...s.th, width: W.unit }}>Unidad</Text>
           <Text style={{ ...s.th, width: W.tenant }}>Inquilino</Text>
           <Text style={{ ...s.th, width: W.amtDue, textAlign: 'right' }}>Alquiler</Text>
+          <Text style={{ ...s.th, width: W.vat, textAlign: 'right' }}>IVA</Text>
           <Text style={{ ...s.th, width: W.amtPaid, textAlign: 'right' }}>Cobrado</Text>
+          {hasComm && <Text style={{ ...s.th, width: W.comm, textAlign: 'right' }}>Comisión</Text>}
+          {hasComm && <Text style={{ ...s.th, width: W.net, textAlign: 'right' }}>Neto</Text>}
           <Text style={{ ...s.th, width: W.status }}>Estado</Text>
           <Text style={{ ...s.th, width: W.date }}>Fecha pago</Text>
         </View>
@@ -121,7 +155,10 @@ function MonthlyDoc({ data }: { data: MonthlyReportData }) {
             </View>
             <Text style={{ ...s.td, width: W.tenant }}>{row.tenant.lastName}, {row.tenant.firstName}</Text>
             <Text style={{ ...s.td, width: W.amtDue, textAlign: 'right' }}>{ars(row.amountDue)}</Text>
+            <Text style={{ ...s.tdSub, width: W.vat, textAlign: 'right' }}>{row.vatAmount > 0 ? ars(row.vatAmount) : '—'}</Text>
             <Text style={{ ...s.td, width: W.amtPaid, textAlign: 'right' }}>{ars(row.amountPaid)}</Text>
+            {hasComm && <Text style={{ ...s.tdSub, width: W.comm, textAlign: 'right' }}>{row.commissionAmount > 0 ? ars(row.commissionAmount) : '—'}</Text>}
+            {hasComm && <Text style={{ ...s.td, width: W.net, textAlign: 'right' }}>{row.netAmount != null ? ars(row.netAmount) : '—'}</Text>}
             <Text style={{ ...s.td, width: W.status }}>{STATUS_LABEL[row.status] ?? row.status}</Text>
             <Text style={{ ...s.tdSub, width: W.date }}>{fmtDate(row.paymentDate)}</Text>
           </View>

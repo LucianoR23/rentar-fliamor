@@ -17,19 +17,20 @@ export default async function EditTenantPage({ params }: Props) {
       <PageHeader
         title="Editar inquilino"
         description={`${tenant.firstName} ${tenant.lastName}`}
+        backHref={`/tenants/${tenant.id}`}
       />
       <TenantForm
         tenantId={tenant.id}
         defaultValues={{
           firstName: tenant.firstName,
           lastName: tenant.lastName,
-          dni: tenant.dni,
+          cuitDni: tenant.cuitDni,
           phone: tenant.phone,
           email: tenant.email ?? '',
           address: tenant.address ?? '',
           guarantorName: tenant.guarantorName ?? '',
           guarantorPhone: tenant.guarantorPhone ?? '',
-          guarantorDni: tenant.guarantorDni ?? '',
+          guarantorCuitDni: tenant.guarantorCuitDni ?? '',
           notes: tenant.notes ?? '',
         }}
       />

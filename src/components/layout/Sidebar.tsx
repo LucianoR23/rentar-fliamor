@@ -20,7 +20,7 @@ type NavItem = {
 }
 
 const navItems: NavItem[] = [
-  { href: '/', icon: LayoutDashboard, label: 'Dashboard', exact: true },
+  { href: '/', icon: LayoutDashboard, label: 'Inicio', exact: true },
   { href: '/units', icon: Building2, label: 'Unidades' },
   { href: '/tenants', icon: Users, label: 'Inquilinos' },
   { href: '/groups', icon: Layers, label: 'Grupos' },

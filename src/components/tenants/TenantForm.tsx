@@ -84,8 +84,8 @@ export function TenantForm({ defaultValues, tenantId }: TenantFormProps) {
             <Input {...register('lastName')} placeholder="García" />
           </Field>
         </div>
-        <Field label="DNI *" error={errors.dni?.message}>
-          <Input {...register('dni')} placeholder="12345678" className="max-w-48" />
+        <Field label="CUIT/CUIL/DNI *" error={errors.cuitDni?.message}>
+          <Input {...register('cuitDni')} placeholder="20123456789" className="max-w-48" inputMode="numeric" pattern="\d*" onKeyDown={(e) => { if (!/\d|Backspace|Tab|ArrowLeft|ArrowRight|Delete/.test(e.key)) e.preventDefault() }} />
         </Field>
       </section>
 
@@ -96,7 +96,7 @@ export function TenantForm({ defaultValues, tenantId }: TenantFormProps) {
         </h2>
         <div className="grid grid-cols-2 gap-4">
           <Field label="Teléfono *" error={errors.phone?.message}>
-            <Input {...register('phone')} placeholder="+54 9 11 1234-5678" />
+            <Input {...register('phone')} placeholder="5491112345678" inputMode="numeric" pattern="\d*" onKeyDown={(e) => { if (!/\d|Backspace|Tab|ArrowLeft|ArrowRight|Delete/.test(e.key)) e.preventDefault() }} />
           </Field>
           <Field label="Email" error={errors.email?.message}>
             <Input {...register('email')} type="email" placeholder="juan@ejemplo.com" />
@@ -116,15 +116,18 @@ export function TenantForm({ defaultValues, tenantId }: TenantFormProps) {
           <Field label="Nombre" error={errors.guarantorName?.message}>
             <Input {...register('guarantorName')} placeholder="María López" />
           </Field>
-          <Field label="DNI" error={errors.guarantorDni?.message}>
-            <Input {...register('guarantorDni')} placeholder="87654321" />
+          <Field label="CUIT/CUIL/DNI" error={errors.guarantorCuitDni?.message}>
+            <Input {...register('guarantorCuitDni')} placeholder="20876543219" inputMode="numeric" pattern="\d*" onKeyDown={(e) => { if (!/\d|Backspace|Tab|ArrowLeft|ArrowRight|Delete/.test(e.key)) e.preventDefault() }} />
           </Field>
         </div>
         <Field label="Teléfono" error={errors.guarantorPhone?.message}>
           <Input
             {...register('guarantorPhone')}
-            placeholder="+54 9 11 8765-4321"
+            placeholder="5491187654321"
             className="max-w-64"
+            inputMode="numeric"
+            pattern="\d*"
+            onKeyDown={(e) => { if (!/\d|Backspace|Tab|ArrowLeft|ArrowRight|Delete/.test(e.key)) e.preventDefault() }}
           />
         </Field>
       </section>

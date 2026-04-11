@@ -10,6 +10,7 @@ import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 import { ContractStatusBadge } from './ContractStatusBadge'
 import { Button } from '@/components/ui/button'
 import { formatDate } from '@/lib/utils'
+import { calculateVat } from '@/lib/vat'
 import type { Contract, Unit, Tenant } from '@/types'
 
 export type ContractRow = {
@@ -59,14 +60,35 @@ export function ContractsTable({ data }: { data: ContractRow[] }) {
     {
       id: 'status',
       header: 'Estado',
-      cell: ({ row }) => <ContractStatusBadge status={row.original.contract.status} />,
+      cell: ({ row }) => (
+        <div className="flex items-center gap-1.5">
+          <ContractStatusBadge status={row.original.contract.status} />
+          {row.original.contract.managedSince && (
+            <span className="inline-flex items-center rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+              Desde {formatDate(row.original.contract.managedSince)}
+            </span>
+          )}
+        </div>
+      ),
     },
     {
       id: 'price',
       header: 'Precio actual',
-      cell: ({ row }) => (
-        <span className="font-mono tabular-nums">${formatARS(row.original.contract.currentPrice)}</span>
-      ),
+      cell: ({ row }) => {
+        const c = row.original.contract
+        if (!c.appliesVat) {
+          return <span className="font-mono tabular-nums">${formatARS(c.currentPrice)}</span>
+        }
+        const vat = calculateVat(Number(c.currentPrice), true, Number(c.vatPercentage))
+        return (
+          <div className="flex items-center gap-1.5">
+            <span className="font-mono tabular-nums">${formatARS(c.currentPrice)}</span>
+            <span className="inline-flex items-center rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">
+              +IVA ${formatARS(vat.vat)}
+            </span>
+          </div>
+        )
+      },
     },
     {
       id: 'nextUpdate',

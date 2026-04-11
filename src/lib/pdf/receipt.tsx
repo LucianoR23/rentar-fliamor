@@ -1,12 +1,18 @@
 import React from 'react'
 import { Document, Page, Text, View, StyleSheet, renderToBuffer } from '@react-pdf/renderer'
 
+export interface ReceiptLineItem {
+  type: string
+  description: string
+  amount: string
+}
+
 export interface ReceiptData {
   receiptNumber: string
   tenant: {
     firstName: string
     lastName: string
-    dni: string
+    cuitDni: string
   }
   unit: {
     identifier: string
@@ -21,6 +27,13 @@ export interface ReceiptData {
   paymentDate: string | null
   paymentMethod: string
   notes: string | null
+  vat: {
+    appliesVat: boolean
+    vatableBase: number
+    vatAmount: number
+    rentBase: number
+  } | null
+  lineItems?: ReceiptLineItem[]
 }
 
 const MONTHS = [
@@ -114,6 +127,15 @@ const s = StyleSheet.create({
     color: '#7C3AED',
   },
 
+  /* ── Line items ── */
+  lineRow: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 3, borderBottomWidth: 0.3, borderBottomColor: '#E4E4E7' },
+  lineDesc: { fontSize: 9, color: '#1a1a1a', flex: 1 },
+  lineType: { fontSize: 7, color: '#71717A', marginRight: 6 },
+  lineAmount: { fontSize: 9, color: '#1a1a1a', fontFamily: 'Helvetica-Bold', textAlign: 'right', width: 90 },
+  lineTotalRow: { flexDirection: 'row', justifyContent: 'space-between', paddingTop: 5, borderTopWidth: 0.8, borderTopColor: '#7C3AED', marginTop: 2 },
+  lineTotalLabel: { fontSize: 9, fontFamily: 'Helvetica-Bold', color: '#7C3AED' },
+  lineTotalAmount: { fontSize: 9, fontFamily: 'Helvetica-Bold', color: '#7C3AED', textAlign: 'right', width: 90 },
+
   /* ── Notes ── */
   notesBox: {
     backgroundColor: '#F8F8F8',
@@ -193,8 +215,8 @@ function ReceiptDocument({ data }: { data: ReceiptData }) {
             <Text style={s.valueBold}>{data.tenant.lastName}, {data.tenant.firstName}</Text>
           </View>
           <View style={s.row}>
-            <Text style={s.label}>DNI:</Text>
-            <Text style={s.value}>{data.tenant.dni}</Text>
+            <Text style={s.label}>CUIT/CUIL/DNI:</Text>
+            <Text style={s.value}>{data.tenant.cuitDni}</Text>
           </View>
           <View style={s.row}>
             <Text style={s.label}>Unidad:</Text>
@@ -218,10 +240,27 @@ function ReceiptDocument({ data }: { data: ReceiptData }) {
             <Text style={s.value}>{data.paymentMethod}</Text>
           </View>
           <View style={s.row}>
-            <Text style={s.label}>Alquiler del período:</Text>
+            <Text style={s.label}>Total del período:</Text>
             <Text style={s.value}>{ars(data.amountDue)}</Text>
           </View>
         </View>
+
+        {/* Line items breakdown */}
+        {data.lineItems && data.lineItems.length > 0 && (
+          <View style={s.section}>
+            <Text style={s.sectionTitle}>Desglose</Text>
+            {data.lineItems.map((item, i) => (
+              <View key={i} style={s.lineRow}>
+                <Text style={s.lineDesc}>{item.description}</Text>
+                <Text style={s.lineAmount}>{ars(item.amount)}</Text>
+              </View>
+            ))}
+            <View style={s.lineTotalRow}>
+              <Text style={s.lineTotalLabel}>Total</Text>
+              <Text style={s.lineTotalAmount}>{ars(data.amountDue)}</Text>
+            </View>
+          </View>
+        )}
 
         {/* Amount highlight */}
         <View style={s.amountBox}>

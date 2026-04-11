@@ -3,6 +3,7 @@ import { and, desc, eq, inArray } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { contracts, contractUpdates, groups, payments, tenants, units } from '@/lib/schema'
 import { requireRole } from '@/lib/auth'
+import { getCommissionRate, calculateCommission } from '@/lib/commission'
 import { generateUnitReport, type UnitReportData } from '@/lib/pdf/unit-report'
 
 export async function GET(req: NextRequest) {
@@ -52,6 +53,8 @@ export async function GET(req: NextRequest) {
       updatesByContract.set(u.contractId, arr)
     }
 
+    const commissionRate = await getCommissionRate()
+
     const data: UnitReportData = {
       unit: {
         identifier: unitRow.unit.identifier,
@@ -60,6 +63,7 @@ export async function GET(req: NextRequest) {
         description: unitRow.unit.description ?? null,
       },
       group: unitRow.group ? { name: unitRow.group.name, address: unitRow.group.address } : null,
+      commissionRate,
       contracts: contractRows.map(({ contract, tenant }) => ({
         startDate: contract.startDate,
         endDate: contract.endDate,
@@ -68,21 +72,30 @@ export async function GET(req: NextRequest) {
         firstMonthPrice: contract.firstMonthPrice,
         updateType: contract.updateType,
         updateValue: contract.updateValue ?? null,
+        appliesVat: contract.appliesVat,
+        vatPercentage: contract.vatPercentage,
         tenant: {
           firstName: tenant.firstName,
           lastName: tenant.lastName,
-          dni: tenant.dni,
+          cuitDni: tenant.cuitDni,
           phone: tenant.phone,
         },
-        payments: (paymentsByContract.get(contract.id) ?? []).map((p) => ({
-          periodMonth: p.periodMonth,
-          periodYear: p.periodYear,
-          amountDue: p.amountDue,
-          amountPaid: p.amountPaid ?? null,
-          status: p.status,
-          paymentDate: p.paymentDate ?? null,
-          dueDate: p.dueDate,
-        })),
+        payments: (paymentsByContract.get(contract.id) ?? []).map((p) => {
+          const rate = p.commissionRate != null ? Number(p.commissionRate) : commissionRate
+          const comm = calculateCommission(Number(contract.currentPrice), rate, p.applyCommission)
+          const isPaid = p.status === 'paid' || p.status === 'partial'
+          return {
+            periodMonth: p.periodMonth,
+            periodYear: p.periodYear,
+            amountDue: p.amountDue,
+            amountPaid: p.amountPaid ?? null,
+            commissionAmount: isPaid ? comm.commission : 0,
+            netAmount: isPaid && p.amountPaid ? comm.net : null,
+            status: p.status,
+            paymentDate: p.paymentDate ?? null,
+            dueDate: p.dueDate,
+          }
+        }),
         updates: (updatesByContract.get(contract.id) ?? []).map((u) => ({
           updateDate: u.updateDate,
           previousPrice: u.previousPrice,

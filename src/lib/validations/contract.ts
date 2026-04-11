@@ -15,6 +15,9 @@ export const contractSchema = z
     updateValue: z.coerce.number().optional().nullable(),
     firstMonthPrice: z.coerce.number().positive('Debe ser mayor a 0'),
     depositAmount: z.coerce.number().optional().nullable(),
+    appliesVat: z.boolean().optional(),
+    vatPercentage: z.coerce.number().min(1, 'Mínimo 1%').max(100, 'Máximo 100%').optional(),
+    managedSince: z.string().optional().nullable(),
   })
   .refine((d) => new Date(d.endDate) > new Date(d.startDate), {
     message: 'La fecha de fin debe ser posterior al inicio',

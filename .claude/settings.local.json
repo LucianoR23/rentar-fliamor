@@ -5,7 +5,11 @@
       "Bash(pnpm type-check:*)",
       "Bash(pnpm exec:*)",
       "Bash(node:*)",
-      "WebFetch(domain:api.argly.com.ar)"
+      "WebFetch(domain:api.argly.com.ar)",
+      "Bash(pnpm drizzle-kit:*)",
+      "Bash(npx shadcn@latest add switch)",
+      "Bash(ls:*)",
+      "Bash(find:*)"
     ]
   },
   "enabledPlugins": {

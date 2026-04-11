@@ -16,13 +16,15 @@ const STATUS_LABELS: Record<Payment['status'], string> = {
   paid: 'Pagado',
   partial: 'Parcial',
   overdue: 'Vencido',
+  cancelled: 'Cancelado',
 }
 
-const STATUS_VARIANTS: Record<Payment['status'], 'warning' | 'success' | 'primary' | 'danger'> = {
+const STATUS_VARIANTS: Record<Payment['status'], 'warning' | 'success' | 'primary' | 'danger' | 'muted'> = {
   pending: 'warning',
   paid: 'success',
   partial: 'primary',
   overdue: 'danger',
+  cancelled: 'muted',
 }
 
 const columns: ColumnDef<Payment>[] = [

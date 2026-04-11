@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { eq } from 'drizzle-orm'
 import { db } from '@/lib/db'
-import { payments, contracts, units, tenants } from '@/lib/schema'
+import { payments, contracts, units, tenants, paymentLineItems } from '@/lib/schema'
 import { requireRole } from '@/lib/auth'
+import { calculateVat } from '@/lib/vat'
 import { generateReceiptPdf, type ReceiptData } from '@/lib/pdf/receipt'
 
 type Params = { params: Promise<{ id: string }> }
@@ -23,8 +24,9 @@ export async function GET(req: NextRequest, { params }: Params) {
 
     if (!row) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
-    const { payment, unit, tenant } = row
+    const { payment, contract, unit, tenant } = row
     const sp = req.nextUrl.searchParams
+    const vatBreakdown = calculateVat(Number(contract.currentPrice), contract.appliesVat, Number(contract.vatPercentage))
 
     // Generate receipt number on first access and persist it
     let receiptNumber = payment.receiptNumber
@@ -41,7 +43,7 @@ export async function GET(req: NextRequest, { params }: Params) {
       tenant: {
         firstName: tenant.firstName,
         lastName: tenant.lastName,
-        dni: tenant.dni,
+        cuitDni: tenant.cuitDni,
       },
       unit: {
         identifier: unit.identifier,
@@ -56,6 +58,27 @@ export async function GET(req: NextRequest, { params }: Params) {
       paymentDate: payment.paymentDate,
       paymentMethod: sp.get('paymentMethod') ?? 'Efectivo',
       notes: sp.get('notes') ?? payment.notes ?? null,
+      vat: contract.appliesVat ? {
+        appliesVat: true,
+        vatableBase: vatBreakdown.vatableBase,
+        vatAmount: vatBreakdown.vat,
+        rentBase: vatBreakdown.price,
+      } : null,
+    }
+
+    // Fetch line items for breakdown
+    const lines = await db
+      .select()
+      .from(paymentLineItems)
+      .where(eq(paymentLineItems.paymentId, id))
+      .orderBy(paymentLineItems.createdAt)
+
+    if (lines.length > 0) {
+      data.lineItems = lines.map((l) => ({
+        type: l.type,
+        description: l.description,
+        amount: l.amount,
+      }))
     }
 
     const buffer = await generateReceiptPdf(data)

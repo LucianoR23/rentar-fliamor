@@ -13,17 +13,22 @@ const MONTHS = [
 interface MonthPickerProps {
   month: number
   year: number
+  status?: string
 }
 
-export function MonthPicker({ month, year }: MonthPickerProps) {
+export function MonthPicker({ month, year, status }: MonthPickerProps) {
   const router = useRouter()
   const pathname = usePathname()
 
   const navigate = useCallback(
     (m: number, y: number) => {
-      router.push(`${pathname}?month=${m}&year=${y}`)
+      const params = new URLSearchParams()
+      params.set('month', String(m))
+      params.set('year', String(y))
+      if (status && status !== 'all') params.set('status', status)
+      router.push(`${pathname}?${params.toString()}`)
     },
-    [router, pathname]
+    [router, pathname, status]
   )
 
   function prev() {
