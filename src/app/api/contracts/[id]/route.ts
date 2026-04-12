@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { eq, and } from 'drizzle-orm'
 import { db } from '@/lib/db'
-import { contracts, payments, units, tenants } from '@/lib/schema'
+import { contracts, contractUpdates, payments, units, tenants } from '@/lib/schema'
 import { requireRole } from '@/lib/auth'
 import { contractSchema } from '@/lib/validations/contract'
 import { addMonths } from '@/lib/compute-update'
@@ -37,6 +37,11 @@ export async function PUT(request: NextRequest, { params }: Params) {
 
     const nextUpdateDate = addMonths(data.startDate, data.updateFrequencyMonths)
 
+    // If no updates have been applied, sync currentPrice with firstMonthPrice
+    const hasUpdates = await db.query.contractUpdates.findFirst({
+      where: eq(contractUpdates.contractId, id),
+    })
+
     const [updated] = await db
       .update(contracts)
       .set({
@@ -48,6 +53,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
         updateType: data.updateType,
         updateValue: data.updateValue != null ? String(data.updateValue) : null,
         firstMonthPrice: String(data.firstMonthPrice),
+        ...(!hasUpdates ? { currentPrice: String(data.firstMonthPrice) } : {}),
         depositAmount: data.depositAmount != null ? String(data.depositAmount) : null,
         appliesVat: data.appliesVat ?? false,
         vatPercentage: String(data.vatPercentage ?? 100),

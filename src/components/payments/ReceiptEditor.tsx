@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 const PAYMENT_METHODS = ['Efectivo', 'Transferencia bancaria', 'Cheque', 'Mercado Pago', 'Otro']
 
@@ -57,16 +58,16 @@ export function ReceiptEditor({ paymentId, defaultReceiptNumber, defaultNotes }:
 
         <div className="space-y-1.5">
           <Label htmlFor="paymentMethod">Forma de pago</Label>
-          <select
-            id="paymentMethod"
-            value={paymentMethod}
-            onChange={(e) => setPaymentMethod(e.target.value)}
-            className="h-9 w-full rounded-3xl border border-transparent bg-input/50 px-3 py-1 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
-          >
-            {PAYMENT_METHODS.map((m) => (
-              <option key={m} value={m}>{m}</option>
-            ))}
-          </select>
+          <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+            <SelectTrigger id="paymentMethod">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {PAYMENT_METHODS.map((m) => (
+                <SelectItem key={m} value={m}>{m}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="space-y-1.5">

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import {
   Dialog,
   DialogContent,
@@ -52,12 +53,15 @@ export function CancelPaymentDialog({
       if (!res.ok) {
         const data = await res.json()
         setError(data.error ?? 'Error al cancelar el pago')
+        toast.error('Error al cancelar el pago')
         return
       }
       onOpenChange(false)
       router.refresh()
+      toast.success('Pago anulado')
     } catch {
       setError('Error de conexión')
+      toast.error('Error de conexión')
     } finally {
       setLoading(false)
     }

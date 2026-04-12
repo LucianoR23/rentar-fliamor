@@ -2,8 +2,10 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 import { formatCurrency } from '@/lib/utils'
 import type { GroupExpense } from '@/types'
@@ -33,6 +35,7 @@ export function GroupExpensesList({ expenses }: GroupExpensesListProps) {
     setDeleting(false)
     setDeleteId(null)
     router.refresh()
+    toast.success('Gasto grupal eliminado')
   }
 
   if (expenses.length === 0) {
@@ -49,9 +52,9 @@ export function GroupExpensesList({ expenses }: GroupExpensesListProps) {
         {expenses.map((exp) => {
           const isScoped = exp.scopedUnitIdentifiers && exp.scopedUnitIdentifiers.length > 0
           return (
-            <div
+            <Card
               key={exp.id}
-              className="flex items-center justify-between rounded-lg border border-border bg-card px-4 py-3"
+              className="flex-row items-center justify-between px-4 py-3"
             >
               <div>
                 <p className="text-sm font-medium">{exp.name}</p>
@@ -83,7 +86,7 @@ export function GroupExpensesList({ expenses }: GroupExpensesListProps) {
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
-            </div>
+            </Card>
           )
         })}
       </div>

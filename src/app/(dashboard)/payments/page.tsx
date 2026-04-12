@@ -1,9 +1,9 @@
-import { eq, and, inArray } from 'drizzle-orm'
+import { eq, and } from 'drizzle-orm'
 import { CreditCard } from 'lucide-react'
 import { db } from '@/lib/db'
 import { contracts, payments, units, tenants } from '@/lib/schema'
 import { getCommissionRate } from '@/lib/commission'
-import { generatePaymentWithLineItems } from '@/lib/payment-generator'
+import { ensurePaymentsForMonth } from '@/lib/payment-generator'
 import { PageHeader } from '@/components/shared/PageHeader'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { MonthPicker } from '@/components/payments/MonthPicker'
@@ -26,41 +26,7 @@ export default async function PaymentsPage({
     ? (params.status as StatusFilter_)
     : 'all'
 
-  const activeContracts = await db
-    .select({ contract: contracts, unit: units, tenant: tenants })
-    .from(contracts)
-    .innerJoin(units, eq(contracts.unitId, units.id))
-    .innerJoin(tenants, eq(contracts.tenantId, tenants.id))
-    .where(eq(contracts.status, 'active'))
-
-  if (activeContracts.length > 0) {
-    const contractIds = activeContracts.map((r) => r.contract.id)
-
-    const existingPayments = await db
-      .select({ contractId: payments.contractId })
-      .from(payments)
-      .where(
-        and(
-          inArray(payments.contractId, contractIds),
-          eq(payments.periodMonth, month),
-          eq(payments.periodYear, year)
-        )
-      )
-
-    const existingIds = new Set(existingPayments.map((p) => p.contractId))
-    const missing = activeContracts.filter((r) => {
-      if (existingIds.has(r.contract.id)) return false
-      const effectiveStart = r.contract.managedSince ?? r.contract.startDate
-      const [esYear, esMonth] = effectiveStart.split('-').map(Number)
-      if (year < esYear || (year === esYear && month < esMonth)) return false
-      return true
-    })
-
-    // Generate payments with full line items (rent + VAT + group expenses + manual charges)
-    for (const r of missing) {
-      await generatePaymentWithLineItems(r.contract, r.unit, month, year)
-    }
-  }
+  await ensurePaymentsForMonth(month, year)
 
   // Build status conditions — show all payments (not just active contracts)
   const conditions = [

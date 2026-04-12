@@ -9,18 +9,13 @@ import { Button } from '@/components/ui/button'
 import { UnitStatusBadge } from '@/components/units/UnitStatusBadge'
 import { GroupExpensesList, type GroupExpenseWithUnits } from '@/components/groups/GroupExpensesList'
 import { UNIT_TYPE_LABELS } from '@/lib/validations/unit'
-import { cn } from '@/lib/utils'
+import { Card } from '@/components/ui/card'
+import { GroupTabs } from '@/components/groups/GroupTabs'
 
 type Props = {
   params: Promise<{ id: string }>
   searchParams: Promise<{ tab?: string }>
 }
-
-const TABS = [
-  { key: 'units', label: 'Unidades' },
-  { key: 'expenses', label: 'Gastos' },
-  { key: 'config', label: 'Configuración' },
-]
 
 export default async function GroupDetailPage({ params, searchParams }: Props) {
   const { id } = await params
@@ -85,23 +80,7 @@ export default async function GroupDetailPage({ params, searchParams }: Props) {
         </Button>
       </PageHeader>
 
-      {/* Tabs */}
-      <nav className="flex gap-1 border-b border-border mb-6">
-        {TABS.map((t) => (
-          <Link
-            key={t.key}
-            href={`/groups/${id}?tab=${t.key}`}
-            className={cn(
-              'px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors',
-              tab === t.key
-                ? 'border-primary text-primary'
-                : 'border-transparent text-muted-foreground hover:text-foreground'
-            )}
-          >
-            {t.label}
-          </Link>
-        ))}
-      </nav>
+      <GroupTabs groupId={id} activeTab={tab} />
 
       {/* Units tab */}
       {tab === 'units' && (
@@ -168,15 +147,15 @@ export default async function GroupDetailPage({ params, searchParams }: Props) {
       {tab === 'config' && (
         <div className="max-w-lg space-y-4">
           {group.description && (
-            <section className="rounded-lg border border-border bg-card p-5">
+            <Card>
               <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">
                 Descripción
               </h2>
               <p className="text-sm whitespace-pre-wrap">{group.description}</p>
-            </section>
+            </Card>
           )}
 
-          <section className="rounded-lg border border-border bg-card p-5">
+          <Card>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 Distribución de gastos
@@ -197,7 +176,7 @@ export default async function GroupDetailPage({ params, searchParams }: Props) {
                 ))}
               </dl>
             )}
-          </section>
+          </Card>
         </div>
       )}
     </div>

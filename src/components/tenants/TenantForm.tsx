@@ -9,6 +9,8 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { toast } from 'sonner'
 
 interface TenantFormProps {
   defaultValues?: Partial<TenantFormData>
@@ -65,6 +67,7 @@ export function TenantForm({ defaultValues, tenantId }: TenantFormProps) {
     }
 
     const tenant = await res.json() as { id: string }
+    toast.success(isEdit ? 'Inquilino actualizado' : 'Inquilino creado')
     router.push(`/tenants/${tenant.id}`)
     router.refresh()
   }
@@ -147,9 +150,9 @@ export function TenantForm({ defaultValues, tenantId }: TenantFormProps) {
       </section>
 
       {serverError && (
-        <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-          {serverError}
-        </div>
+        <Alert variant="destructive">
+          <AlertDescription>{serverError}</AlertDescription>
+        </Alert>
       )}
 
       <div className="flex gap-3">

@@ -1,6 +1,7 @@
 'use client'
 
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts'
+import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
 
 const UNIT_TYPE_LABELS: Record<string, string> = {
@@ -50,16 +51,16 @@ export function OccupancyChart({ data, className }: OccupancyChartProps) {
 
   if (totalUnits === 0) {
     return (
-      <div className={cn('flex items-center justify-center rounded-lg border border-border bg-card p-6 text-sm text-muted-foreground', className)}>
+      <Card className={cn('flex items-center justify-center p-6 text-muted-foreground', className)}>
         Sin unidades registradas
-      </div>
+      </Card>
     )
   }
 
   const occupancyPct = Math.round((totalOccupied / totalUnits) * 100)
 
   return (
-    <div className={cn('rounded-lg border border-border bg-card p-5', className)}>
+    <Card className={className}>
       <p className="text-sm font-medium text-muted-foreground">Ocupación por tipo</p>
       <p className="mt-1 font-mono text-2xl font-bold tabular-nums text-foreground">
         {totalOccupied}/{totalUnits}
@@ -114,6 +115,6 @@ export function OccupancyChart({ data, className }: OccupancyChartProps) {
           </div>
         ))}
       </div>
-    </div>
+    </Card>
   )
 }

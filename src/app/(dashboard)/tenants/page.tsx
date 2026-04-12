@@ -2,14 +2,21 @@ import Link from 'next/link'
 import { Plus, Users } from 'lucide-react'
 import { db } from '@/lib/db'
 import { tenants } from '@/lib/schema'
-import { desc } from 'drizzle-orm'
+import { desc, eq } from 'drizzle-orm'
+import { requireRole } from '@/lib/auth'
 import { PageHeader } from '@/components/shared/PageHeader'
 import { Button } from '@/components/ui/button'
 import { TenantsTable } from '@/components/tenants/TenantsTable'
 import { EmptyState } from '@/components/shared/EmptyState'
 
 export default async function TenantsPage() {
-  const allTenants = await db.select().from(tenants).orderBy(desc(tenants.createdAt))
+  const dbUser = await requireRole('viewer')
+
+  const allTenants = await db
+    .select()
+    .from(tenants)
+    .where(eq(tenants.active, true))
+    .orderBy(desc(tenants.createdAt))
 
   return (
     <div>
@@ -39,7 +46,7 @@ export default async function TenantsPage() {
           </Button>
         </EmptyState>
       ) : (
-        <TenantsTable data={allTenants} />
+        <TenantsTable data={allTenants} userRole={dbUser.role} />
       )}
     </div>
   )

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import {
   Dialog,
   DialogContent,
@@ -77,13 +78,16 @@ export function ManualChargeDialog({
       if (!res.ok) {
         const data = await res.json()
         setError(data.error ?? 'Error al crear el cargo')
+        toast.error('Error al crear el cargo')
         return
       }
       reset()
       onOpenChange(false)
       router.refresh()
+      toast.success('Cobro registrado')
     } catch {
       setError('Error de conexión')
+      toast.error('Error de conexión')
     } finally {
       setLoading(false)
     }

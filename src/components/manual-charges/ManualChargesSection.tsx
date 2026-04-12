@@ -2,8 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { Pencil, Plus, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
@@ -105,8 +107,10 @@ export function ManualChargesSection({ unitId, unitIdentifier }: ManualChargesSe
       }
       setDialogOpen(false)
       router.refresh()
+      toast.success(editing ? 'Cobro actualizado' : 'Cobro registrado')
     } catch {
       setError('Error de conexión')
+      toast.error('Error de conexión')
     } finally {
       setSaving(false)
     }
@@ -119,6 +123,7 @@ export function ManualChargesSection({ unitId, unitIdentifier }: ManualChargesSe
       if (res.ok) {
         setCharges((prev) => prev.filter((c) => c.id !== id))
         router.refresh()
+        toast.success('Cobro eliminado')
       }
     } finally {
       setDeleting(null)
@@ -126,7 +131,7 @@ export function ManualChargesSection({ unitId, unitIdentifier }: ManualChargesSe
   }
 
   return (
-    <section className="rounded-lg border border-border bg-card p-5">
+    <Card>
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
           Cargos manuales
@@ -259,6 +264,6 @@ export function ManualChargesSection({ unitId, unitIdentifier }: ManualChargesSe
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </section>
+    </Card>
   )
 }

@@ -5,15 +5,17 @@ import { Pencil } from 'lucide-react'
 import { db } from '@/lib/db'
 import { tenants } from '@/lib/schema'
 import { PageHeader } from '@/components/shared/PageHeader'
+import { WhatsAppLink } from '@/components/shared/WhatsAppLink'
 import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
 
 type Props = { params: Promise<{ id: string }> }
 
-function Row({ label, value }: { label: string; value?: string | null }) {
+function Row({ label, children }: { label: string; children?: React.ReactNode }) {
   return (
     <div>
       <dt className="text-xs text-muted-foreground">{label}</dt>
-      <dd className="text-sm font-medium mt-0.5">{value || '—'}</dd>
+      <dd className="text-sm font-medium mt-0.5">{children ?? '—'}</dd>
     </div>
   )
 }
@@ -40,45 +42,49 @@ export default async function TenantDetailPage({ params }: Props) {
 
       <div className="grid gap-4 max-w-2xl">
         {/* Personal */}
-        <section className="rounded-lg border border-border bg-card p-5">
+        <Card>
           <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
             Datos personales
           </h2>
           <dl className="grid grid-cols-2 gap-x-8 gap-y-4">
-            <Row label="Nombre completo" value={`${tenant.firstName} ${tenant.lastName}`} />
-            <Row label="CUIT/CUIL/DNI" value={tenant.cuitDni} />
-            <Row label="Teléfono" value={tenant.phone} />
-            <Row label="Email" value={tenant.email} />
+            <Row label="Nombre completo">{`${tenant.firstName} ${tenant.lastName}`}</Row>
+            <Row label="CUIT/CUIL/DNI">{tenant.cuitDni}</Row>
+            <Row label="Teléfono">
+              {tenant.phone ? <WhatsAppLink phone={tenant.phone} /> : '—'}
+            </Row>
+            <Row label="Email">{tenant.email || '—'}</Row>
             {tenant.address && (
               <div className="col-span-2">
-                <Row label="Dirección" value={tenant.address} />
+                <Row label="Dirección">{tenant.address}</Row>
               </div>
             )}
           </dl>
-        </section>
+        </Card>
 
         {/* Garante */}
         {tenant.guarantorName && (
-          <section className="rounded-lg border border-border bg-card p-5">
+          <Card>
             <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
               Garante
             </h2>
             <dl className="grid grid-cols-2 gap-x-8 gap-y-4">
-              <Row label="Nombre" value={tenant.guarantorName} />
-              <Row label="CUIT/CUIL/DNI" value={tenant.guarantorCuitDni} />
-              <Row label="Teléfono" value={tenant.guarantorPhone} />
+              <Row label="Nombre">{tenant.guarantorName}</Row>
+              <Row label="CUIT/CUIL/DNI">{tenant.guarantorCuitDni || '—'}</Row>
+              <Row label="Teléfono">
+                {tenant.guarantorPhone ? <WhatsAppLink phone={tenant.guarantorPhone} /> : '—'}
+              </Row>
             </dl>
-          </section>
+          </Card>
         )}
 
         {/* Notas */}
         {tenant.notes && (
-          <section className="rounded-lg border border-border bg-card p-5">
+          <Card>
             <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">
               Notas
             </h2>
             <p className="text-sm text-foreground whitespace-pre-wrap">{tenant.notes}</p>
-          </section>
+          </Card>
         )}
       </div>
     </div>

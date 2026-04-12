@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation'
 import { PageHeader } from '@/components/shared/PageHeader'
 import { UsersTable } from '@/components/settings/UsersTable'
 import { CreateUserForm } from '@/components/settings/CreateUserForm'
+import { Card } from '@/components/ui/card'
 
 export default async function UsersSettingsPage() {
   let currentUser
@@ -32,12 +33,12 @@ export default async function UsersSettingsPage() {
         <UsersTable data={allUsers} currentUserId={currentUser.id} />
       </section>
 
-      <section className="rounded-lg border border-border bg-card p-6 space-y-4">
+      <Card className="p-6 space-y-4">
         <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
           Crear usuario
         </h2>
         <CreateUserForm />
-      </section>
+      </Card>
     </div>
   )
 }

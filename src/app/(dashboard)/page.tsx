@@ -9,7 +9,7 @@ import { db } from '@/lib/db'
 import { contracts, payments, units } from '@/lib/schema'
 import { formatCurrency } from '@/lib/utils'
 import { getCommissionRate, calculateCommission } from '@/lib/commission'
-import { calculateVat } from '@/lib/vat'
+import { ensurePaymentsForMonth } from '@/lib/payment-generator'
 
 const MONTH_LABELS = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
 
@@ -31,6 +31,9 @@ export default async function DashboardPage() {
     }
   })
   const { month: startMonth, year: startYear } = last6Months[0]
+
+  // Ensure payments exist for current month before querying totals
+  await ensurePaymentsForMonth(currentMonth, currentYear)
 
   const [
     rawUnitsStats,

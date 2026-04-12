@@ -2,19 +2,23 @@
 
 import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { type ColumnDef } from '@tanstack/react-table'
-import { Trash2 } from 'lucide-react'
+import { Trash2, Archive } from 'lucide-react'
 import { DataTable } from '@/components/shared/DataTable'
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { DateInput } from '@/components/ui/date-input'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { formatCurrency, formatDate } from '@/lib/utils'
-import type { Expense } from '@/types'
+import type { Expense, UserRole } from '@/types'
 
-export function ExpensesTable({ data }: { data: Expense[] }) {
+export function ExpensesTable({ data, userRole }: { data: Expense[]; userRole: UserRole }) {
   const router = useRouter()
+  const [archiveId, setArchiveId] = useState<string | null>(null)
+  const [archiving, setArchiving] = useState(false)
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [deleting, setDeleting] = useState(false)
 
@@ -32,6 +36,16 @@ export function ExpensesTable({ data }: { data: Expense[] }) {
     })
   }, [data, dateFrom, dateTo, categoryFilter])
 
+  async function handleArchive() {
+    if (!archiveId) return
+    setArchiving(true)
+    await fetch(`/api/expenses/${archiveId}`, { method: 'PATCH' })
+    setArchiving(false)
+    setArchiveId(null)
+    router.refresh()
+    toast.success('Gasto archivado')
+  }
+
   async function handleDelete() {
     if (!deleteId) return
     setDeleting(true)
@@ -39,6 +53,7 @@ export function ExpensesTable({ data }: { data: Expense[] }) {
     setDeleting(false)
     setDeleteId(null)
     router.refresh()
+    toast.success('Gasto eliminado')
   }
 
   const columns: ColumnDef<Expense>[] = [
@@ -96,15 +111,35 @@ export function ExpensesTable({ data }: { data: Expense[] }) {
       id: 'actions',
       header: '',
       cell: ({ row }) => (
-        <div className="flex justify-end">
-          <Button
-            variant="ghost"
-            size="icon-sm"
-            className="text-muted-foreground hover:text-destructive"
-            onClick={() => setDeleteId(row.original.id)}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+        <div className="flex items-center gap-0.5 justify-end">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                className="text-muted-foreground hover:text-amber-500"
+                onClick={() => setArchiveId(row.original.id)}
+              >
+                <Archive className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Archivar</TooltipContent>
+          </Tooltip>
+          {userRole === 'superadmin' && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon-sm"
+                  className="text-muted-foreground hover:text-destructive"
+                  onClick={() => setDeleteId(row.original.id)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Eliminar permanentemente</TooltipContent>
+            </Tooltip>
+          )}
         </div>
       ),
     },
@@ -157,6 +192,17 @@ export function ExpensesTable({ data }: { data: Expense[] }) {
         searchPlaceholder="Buscar por título, categoría..."
       />
 
+      <ConfirmDialog
+        open={!!archiveId}
+        onOpenChange={(open) => !open && setArchiveId(null)}
+        title="Archivar gasto"
+        description="El gasto dejará de aparecer en los listados."
+        onConfirm={handleArchive}
+        loading={archiving}
+        confirmLabel="Archivar"
+        loadingLabel="Archivando..."
+        variant="default"
+      />
       <ConfirmDialog
         open={!!deleteId}
         onOpenChange={(open) => !open && setDeleteId(null)}

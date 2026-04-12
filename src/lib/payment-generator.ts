@@ -8,6 +8,7 @@ import {
   manualCharges,
   paymentLineItems,
   payments,
+  tenants,
   units,
 } from '@/lib/schema'
 import { calculateVat } from '@/lib/vat'
@@ -323,4 +324,45 @@ async function getGroupExpenseLinesForUnit(
   }
 
   return lines
+}
+
+/**
+ * Ensures payments exist for all active contracts in a given month/year.
+ * Creates missing payments with line items. Safe to call multiple times.
+ */
+export async function ensurePaymentsForMonth(month: number, year: number): Promise<void> {
+  const activeContracts = await db
+    .select({ contract: contracts, unit: units, tenant: tenants })
+    .from(contracts)
+    .innerJoin(units, eq(contracts.unitId, units.id))
+    .innerJoin(tenants, eq(contracts.tenantId, tenants.id))
+    .where(eq(contracts.status, 'active'))
+
+  if (activeContracts.length === 0) return
+
+  const contractIds = activeContracts.map((r) => r.contract.id)
+
+  const existingPayments = await db
+    .select({ contractId: payments.contractId })
+    .from(payments)
+    .where(
+      and(
+        inArray(payments.contractId, contractIds),
+        eq(payments.periodMonth, month),
+        eq(payments.periodYear, year),
+      ),
+    )
+
+  const existingIds = new Set(existingPayments.map((p) => p.contractId))
+  const missing = activeContracts.filter((r) => {
+    if (existingIds.has(r.contract.id)) return false
+    const effectiveStart = r.contract.managedSince ?? r.contract.startDate
+    const [esYear, esMonth] = effectiveStart.split('-').map(Number)
+    if (year < esYear || (year === esYear && month < esMonth)) return false
+    return true
+  })
+
+  for (const r of missing) {
+    await generatePaymentWithLineItems(r.contract, r.unit, month, year)
+  }
 }

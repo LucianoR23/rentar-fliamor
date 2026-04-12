@@ -7,11 +7,12 @@ import { contracts, units, tenants, contractUpdates, files } from '@/lib/schema'
 import { PageHeader } from '@/components/shared/PageHeader'
 import { FilesSection } from '@/components/files/FilesSection'
 import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
 import { ContractStatusBadge } from '@/components/contracts/ContractStatusBadge'
 import { ContractTimeline } from '@/components/contracts/ContractTimeline'
 import { UpdateCalculator } from '@/components/contracts/UpdateCalculator'
 import { UPDATE_TYPE_LABELS } from '@/lib/validations/contract'
-import { formatDate } from '@/lib/utils'
+import { formatCurrency, formatDate } from '@/lib/utils'
 
 type Props = { params: Promise<{ id: string }> }
 
@@ -22,10 +23,6 @@ function Row({ label, value }: { label: string; value?: React.ReactNode }) {
       <dd className="text-sm font-medium mt-0.5">{value ?? '—'}</dd>
     </div>
   )
-}
-
-function formatARS(value: string | number) {
-  return Number(value).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
 
 export default async function ContractDetailPage({ params }: Props) {
@@ -71,7 +68,7 @@ export default async function ContractDetailPage({ params }: Props) {
         {/* Left column */}
         <div className="space-y-4">
           {/* Details */}
-          <section className="rounded-lg border border-border bg-card p-5">
+          <Card>
             <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
               Datos del contrato
             </h2>
@@ -83,16 +80,16 @@ export default async function ContractDetailPage({ params }: Props) {
               <Row label="Tipo de actualización" value={UPDATE_TYPE_LABELS[contract.updateType]} />
               <Row
                 label="Precio actual"
-                value={<span className="font-mono tabular-nums">${formatARS(contract.currentPrice)}</span>}
+                value={<span className="font-mono tabular-nums">{formatCurrency(contract.currentPrice)}</span>}
               />
               <Row
                 label="Precio inicial"
-                value={<span className="font-mono tabular-nums">${formatARS(contract.firstMonthPrice)}</span>}
+                value={<span className="font-mono tabular-nums">{formatCurrency(contract.firstMonthPrice)}</span>}
               />
               {contract.depositAmount && (
                 <Row
                   label="Depósito"
-                  value={<span className="font-mono tabular-nums">${formatARS(contract.depositAmount)}</span>}
+                  value={<span className="font-mono tabular-nums">{formatCurrency(contract.depositAmount)}</span>}
                 />
               )}
               <Row label="Frecuencia" value={`${contract.updateFrequencyMonths} meses`} />
@@ -102,7 +99,7 @@ export default async function ContractDetailPage({ params }: Props) {
                   value={
                     <span className="font-mono tabular-nums">
                       {contract.updateType === 'fixed_amount'
-                        ? `$${formatARS(contract.updateValue)}`
+                        ? formatCurrency(contract.updateValue)
                         : `${contract.updateValue}%`}
                     </span>
                   }
@@ -132,7 +129,7 @@ export default async function ContractDetailPage({ params }: Props) {
                 </div>
               )}
             </dl>
-          </section>
+          </Card>
 
           {/* UpdateCalculator — only for active contracts */}
           {contract.status === 'active' && (

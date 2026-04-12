@@ -16,6 +16,8 @@ import {
 } from '@/components/ui/select'
 import { calculateVat } from '@/lib/vat'
 import { formatCurrency } from '@/lib/utils'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { toast } from 'sonner'
 
 interface UnitOption { id: string; identifier: string; type: string }
 interface TenantOption { id: string; firstName: string; lastName: string }
@@ -78,6 +80,7 @@ export function ContractForm({ defaultValues, contractId, units, tenants }: Cont
     }
 
     const contract = await res.json() as { id: string }
+    toast.success(isEdit ? 'Contrato actualizado' : 'Contrato creado')
     router.push(`/contracts/${contract.id}`)
     router.refresh()
   }
@@ -256,9 +259,9 @@ export function ContractForm({ defaultValues, contractId, units, tenants }: Cont
       </section>
 
       {serverError && (
-        <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-          {serverError}
-        </div>
+        <Alert variant="destructive">
+          <AlertDescription>{serverError}</AlertDescription>
+        </Alert>
       )}
 
       <div className="flex gap-3">

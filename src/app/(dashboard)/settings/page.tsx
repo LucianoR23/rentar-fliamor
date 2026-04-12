@@ -5,6 +5,7 @@ import { requireRole } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { PageHeader } from '@/components/shared/PageHeader'
 import { CommissionForm } from '@/components/settings/CommissionForm'
+import { Card } from '@/components/ui/card'
 
 export default async function SettingsPage() {
   let currentUser
@@ -30,7 +31,7 @@ export default async function SettingsPage() {
         description="Configuración general del sistema."
       />
 
-      <section className="rounded-lg border border-border bg-card p-6 space-y-4">
+      <Card className="p-6 space-y-4">
         <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
           Comisión inmobiliaria
         </h2>
@@ -38,7 +39,7 @@ export default async function SettingsPage() {
           Porcentaje que se aplica sobre el alquiler cobrado (sin IVA). Es informativo y no afecta los recibos al inquilino.
         </p>
         <CommissionForm defaultPercentage={commissionPercentage} canEdit={canEdit} />
-      </section>
+      </Card>
     </div>
   )
 }
