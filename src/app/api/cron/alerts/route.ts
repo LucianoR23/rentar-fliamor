@@ -10,6 +10,23 @@ import { ActualizacionProxima, actualizacionProximaSubject } from '@/emails/Actu
 
 export const runtime = 'nodejs'
 
+async function redisGet(key: string): Promise<string | null> {
+  try {
+    return await redis.get(key)
+  } catch {
+    console.warn('[cron/alerts] redis get failed, skipping dedup for', key)
+    return null
+  }
+}
+
+async function redisSet(key: string, ttl: number): Promise<void> {
+  try {
+    await redis.set(key, '1', 'EX', ttl)
+  } catch {
+    console.warn('[cron/alerts] redis set failed for', key)
+  }
+}
+
 export async function GET(req: NextRequest) {
   const auth = req.headers.get('Authorization')
   if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
@@ -35,6 +52,7 @@ export async function GET(req: NextRequest) {
 
     let sent = 0
     let skipped = 0
+    const errors: string[] = []
 
     /* ── 1. Contratos que vencen en los próximos 30 días ── */
     const expiring = await db
@@ -46,7 +64,7 @@ export async function GET(req: NextRequest) {
 
     for (const { contract, unit, tenant } of expiring) {
       const key = `alert:expiry:${contract.id}`
-      if (await redis.get(key)) { skipped++; continue }
+      if (await redisGet(key)) { skipped++; continue }
 
       const daysLeft = Math.max(1, Math.ceil(
         (new Date(contract.endDate).getTime() - now.getTime()) / 86_400_000
@@ -64,10 +82,11 @@ export async function GET(req: NextRequest) {
       const { error } = await resend.emails.send({ from: FROM_EMAIL, to: adminEmails, subject, html })
       if (error) {
         console.error('[cron/alerts] expiry send failed:', error.message)
+        errors.push(`expiry:${contract.id}:${error.message}`)
         skipped++
         continue
       }
-      await redis.set(key, '1', 'EX', 60 * 60 * 24 * 35)
+      await redisSet(key, 60 * 60 * 24 * 35)
       sent++
     }
 
@@ -81,7 +100,7 @@ export async function GET(req: NextRequest) {
 
     for (const { contract, unit, tenant } of updating) {
       const key = `alert:update:${contract.id}:${contract.nextUpdateDate}`
-      if (await redis.get(key)) { skipped++; continue }
+      if (await redisGet(key)) { skipped++; continue }
 
       const daysLeft = Math.max(1, Math.ceil(
         (new Date(contract.nextUpdateDate).getTime() - now.getTime()) / 86_400_000
@@ -101,18 +120,18 @@ export async function GET(req: NextRequest) {
       const { error } = await resend.emails.send({ from: FROM_EMAIL, to: adminEmails, subject, html })
       if (error) {
         console.error('[cron/alerts] update send failed:', error.message)
+        errors.push(`update:${contract.id}:${error.message}`)
         skipped++
         continue
       }
-      await redis.set(key, '1', 'EX', 60 * 60 * 24 * 10)
+      await redisSet(key, 60 * 60 * 24 * 10)
       sent++
     }
 
-    return NextResponse.json({ ok: true, sent, skipped, ts: now.toISOString() })
+    return NextResponse.json({ ok: true, sent, skipped, errors: errors.length ? errors : undefined, ts: now.toISOString() })
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err)
-    const stack = err instanceof Error ? err.stack : undefined
-    console.error('[cron/alerts] unhandled error:', message, stack)
-    return NextResponse.json({ error: message }, { status: 500 })
+    console.error('[cron/alerts] unhandled error:', message, err instanceof Error ? err.stack : '')
+    return NextResponse.json({ ok: false, error: message }, { status: 500 })
   }
 }
