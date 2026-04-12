@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
@@ -80,9 +81,11 @@ export function RegisterPaymentDialog({
       reset()
       onOpenChange(false)
       router.refresh()
+      toast.success('Pago registrado')
     } else {
       const body = (await res.json()) as { error?: string }
       setError(body.error ?? 'Error al registrar el pago')
+      toast.error('Error al registrar el pago')
     }
   }
 

@@ -88,6 +88,7 @@ export const tenants = pgTable('tenants', {
   guarantorPhone: varchar('guarantor_phone', { length: 30 }),
   guarantorCuitDni: varchar('guarantor_cuit_dni', { length: 20 }),
   notes: text('notes'),
+  active: boolean('active').default(true).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
@@ -97,6 +98,7 @@ export const groups = pgTable('groups', {
   name: varchar('name', { length: 255 }).notNull(),
   address: text('address').notNull(),
   description: text('description'),
+  active: boolean('active').default(true).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
@@ -117,6 +119,7 @@ export const units = pgTable('units', {
   identifier: varchar('identifier', { length: 100 }).notNull(),
   floor: varchar('floor', { length: 20 }),
   description: text('description'),
+  active: boolean('active').default(true).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
@@ -234,6 +237,7 @@ export const expenses = pgTable('expenses', {
   category: varchar('category', { length: 100 }),
   expenseDate: date('expense_date').notNull(),
   notes: text('notes'),
+  active: boolean('active').default(true).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })

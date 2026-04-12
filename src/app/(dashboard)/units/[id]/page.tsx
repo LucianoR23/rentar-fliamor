@@ -8,6 +8,7 @@ import { PageHeader } from '@/components/shared/PageHeader'
 import { FilesSection } from '@/components/files/FilesSection'
 import { ManualChargesSection } from '@/components/manual-charges/ManualChargesSection'
 import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
 import { UnitStatusBadge } from '@/components/units/UnitStatusBadge'
 import { ContractStatusBadge } from '@/components/contracts/ContractStatusBadge'
 import { UpdateCalculator } from '@/components/contracts/UpdateCalculator'
@@ -67,7 +68,7 @@ export default async function UnitDetailPage({ params }: Props) {
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_650px] gap-6 max-w-7xl">
         {/* Left — unit info */}
         <div className="space-y-4">
-          <section className="rounded-lg border border-border bg-card p-5">
+          <Card>
             <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
               Datos de la unidad
             </h2>
@@ -95,11 +96,11 @@ export default async function UnitDetailPage({ params }: Props) {
                 </div>
               )}
             </dl>
-          </section>
+          </Card>
 
           {/* Active contract */}
           {activeContract ? (
-            <section className="rounded-lg border border-border bg-card p-5">
+            <Card>
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                   Contrato activo
@@ -135,7 +136,7 @@ export default async function UnitDetailPage({ params }: Props) {
                   <span className="font-mono text-sm">{formatDate(activeContract.nextUpdateDate)}</span>
                 } />
               </dl>
-            </section>
+            </Card>
           ) : (
             <section className="rounded-lg border border-dashed border-border p-5 text-center">
               <p className="text-sm text-muted-foreground mb-3">Esta unidad no tiene contrato activo.</p>

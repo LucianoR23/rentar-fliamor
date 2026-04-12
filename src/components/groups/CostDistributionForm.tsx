@@ -9,6 +9,8 @@ import { UNIT_TYPE_LABELS } from '@/lib/validations/unit'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { toast } from 'sonner'
 
 interface CostDistributionFormProps {
   groupId: string
@@ -55,6 +57,7 @@ export function CostDistributionForm({ groupId, defaultValues }: CostDistributio
       return
     }
 
+    toast.success('Distribución guardada')
     router.push(`/groups/${groupId}`)
     router.refresh()
   }
@@ -107,9 +110,9 @@ export function CostDistributionForm({ groupId, defaultValues }: CostDistributio
       )}
 
       {serverError && (
-        <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-          {serverError}
-        </div>
+        <Alert variant="destructive">
+          <AlertDescription>{serverError}</AlertDescription>
+        </Alert>
       )}
 
       <div className="flex gap-3">

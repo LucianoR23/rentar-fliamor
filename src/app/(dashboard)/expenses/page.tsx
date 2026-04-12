@@ -1,15 +1,22 @@
 import Link from 'next/link'
 import { Plus, Receipt } from 'lucide-react'
-import { desc } from 'drizzle-orm'
+import { desc, eq } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { expenses } from '@/lib/schema'
+import { requireRole } from '@/lib/auth'
 import { PageHeader } from '@/components/shared/PageHeader'
 import { EmptyState } from '@/components/shared/EmptyState'
 import { Button } from '@/components/ui/button'
 import { ExpensesTable } from '@/components/expenses/ExpensesTable'
 
 export default async function ExpensesPage() {
-  const rows = await db.select().from(expenses).orderBy(desc(expenses.expenseDate))
+  const dbUser = await requireRole('viewer')
+
+  const rows = await db
+    .select()
+    .from(expenses)
+    .where(eq(expenses.active, true))
+    .orderBy(desc(expenses.expenseDate))
 
   return (
     <div>
@@ -32,7 +39,7 @@ export default async function ExpensesPage() {
           description="Registrá el primer gasto para empezar a hacer seguimiento."
         />
       ) : (
-        <ExpensesTable data={rows} />
+        <ExpensesTable data={rows} userRole={dbUser.role} />
       )}
     </div>
   )

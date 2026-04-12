@@ -1,18 +1,20 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useForm } from 'react-hook-form'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState, useMemo } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { CurrencyInput } from '@/components/ui/currency-input'
 import { CostBreakdownTable } from './CostBreakdownTable'
 import { UNIT_TYPE_LABELS } from '@/lib/validations/unit'
 import { groupExpenseSchema, type GroupExpenseFormData } from '@/lib/validations/group-expense'
 import type { DistributionUnit, DistributionConfig } from '@/lib/rent-calculator'
+import { toast } from 'sonner'
 
 const MONTHS = [
   { value: 1, label: 'Enero' }, { value: 2, label: 'Febrero' },
@@ -44,6 +46,7 @@ export function GroupExpenseForm({ groupId, activeUnits, costConfig }: GroupExpe
     register,
     handleSubmit,
     watch,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<GroupExpenseFormData>({
     resolver: zodResolver(groupExpenseSchema),
@@ -89,6 +92,7 @@ export function GroupExpenseForm({ groupId, activeUnits, costConfig }: GroupExpe
       body: JSON.stringify(payload),
     })
     if (res.ok) {
+      toast.success('Gasto grupal registrado')
       router.push(`/groups/${groupId}?tab=expenses`)
       router.refresh()
     } else {
@@ -128,16 +132,22 @@ export function GroupExpenseForm({ groupId, activeUnits, costConfig }: GroupExpe
         <div className="grid grid-cols-2 gap-3">
           <div className="space-y-1.5">
             <Label htmlFor="periodMonth">Mes *</Label>
-            <select
-              id="periodMonth"
-              aria-invalid={!!errors.periodMonth}
-              className="h-9 w-full rounded-3xl border border-transparent bg-input/50 px-3 py-1 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring/30"
-              {...register('periodMonth')}
-            >
-              {MONTHS.map((m) => (
-                <option key={m.value} value={m.value}>{m.label}</option>
-              ))}
-            </select>
+            <Controller
+              control={control}
+              name="periodMonth"
+              render={({ field }) => (
+                <Select value={String(field.value)} onValueChange={(v) => field.onChange(Number(v))}>
+                  <SelectTrigger id="periodMonth" aria-invalid={!!errors.periodMonth}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {MONTHS.map((m) => (
+                      <SelectItem key={m.value} value={String(m.value)}>{m.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+            />
             {errors.periodMonth && <p className="text-xs text-destructive">{errors.periodMonth.message}</p>}
           </div>
 

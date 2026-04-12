@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { Download } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 const MONTH_NAMES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
@@ -20,11 +22,16 @@ function MonthYearPicker({
     <div className="flex items-center gap-3">
       <div className="flex flex-col gap-1">
         <label className="text-xs text-muted-foreground">Mes</label>
-        <select className={selectCls} value={month} onChange={(e) => onMonth(Number(e.target.value))}>
-          {MONTH_NAMES.map((name, i) => (
-            <option key={i} value={i + 1}>{name}</option>
-          ))}
-        </select>
+        <Select value={String(month)} onValueChange={(v) => onMonth(Number(v))}>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {MONTH_NAMES.map((name, i) => (
+              <SelectItem key={i} value={String(i + 1)}>{name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
       <div className="flex flex-col gap-1">
         <label className="text-xs text-muted-foreground">Año</label>
@@ -55,7 +62,7 @@ export function MonthlyReportForm() {
   const filename = `reporte-mensual-${year}-${String(month).padStart(2, '0')}.pdf`
 
   return (
-    <div className="rounded-lg border border-border bg-card p-6 max-w-lg">
+    <Card className="p-6 max-w-lg">
       <p className="text-sm text-muted-foreground mb-5">
         Tabla de todos los pagos del período seleccionado con estado, monto proyectado y monto cobrado.
       </p>
@@ -68,7 +75,7 @@ export function MonthlyReportForm() {
           </a>
         </Button>
       </div>
-    </div>
+    </Card>
   )
 }
 
@@ -80,7 +87,7 @@ export function UnitReportForm({ units }: { units: UnitOption[] }) {
     : 'historial.pdf'
 
   return (
-    <div className="rounded-lg border border-border bg-card p-6 max-w-lg">
+    <Card className="p-6 max-w-lg">
       <p className="text-sm text-muted-foreground mb-5">
         Historial completo de una unidad: todos sus contratos, pagos registrados y actualizaciones de precio.
       </p>
@@ -90,17 +97,18 @@ export function UnitReportForm({ units }: { units: UnitOption[] }) {
         <div className="flex flex-wrap items-end gap-4">
           <div className="flex flex-col gap-1">
             <label className="text-xs text-muted-foreground">Unidad</label>
-            <select
-              className={`${selectCls} min-w-55`}
-              value={unitId}
-              onChange={(e) => setUnitId(e.target.value)}
-            >
-              {units.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.identifier}{u.floor ? ` (Piso ${u.floor})` : ''} — {UNIT_TYPE_LABELS[u.type] ?? u.type}
-                </option>
-              ))}
-            </select>
+            <Select value={unitId} onValueChange={setUnitId}>
+              <SelectTrigger className="min-w-55">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {units.map((u) => (
+                  <SelectItem key={u.id} value={u.id}>
+                    {u.identifier}{u.floor ? ` (Piso ${u.floor})` : ''} — {UNIT_TYPE_LABELS[u.type] ?? u.type}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <Button asChild size="sm" disabled={!unitId}>
             <a href={unitId ? `/api/reports/unit?unitId=${unitId}` : '#'} download={filename}>
@@ -110,7 +118,7 @@ export function UnitReportForm({ units }: { units: UnitOption[] }) {
           </Button>
         </div>
       )}
-    </div>
+    </Card>
   )
 }
 
@@ -121,7 +129,7 @@ export function CompleteReportForm() {
   const filename = `reporte-completo-${year}-${String(month).padStart(2, '0')}.pdf`
 
   return (
-    <div className="rounded-lg border border-border bg-card p-6 max-w-lg">
+    <Card className="p-6 max-w-lg">
       <p className="text-sm text-muted-foreground mb-5">
         Resumen total del sistema: unidades, contratos activos, ingresos y gastos del período seleccionado.
       </p>
@@ -134,6 +142,6 @@ export function CompleteReportForm() {
           </a>
         </Button>
       </div>
-    </div>
+    </Card>
   )
 }

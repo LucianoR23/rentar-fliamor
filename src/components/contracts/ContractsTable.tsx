@@ -3,13 +3,15 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { type ColumnDef } from '@tanstack/react-table'
 import { Eye, Pencil, Trash2 } from 'lucide-react'
 import { DataTable } from '@/components/shared/DataTable'
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 import { ContractStatusBadge } from './ContractStatusBadge'
 import { Button } from '@/components/ui/button'
-import { formatDate } from '@/lib/utils'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
+import { formatCurrency, formatDate } from '@/lib/utils'
 import { calculateVat } from '@/lib/vat'
 import type { Contract, Unit, Tenant } from '@/types'
 
@@ -17,10 +19,6 @@ export type ContractRow = {
   contract: Contract
   unit: Unit | null
   tenant: Tenant | null
-}
-
-function formatARS(value: string | number) {
-  return Number(value).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
 
 export function ContractsTable({ data }: { data: ContractRow[] }) {
@@ -35,6 +33,7 @@ export function ContractsTable({ data }: { data: ContractRow[] }) {
     setTerminating(false)
     setTerminateId(null)
     router.refresh()
+    toast.success('Contrato archivado')
   }
 
   const columns: ColumnDef<ContractRow>[] = [
@@ -77,14 +76,14 @@ export function ContractsTable({ data }: { data: ContractRow[] }) {
       cell: ({ row }) => {
         const c = row.original.contract
         if (!c.appliesVat) {
-          return <span className="font-mono tabular-nums">${formatARS(c.currentPrice)}</span>
+          return <span className="font-mono tabular-nums">{formatCurrency(c.currentPrice)}</span>
         }
         const vat = calculateVat(Number(c.currentPrice), true, Number(c.vatPercentage))
         return (
           <div className="flex items-center gap-1.5">
-            <span className="font-mono tabular-nums">${formatARS(c.currentPrice)}</span>
+            <span className="font-mono tabular-nums">{formatCurrency(c.currentPrice)}</span>
             <span className="inline-flex items-center rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-medium text-primary">
-              +IVA ${formatARS(vat.vat)}
+              +IVA {formatCurrency(vat.vat)}
             </span>
           </div>
         )
@@ -105,19 +104,34 @@ export function ContractsTable({ data }: { data: ContractRow[] }) {
       header: '',
       cell: ({ row }) => (
         <div className="flex items-center gap-0.5 justify-end">
-          <Button variant="ghost" size="icon-sm" asChild>
-            <Link href={`/contracts/${row.original.contract.id}`}><Eye className="h-4 w-4" /></Link>
-          </Button>
-          <Button variant="ghost" size="icon-sm" asChild>
-            <Link href={`/contracts/${row.original.contract.id}/edit`}><Pencil className="h-4 w-4" /></Link>
-          </Button>
-          <Button
-            variant="ghost" size="icon-sm"
-            className="text-muted-foreground hover:text-destructive"
-            onClick={() => setTerminateId(row.original.contract.id)}
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon-sm" asChild>
+                <Link href={`/contracts/${row.original.contract.id}`}><Eye className="h-4 w-4" /></Link>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Ver detalle</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="ghost" size="icon-sm" asChild>
+                <Link href={`/contracts/${row.original.contract.id}/edit`}><Pencil className="h-4 w-4" /></Link>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Editar</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                variant="ghost" size="icon-sm"
+                className="text-muted-foreground hover:text-destructive"
+                onClick={() => setTerminateId(row.original.contract.id)}
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>Rescindir contrato</TooltipContent>
+          </Tooltip>
         </div>
       ),
     },
@@ -133,6 +147,8 @@ export function ContractsTable({ data }: { data: ContractRow[] }) {
         description="El contrato pasará a estado 'Rescindido'. Esta acción no se puede deshacer."
         onConfirm={handleTerminate}
         loading={terminating}
+        confirmLabel="Rescindir"
+        loadingLabel="Rescindiendo..."
       />
     </>
   )

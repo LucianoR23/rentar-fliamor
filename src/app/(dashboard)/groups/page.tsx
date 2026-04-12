@@ -3,12 +3,15 @@ import { Plus, Layers } from 'lucide-react'
 import { desc, eq, count } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { groups, units } from '@/lib/schema'
+import { requireRole } from '@/lib/auth'
 import { PageHeader } from '@/components/shared/PageHeader'
 import { Button } from '@/components/ui/button'
 import { GroupsTable } from '@/components/groups/GroupsTable'
 import { EmptyState } from '@/components/shared/EmptyState'
 
 export default async function GroupsPage() {
+  const dbUser = await requireRole('viewer')
+
   const rows = await db
     .select({
       group: groups,
@@ -16,6 +19,7 @@ export default async function GroupsPage() {
     })
     .from(groups)
     .leftJoin(units, eq(units.groupId, groups.id))
+    .where(eq(groups.active, true))
     .groupBy(groups.id)
     .orderBy(desc(groups.createdAt))
 
@@ -49,7 +53,7 @@ export default async function GroupsPage() {
           </Button>
         </EmptyState>
       ) : (
-        <GroupsTable data={data} />
+        <GroupsTable data={data} userRole={dbUser.role} />
       )}
     </div>
   )

@@ -3,12 +3,15 @@ import { Plus, Building2 } from 'lucide-react'
 import { desc, eq, and } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { units, groups, contracts } from '@/lib/schema'
+import { requireRole } from '@/lib/auth'
 import { PageHeader } from '@/components/shared/PageHeader'
 import { Button } from '@/components/ui/button'
 import { UnitsTable } from '@/components/units/UnitsTable'
 import { EmptyState } from '@/components/shared/EmptyState'
 
 export default async function UnitsPage() {
+  const dbUser = await requireRole('viewer')
+
   const rows = await db
     .select({
       unit: units,
@@ -21,6 +24,7 @@ export default async function UnitsPage() {
       contracts,
       and(eq(contracts.unitId, units.id), eq(contracts.status, 'active'))
     )
+    .where(eq(units.active, true))
     .orderBy(desc(units.createdAt))
 
   const data = rows.map(({ unit, group, activeContract }) => ({
@@ -57,7 +61,7 @@ export default async function UnitsPage() {
           </Button>
         </EmptyState>
       ) : (
-        <UnitsTable data={data} />
+        <UnitsTable data={data} userRole={dbUser.role} />
       )}
     </div>
   )

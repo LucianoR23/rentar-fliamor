@@ -11,6 +11,7 @@ import { CancelPaymentDialog } from './CancelPaymentDialog'
 import { ManualChargeDialog } from './ManualChargeDialog'
 import { PaymentBreakdown } from './PaymentBreakdown'
 import { Button } from '@/components/ui/button'
+import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip'
 import { formatCurrency, formatDate } from '@/lib/utils'
 import { calculateVat } from '@/lib/vat'
 import { calculateCommission } from '@/lib/commission-calc'
@@ -135,7 +136,6 @@ export function PaymentsTable({ data, commissionRate = 0 }: { data: PaymentRow[]
       cell: ({ row }) => {
         const { contract, payment } = row.original
         if (!contract.appliesVat) return <span className="text-muted-foreground">—</span>
-        // Use snapshot if available, otherwise calculate
         if (payment.vatAmount && Number(payment.vatAmount) > 0) {
           return (
             <span className="font-mono tabular-nums text-muted-foreground">
@@ -229,47 +229,61 @@ export function PaymentsTable({ data, commissionRate = 0 }: { data: PaymentRow[]
         const canCancel = payment.status === 'pending' || payment.status === 'overdue'
         const canAddCharge = payment.status === 'pending' || payment.status === 'overdue'
         return (
-          <div className="flex items-center justify-end gap-1">
+          <div className="flex items-center justify-end gap-0.5">
             {canAddCharge && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="gap-1.5"
-                onClick={() => openChargeDialog(row.original)}
-              >
-                <Plus className="h-4 w-4" />
-                Cargo
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={() => openChargeDialog(row.original)}
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Agregar cargo</TooltipContent>
+              </Tooltip>
             )}
             {canReceipt && (
-              <Button variant="ghost" size="sm" className="gap-1.5" asChild>
-                <Link href={`/payments/${payment.id}/receipt`}>
-                  <FileText className="h-4 w-4" />
-                  Recibo
-                </Link>
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="ghost" size="icon-sm" asChild>
+                    <Link href={`/payments/${payment.id}/receipt`}>
+                      <FileText className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Ver recibo</TooltipContent>
+              </Tooltip>
             )}
             {canRegister && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="gap-1.5"
-                onClick={() => openDialog(row.original)}
-              >
-                <CircleDollarSign className="h-4 w-4" />
-                Registrar
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={() => openDialog(row.original)}
+                  >
+                    <CircleDollarSign className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Registrar pago</TooltipContent>
+              </Tooltip>
             )}
             {canCancel && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="gap-1.5 text-danger hover:text-danger"
-                onClick={() => openCancelDialog(row.original)}
-              >
-                <Ban className="h-4 w-4" />
-                Cancelar
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon-sm"
+                    className="text-muted-foreground hover:text-destructive"
+                    onClick={() => openCancelDialog(row.original)}
+                  >
+                    <Ban className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Cancelar pago</TooltipContent>
+              </Tooltip>
             )}
           </div>
         )

@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, Building2, Users, Layers, FileText,
-  CreditCard, Receipt, BarChart3, Settings, UserCog,
+  CreditCard, Receipt, BarChart3, Settings, UserCog, SlidersHorizontal,
   Archive, ChevronLeft, ChevronRight, ChevronDown,
 } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
@@ -16,7 +16,7 @@ type NavItem = {
   icon: React.ElementType
   label: string
   exact?: boolean
-  children?: { href: string; icon: React.ElementType; label: string }[]
+  children?: { href: string; icon: React.ElementType; label: string; exact?: boolean }[]
 }
 
 const navItems: NavItem[] = [
@@ -35,6 +35,7 @@ const navItems: NavItem[] = [
     label: 'Configuración',
     children: [
       { href: '/settings/users', icon: UserCog, label: 'Usuarios' },
+      { href: '/settings', icon: SlidersHorizontal, label: 'General', exact: true },
     ],
   },
 ]
@@ -66,7 +67,7 @@ export function Sidebar() {
           <span className="text-xs font-bold text-primary-foreground">RA</span>
         </div>
         {!collapsed && (
-          <span className="font-semibold text-sm text-sidebar-foreground">RentAR</span>
+          <span className="font-semibold text-sm text-sidebar-foreground">RentAR Fliamor</span>
         )}
       </div>
 
@@ -120,7 +121,7 @@ export function Sidebar() {
                 {!collapsed && settingsOpen && (
                   <div className="mt-0.5 ml-3 space-y-0.5 border-l border-border pl-3">
                     {item.children.map((child) => {
-                      const childActive = pathname.startsWith(child.href)
+                      const childActive = child.exact ? pathname === child.href : pathname.startsWith(child.href)
                       return (
                         <Link
                           key={child.href}
@@ -144,7 +145,7 @@ export function Sidebar() {
                 {collapsed && (
                   <div className="mt-0.5 space-y-0.5">
                     {item.children.map((child) => {
-                      const childActive = pathname.startsWith(child.href)
+                      const childActive = child.exact ? pathname === child.href : pathname.startsWith(child.href)
                       const childLink = (
                         <Link
                           href={child.href}

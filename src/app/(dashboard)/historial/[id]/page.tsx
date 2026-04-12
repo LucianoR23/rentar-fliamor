@@ -12,6 +12,7 @@ import { ContractTimeline } from '@/components/contracts/ContractTimeline'
 import { FilesSection } from '@/components/files/FilesSection'
 import { HistorialPaymentsTable } from '@/components/historial/HistorialPaymentsTable'
 import { HistorialExpensesTable, type HistorialExpenseRow } from '@/components/historial/HistorialExpensesTable'
+import { Card } from '@/components/ui/card'
 import { UPDATE_TYPE_LABELS } from '@/lib/validations/contract'
 import { formatCurrency } from '@/lib/utils'
 
@@ -95,7 +96,7 @@ export default async function HistorialDetailPage({ params }: Props) {
 
       <div className="max-w-4xl space-y-6">
         {/* Contract details */}
-        <section className="rounded-lg border border-border bg-card p-5">
+        <Card>
           <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
             Datos del contrato
           </h2>
@@ -143,11 +144,11 @@ export default async function HistorialDetailPage({ params }: Props) {
               </div>
             )}
           </dl>
-        </section>
+        </Card>
 
         {/* Tenant info */}
         {tenant && (
-          <section className="rounded-lg border border-border bg-card p-5">
+          <Card>
             <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
               Inquilino
             </h2>
@@ -168,11 +169,11 @@ export default async function HistorialDetailPage({ params }: Props) {
                 </>
               )}
             </dl>
-          </section>
+          </Card>
         )}
 
         {/* Price update timeline */}
-        <section className="rounded-lg border border-border bg-card p-5">
+        <Card>
           <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
             Historial de actualizaciones
           </h2>
@@ -181,26 +182,26 @@ export default async function HistorialDetailPage({ params }: Props) {
           ) : (
             <ContractTimeline contract={contract} updates={updates} />
           )}
-        </section>
+        </Card>
 
         {/* Payments */}
-        <section className="rounded-lg border border-border bg-card p-5">
+        <Card>
           <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
             Pagos ({contractPayments.length})
           </h2>
           <HistorialPaymentsTable data={contractPayments} />
-        </section>
+        </Card>
 
         {/* Group expenses */}
-        <section className="rounded-lg border border-border bg-card p-5">
+        <Card>
           <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
             Gastos grupales ({filteredExpenses.length})
           </h2>
           <HistorialExpensesTable data={filteredExpenses} />
-        </section>
+        </Card>
 
         {/* Contract files */}
-        <section className="rounded-lg border border-border bg-card p-5">
+        <Card>
           <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
             Archivos del contrato
           </h2>
@@ -211,11 +212,11 @@ export default async function HistorialDetailPage({ params }: Props) {
             canUpload={false}
             canDelete={false}
           />
-        </section>
+        </Card>
 
         {/* Unit files */}
         {unit && (
-          <section className="rounded-lg border border-border bg-card p-5">
+          <Card>
             <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
               Archivos de la unidad
             </h2>
@@ -226,7 +227,7 @@ export default async function HistorialDetailPage({ params }: Props) {
               canUpload={false}
               canDelete={false}
             />
-          </section>
+          </Card>
         )}
       </div>
     </div>

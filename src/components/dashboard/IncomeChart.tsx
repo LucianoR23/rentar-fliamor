@@ -10,7 +10,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts'
-import { cn } from '@/lib/utils'
+import { Card } from '@/components/ui/card'
 
 export interface IncomeMonth {
   label: string
@@ -35,7 +35,7 @@ function formatTooltipCurrency(value: number): string {
 
 export function IncomeChart({ data, className }: IncomeChartProps) {
   return (
-    <div className={cn('rounded-lg border border-border bg-card p-5', className)}>
+    <Card className={className}>
       <p className="mb-4 text-sm font-medium text-muted-foreground">
         Ingresos — últimos 6 meses
       </p>
@@ -77,6 +77,6 @@ export function IncomeChart({ data, className }: IncomeChartProps) {
           <Bar dataKey="collected" fill="#10B981" radius={[3, 3, 0, 0]} maxBarSize={44} />
         </BarChart>
       </ResponsiveContainer>
-    </div>
+    </Card>
   )
 }

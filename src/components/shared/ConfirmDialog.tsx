@@ -1,14 +1,15 @@
 'use client'
 
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog'
 
 interface ConfirmDialogProps {
   open: boolean
@@ -17,6 +18,9 @@ interface ConfirmDialogProps {
   description: string
   onConfirm: () => void
   loading?: boolean
+  confirmLabel?: string
+  loadingLabel?: string
+  variant?: 'destructive' | 'default'
 }
 
 export function ConfirmDialog({
@@ -26,23 +30,33 @@ export function ConfirmDialog({
   description,
   onConfirm,
   loading,
+  confirmLabel = 'Eliminar',
+  loadingLabel = 'Eliminando...',
+  variant = 'destructive',
 }: ConfirmDialogProps) {
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm">
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
-          <Button variant="ghost" onClick={() => onOpenChange(false)} disabled={loading}>
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>{title}</AlertDialogTitle>
+          <AlertDialogDescription>{description}</AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel disabled={loading}>
             Cancelar
-          </Button>
-          <Button variant="destructive" onClick={onConfirm} disabled={loading}>
-            {loading ? 'Eliminando...' : 'Eliminar'}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+          </AlertDialogCancel>
+          <AlertDialogAction
+            variant={variant}
+            onClick={(e) => {
+              e.preventDefault()
+              onConfirm()
+            }}
+            disabled={loading}
+          >
+            {loading ? loadingLabel : confirmLabel}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }

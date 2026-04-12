@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { KeyRound, Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
@@ -38,6 +39,7 @@ export function UsersTable({ data, currentUserId }: UsersTableProps) {
     })
     setUpdatingId(null)
     router.refresh()
+    toast.success('Rol actualizado')
   }
 
   async function handleDelete() {
@@ -47,6 +49,7 @@ export function UsersTable({ data, currentUserId }: UsersTableProps) {
     setDeleting(false)
     setDeleteId(null)
     router.refresh()
+    toast.success('Usuario eliminado')
   }
 
   return (

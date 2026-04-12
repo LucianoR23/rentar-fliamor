@@ -2,37 +2,17 @@
 
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { Popover } from 'radix-ui'
-import { Calendar, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Calendar as CalendarIcon } from 'lucide-react'
+import { es } from 'react-day-picker/locale'
 import { cn } from '@/lib/utils'
-
-const MONTH_NAMES = [
-  'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
-  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
-]
-const DAY_NAMES = ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa', 'Do']
-
-function parseDate(value: string): { year: number; month: number; day: number } | null {
-  if (!value) return null
-  const parts = value.split('-').map(Number)
-  if (parts.length !== 3 || parts.some(isNaN)) return null
-  const [year, month, day] = parts
-  return { year, month, day }
-}
+import { Calendar } from '@/components/ui/calendar'
 
 function formatDisplay(value: string): string {
-  const p = parseDate(value)
-  if (!p) return ''
-  return `${String(p.day).padStart(2, '0')}/${String(p.month).padStart(2, '0')}/${p.year}`
-}
-
-function daysInMonth(year: number, month: number): number {
-  return new Date(year, month, 0).getDate()
-}
-
-// Monday = 0, Sunday = 6
-function firstWeekday(year: number, month: number): number {
-  const day = new Date(year, month - 1, 1).getDay()
-  return day === 0 ? 6 : day - 1
+  if (!value) return ''
+  const parts = value.split('-').map(Number)
+  if (parts.length !== 3 || parts.some(isNaN)) return ''
+  const [year, month, day] = parts
+  return `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`
 }
 
 type DateInputProps = Omit<React.InputHTMLAttributes<HTMLInputElement>, 'type'>
@@ -49,7 +29,6 @@ export const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
     // Sync with value set via ref by react-hook-form after mount
     useEffect(() => {
       if (isControlled) return
-      // RHF sets defaultValue on the ref in its own useEffect, so we wait a frame
       const id = requestAnimationFrame(() => {
         if (hiddenRef.current?.value && hiddenRef.current.value !== internalValue) {
           setInternalValue(hiddenRef.current.value)
@@ -58,30 +37,19 @@ export const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
       return () => cancelAnimationFrame(id)
     }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
-    const now = new Date()
-    const parsed = parseDate(displayValue)
-    const [navYear, setNavYear] = useState(parsed?.year ?? now.getFullYear())
-    const [navMonth, setNavMonth] = useState(parsed?.month ?? now.getMonth() + 1)
     const [open, setOpen] = useState(false)
 
-    function handleOpenChange(next: boolean) {
-      if (next) {
-        const p = parseDate(displayValue)
-        setNavYear(p?.year ?? now.getFullYear())
-        setNavMonth(p?.month ?? now.getMonth() + 1)
-      }
-      setOpen(next)
-    }
+    const selectedDate = displayValue ? new Date(displayValue + 'T00:00:00') : undefined
+    const defaultMonth = selectedDate ?? new Date()
 
-    function selectDay(day: number) {
-      const dateStr = `${navYear}-${String(navMonth).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+    function handleSelect(date: Date | undefined) {
+      if (!date) return
+      const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`
 
-      // Update hidden input so RHF ref reads the correct value
       if (hiddenRef.current) {
         hiddenRef.current.value = dateStr
       }
 
-      // Call onChange with a synthetic-like event (RHF reads e.target.value)
       if (onChange) {
         const syntheticEvent = {
           target: { value: dateStr, name: name ?? '' },
@@ -110,29 +78,8 @@ export const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
       setOpen(false)
     }
 
-    function prevMonth() {
-      if (navMonth === 1) { setNavMonth(12); setNavYear((y) => y - 1) }
-      else setNavMonth((m) => m - 1)
-    }
-
-    function nextMonth() {
-      if (navMonth === 12) { setNavMonth(1); setNavYear((y) => y + 1) }
-      else setNavMonth((m) => m + 1)
-    }
-
-    const numDays = daysInMonth(navYear, navMonth)
-    const startOffset = firstWeekday(navYear, navMonth)
-
-    const selectedParsed = parseDate(displayValue)
-    const isSelectedMonth =
-      selectedParsed?.year === navYear && selectedParsed?.month === navMonth
-
-    const todayDay = now.getDate()
-    const isCurrentMonth =
-      now.getFullYear() === navYear && now.getMonth() + 1 === navMonth
-
     return (
-      <Popover.Root open={open} onOpenChange={handleOpenChange}>
+      <Popover.Root open={open} onOpenChange={setOpen}>
         {/* Hidden native input — receives ref and register props for RHF */}
         <input
           ref={hiddenRef}
@@ -164,7 +111,7 @@ export const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
             <span className={cn('font-mono', !displayValue && 'text-muted-foreground')}>
               {displayValue ? formatDisplay(displayValue) : 'DD/MM/AAAA'}
             </span>
-            <Calendar className="h-4 w-4 text-muted-foreground shrink-0 ml-2" />
+            <CalendarIcon className="h-4 w-4 text-muted-foreground shrink-0 ml-2" />
           </button>
         </Popover.Trigger>
 
@@ -173,72 +120,21 @@ export const DateInput = forwardRef<HTMLInputElement, DateInputProps>(
             align="start"
             sideOffset={4}
             className={cn(
-              'z-50 w-[268px] rounded-lg border border-border bg-card p-3 shadow-lg',
+              'z-50 rounded-lg border border-border bg-card shadow-lg',
               'data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95',
             )}
           >
-            {/* Navigation header */}
-            <div className="flex items-center justify-between mb-3">
-              <button
-                type="button"
-                onClick={prevMonth}
-                className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted/60 hover:text-foreground transition-colors"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </button>
-              <span className="text-sm font-medium select-none">
-                {MONTH_NAMES[navMonth - 1]} {navYear}
-              </span>
-              <button
-                type="button"
-                onClick={nextMonth}
-                className="flex h-7 w-7 items-center justify-center rounded-md text-muted-foreground hover:bg-muted/60 hover:text-foreground transition-colors"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </button>
-            </div>
-
-            {/* Day-name row */}
-            <div className="grid grid-cols-7 mb-1">
-              {DAY_NAMES.map((d) => (
-                <div
-                  key={d}
-                  className="flex h-8 items-center justify-center text-xs font-medium text-muted-foreground select-none"
-                >
-                  {d}
-                </div>
-              ))}
-            </div>
-
-            {/* Day grid */}
-            <div className="grid grid-cols-7 gap-y-0.5">
-              {Array.from({ length: startOffset }).map((_, i) => (
-                <div key={`pad-${i}`} />
-              ))}
-              {Array.from({ length: numDays }).map((_, i) => {
-                const day = i + 1
-                const isSelected = isSelectedMonth && selectedParsed?.day === day
-                const isToday = isCurrentMonth && todayDay === day
-
-                return (
-                  <button
-                    key={day}
-                    type="button"
-                    onClick={() => selectDay(day)}
-                    className={cn(
-                      'flex h-8 w-full items-center justify-center rounded-md text-sm transition-colors select-none',
-                      isSelected
-                        ? 'bg-primary text-primary-foreground font-semibold'
-                        : isToday
-                        ? 'border border-primary/60 text-primary font-medium hover:bg-primary/10'
-                        : 'text-foreground hover:bg-muted/60',
-                    )}
-                  >
-                    {day}
-                  </button>
-                )
-              })}
-            </div>
+            <Calendar
+              mode="single"
+              selected={selectedDate}
+              onSelect={handleSelect}
+              defaultMonth={defaultMonth}
+              captionLayout="dropdown"
+              startMonth={new Date(2015, 0)}
+              endMonth={new Date(2035, 11)}
+              locale={es}
+              weekStartsOn={1}
+            />
           </Popover.Content>
         </Popover.Portal>
       </Popover.Root>

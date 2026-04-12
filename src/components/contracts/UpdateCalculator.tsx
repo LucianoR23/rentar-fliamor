@@ -2,14 +2,17 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import { useTheme } from 'next-themes'
 import { Calculator, TrendingUp, ArrowRight, CheckCircle } from 'lucide-react'
 import { X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { calculateRentUpdate } from '@/lib/rent-calculator'
 import { formatCurrency, formatDate } from '@/lib/utils'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 
 interface UpdateCalculatorProps {
   contractId: string
@@ -110,6 +113,7 @@ export function UpdateCalculator({
     if (!res.ok) {
       const json = (await res.json().catch(() => ({}))) as { error?: string }
       setError(json.error ?? 'Error al aplicar')
+      toast.error('Error al aplicar la actualización')
       setApplying(false)
       return
     }
@@ -118,6 +122,7 @@ export function UpdateCalculator({
     setApplying(false)
     setCalculated(false)
     router.refresh()
+    toast.success('Actualización aplicada')
   }
 
   function handleCancel() {
@@ -141,7 +146,7 @@ export function UpdateCalculator({
   const pctChange = price > 0 ? Math.round(((final - price) / price) * 10000) / 100 : 0
 
   return (
-    <div className="rounded-lg border border-border bg-card p-5 space-y-4">
+    <Card>
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Calculator className="h-4 w-4 text-muted-foreground" />
@@ -183,9 +188,9 @@ export function UpdateCalculator({
       )}
 
       {error && (
-        <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2.5 text-sm text-destructive">
-          {error}
-        </div>
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
 
       {open && !applied && (
@@ -315,6 +320,6 @@ export function UpdateCalculator({
           )}
         </div>
       )}
-    </div>
+    </Card>
   )
 }

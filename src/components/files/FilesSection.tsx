@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
+import { Card } from '@/components/ui/card'
 import { FileUpload } from './FileUpload'
 import { FileList } from './FileList'
 
@@ -35,15 +37,16 @@ export function FilesSection({ entityType, entityId, initialFiles, canUpload = t
 
   function handleDeleted(id: string) {
     setFiles((prev) => prev.filter((f) => f.id !== id))
+    toast.success('Archivo eliminado')
   }
 
   return (
-    <section className="rounded-lg border border-border bg-card p-5 space-y-4">
+    <Card>
       <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Archivos adjuntos</h2>
       <FileList files={files} canDelete={canDelete} onDeleted={handleDeleted} />
       {canUpload && (
         <FileUpload entityType={entityType} entityId={entityId} onUploaded={handleUploaded} />
       )}
-    </section>
+    </Card>
   )
 }

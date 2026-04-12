@@ -8,6 +8,8 @@ import { createUserSchema, type CreateUserFormData } from '@/lib/validations/use
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { toast } from 'sonner'
 import {
   Select,
   SelectContent,
@@ -66,6 +68,7 @@ export function CreateUserForm() {
       return
     }
 
+    toast.success('Usuario creado')
     reset()
     setSuccess(true)
     router.refresh()
@@ -107,9 +110,9 @@ export function CreateUserForm() {
       </div>
 
       {serverError && (
-        <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
-          {serverError}
-        </div>
+        <Alert variant="destructive">
+          <AlertDescription>{serverError}</AlertDescription>
+        </Alert>
       )}
 
       {success && (
