@@ -43,6 +43,13 @@
       "when": 1775940425718,
       "tag": "0005_curious_tag",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1776042817191,
+      "tag": "0006_narrow_famine",
+      "breakpoints": true
     }
   ]
 }

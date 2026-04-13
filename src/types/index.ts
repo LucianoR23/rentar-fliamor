@@ -14,6 +14,8 @@ import type {
   groupExpenses,
   groupExpenseUnits,
   expenses,
+  invoices,
+  invoiceTemplates,
 } from '@/lib/schema'
 
 // Select types (lectura)
@@ -31,6 +33,8 @@ export type GroupExpenseUnit = InferSelectModel<typeof groupExpenseUnits>
 export type Expense = InferSelectModel<typeof expenses>
 export type PaymentLineItem = InferSelectModel<typeof paymentLineItems>
 export type ManualCharge = InferSelectModel<typeof manualCharges>
+export type Invoice = InferSelectModel<typeof invoices>
+export type InvoiceTemplate = InferSelectModel<typeof invoiceTemplates>
 
 // Insert types (escritura)
 export type NewUser = InferInsertModel<typeof users>
@@ -47,6 +51,8 @@ export type NewGroupExpenseUnit = InferInsertModel<typeof groupExpenseUnits>
 export type NewExpense = InferInsertModel<typeof expenses>
 export type NewPaymentLineItem = InferInsertModel<typeof paymentLineItems>
 export type NewManualCharge = InferInsertModel<typeof manualCharges>
+export type NewInvoice = InferInsertModel<typeof invoices>
+export type NewInvoiceTemplate = InferInsertModel<typeof invoiceTemplates>
 
 // Enum types
 export type UserRole = User['role']
@@ -56,6 +62,8 @@ export type ContractStatus = Contract['status']
 export type PaymentStatus = Payment['status']
 export type FileEntityType = File['entityType']
 export type PaymentLineType = PaymentLineItem['type']
+export type TaxCondition = NonNullable<Tenant['taxCondition']>
+export type InvoiceType = Invoice['invoiceType']
 
 // Tipos con relaciones (para queries con joins)
 export type UnitWithGroup = Unit & { group: Group | null }

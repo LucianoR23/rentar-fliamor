@@ -1,9 +1,9 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { eq, desc, and } from 'drizzle-orm'
-import { Pencil } from 'lucide-react'
+import { Pencil, Stamp } from 'lucide-react'
 import { db } from '@/lib/db'
-import { contracts, units, tenants, contractUpdates, files } from '@/lib/schema'
+import { contracts, units, tenants, contractUpdates, files, invoices } from '@/lib/schema'
 import { PageHeader } from '@/components/shared/PageHeader'
 import { FilesSection } from '@/components/files/FilesSection'
 import { Button } from '@/components/ui/button'
@@ -12,6 +12,7 @@ import { ContractStatusBadge } from '@/components/contracts/ContractStatusBadge'
 import { ContractTimeline } from '@/components/contracts/ContractTimeline'
 import { UpdateCalculator } from '@/components/contracts/UpdateCalculator'
 import { UPDATE_TYPE_LABELS } from '@/lib/validations/contract'
+import { InvoiceTypeBadge } from '@/components/invoices/InvoiceTypeBadge'
 import { formatCurrency, formatDate } from '@/lib/utils'
 
 type Props = { params: Promise<{ id: string }> }
@@ -52,6 +53,12 @@ export default async function ContractDetailPage({ params }: Props) {
     .where(and(eq(files.entityType, 'contract'), eq(files.entityId, id)))
     .orderBy(files.createdAt)
 
+  const contractInvoices = await db
+    .select()
+    .from(invoices)
+    .where(eq(invoices.contractId, id))
+    .orderBy(desc(invoices.createdAt))
+
   const title = unit && tenant
     ? `${unit.identifier} — ${tenant.lastName}, ${tenant.firstName}`
     : `Contrato`
@@ -59,6 +66,11 @@ export default async function ContractDetailPage({ params }: Props) {
   return (
     <div>
       <PageHeader title={title} description={`Contrato ${formatDate(contract.startDate)} → ${formatDate(contract.endDate)}`} backHref="/contracts">
+        {contract.status === 'active' && (
+          <Button asChild size="sm" variant="outline">
+            <Link href={`/invoices/new?contractId=${id}`}><Stamp className="h-4 w-4" />Facturar</Link>
+          </Button>
+        )}
         <Button asChild size="sm">
           <Link href={`/contracts/${id}/edit`}><Pencil className="h-4 w-4" />Editar</Link>
         </Button>
@@ -150,6 +162,39 @@ export default async function ContractDetailPage({ params }: Props) {
             canUpload
             canDelete
           />
+
+          {/* Facturas emitidas */}
+          {contractInvoices.length > 0 && (
+            <Card>
+              <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">
+                Facturas emitidas ({contractInvoices.length})
+              </h2>
+              <div className="space-y-2">
+                {contractInvoices.map((inv) => (
+                  <Link
+                    key={inv.id}
+                    href={`/invoices/${inv.id}`}
+                    className="flex items-center justify-between rounded-md border border-border px-3 py-2 hover:bg-muted/50 transition-colors"
+                  >
+                    <div className="flex items-center gap-2">
+                      <InvoiceTypeBadge type={inv.invoiceType} />
+                      <span className="font-mono text-sm tabular-nums">
+                        {String(inv.puntoVenta).padStart(5, '0')}-{String(inv.cbteNro).padStart(8, '0')}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <span className="text-sm text-muted-foreground">
+                        {['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'][inv.periodMonth - 1]} {inv.periodYear}
+                      </span>
+                      <span className="font-mono tabular-nums text-sm font-medium">
+                        {formatCurrency(inv.impTotal)}
+                      </span>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </Card>
+          )}
         </div>
 
         {/* Right column — timeline */}

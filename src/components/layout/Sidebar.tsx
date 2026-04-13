@@ -6,7 +6,7 @@ import { usePathname } from 'next/navigation'
 import {
   LayoutDashboard, Building2, Users, Layers, FileText,
   CreditCard, Receipt, BarChart3, Settings, UserCog, SlidersHorizontal,
-  Archive, ChevronLeft, ChevronRight, ChevronDown,
+  Archive, ChevronLeft, ChevronRight, ChevronDown, Stamp, FileOutput,
 } from 'lucide-react'
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
@@ -27,6 +27,7 @@ const navItems: NavItem[] = [
   { href: '/contracts', icon: FileText, label: 'Contratos' },
   { href: '/historial', icon: Archive, label: 'Historial' },
   { href: '/payments', icon: CreditCard, label: 'Pagos' },
+  { href: '/invoices', icon: Stamp, label: 'Facturación' },
   { href: '/expenses', icon: Receipt, label: 'Gastos' },
   { href: '/reports', icon: BarChart3, label: 'Reportes' },
   {
@@ -35,6 +36,7 @@ const navItems: NavItem[] = [
     label: 'Configuración',
     children: [
       { href: '/settings/users', icon: UserCog, label: 'Usuarios' },
+      { href: '/settings/invoice-templates', icon: FileOutput, label: 'Templates factura' },
       { href: '/settings', icon: SlidersHorizontal, label: 'General', exact: true },
     ],
   },

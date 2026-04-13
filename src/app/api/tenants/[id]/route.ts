@@ -41,6 +41,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
         guarantorPhone: data.guarantorPhone || null,
         guarantorCuitDni: data.guarantorCuitDni || null,
         notes: data.notes || null,
+        taxCondition: data.taxCondition || null,
         updatedAt: new Date(),
       })
       .where(eq(tenants.id, id))

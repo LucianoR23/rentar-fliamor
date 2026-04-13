@@ -11,6 +11,7 @@ export const tenantSchema = z.object({
   guarantorPhone: z.string().regex(/^\d{6,15}$/, 'Debe contener entre 6 y 15 dígitos numéricos').optional().or(z.literal('')).transform((v) => v === '' ? undefined : v),
   guarantorCuitDni: z.string().regex(/^\d{7,11}$/, 'Debe contener entre 7 y 11 dígitos numéricos').optional().or(z.literal('')).transform((v) => v === '' ? undefined : v),
   notes: z.string().optional(),
+  taxCondition: z.enum(['monotributista', 'responsable_inscripto', 'consumidor_final', 'exento']).optional(),
 })
 
 export type TenantFormData = z.infer<typeof tenantSchema>
