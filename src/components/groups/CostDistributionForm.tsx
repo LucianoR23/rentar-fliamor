@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { costDistributionSchema, type CostDistributionFormData } from '@/lib/validations/group'
 import { UNIT_TYPE_LABELS } from '@/lib/validations/unit'
@@ -26,7 +26,7 @@ export function CostDistributionForm({ groupId, defaultValues }: CostDistributio
   const {
     register,
     handleSubmit,
-    watch,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<CostDistributionFormData>({
     resolver: zodResolver(costDistributionSchema),
@@ -40,7 +40,7 @@ export function CostDistributionForm({ groupId, defaultValues }: CostDistributio
     },
   })
 
-  const values = watch()
+  const values = useWatch({ control })
   const total = UNIT_TYPES.reduce((sum, type) => sum + (Number(values[type]) || 0), 0)
 
   async function onSubmit(data: CostDistributionFormData) {

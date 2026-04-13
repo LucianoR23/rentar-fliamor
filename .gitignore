@@ -23,8 +23,9 @@
 # misc
 .DS_Store
 *.pem
-Fliamor.csr
-Fliamor.key
+fliamor-rentar-produccion_2ca9756e17146246.crt
+pedido.csr
+privada
 
 # debug
 npm-debug.log*

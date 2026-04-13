@@ -1,5 +1,3 @@
-import React from 'react'
-
 export interface ActualizacionProximaProps {
   tenant: { firstName: string; lastName: string }
   unit: { identifier: string; type: string }

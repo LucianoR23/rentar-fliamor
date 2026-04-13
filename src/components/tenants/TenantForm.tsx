@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { tenantSchema, type TenantFormData } from '@/lib/validations/tenant'
 import { Input } from '@/components/ui/input'
@@ -46,14 +46,14 @@ export function TenantForm({ defaultValues, tenantId }: TenantFormProps) {
     register,
     handleSubmit,
     setValue,
-    watch,
+    control,
     formState: { errors, isSubmitting },
   } = useForm<TenantFormData>({
     resolver: zodResolver(tenantSchema),
     defaultValues,
   })
 
-  const taxCondition = watch('taxCondition')
+  const taxCondition = useWatch({ control, name: 'taxCondition' })
 
   async function onSubmit(data: TenantFormData) {
     setServerError(null)

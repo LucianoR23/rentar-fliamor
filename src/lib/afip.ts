@@ -21,7 +21,7 @@ export function createAfipClient() {
     CUIT: cuit,
     cert,
     key,
-    production: false,
+    production: true,
     access_token: accessToken,
   })
 

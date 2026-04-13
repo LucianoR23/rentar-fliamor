@@ -29,7 +29,7 @@ function formatBytes(bytes: number) {
 }
 
 function FileIcon({ mimeType }: { mimeType: string }) {
-  if (mimeType.startsWith('image/')) return <Image className="h-4 w-4 text-primary shrink-0" />
+  if (mimeType.startsWith('image/')) return <Image aria-hidden className="h-4 w-4 text-primary shrink-0" />
   return <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
 }
 
