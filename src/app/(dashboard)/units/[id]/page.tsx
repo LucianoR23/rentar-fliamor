@@ -76,6 +76,7 @@ export default async function UnitDetailPage({ params }: Props) {
               <Row label="Identificador" value={<span className="font-mono">{unit.identifier}</span>} />
               <Row label="Tipo" value={UNIT_TYPE_LABELS[unit.type] ?? unit.type} />
               <Row label="Piso" value={unit.floor} />
+              <Row label="Dirección" value={unit.address} />
               <div className="flex flex-col gap-0.5">
                 <dt className="text-xs text-muted-foreground">Estado</dt>
                 <dd className="mt-0.5"><UnitStatusBadge hasActiveContract={!!activeContract} /></dd>

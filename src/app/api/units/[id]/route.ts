@@ -35,6 +35,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
         identifier: data.identifier,
         groupId: data.groupId ?? null,
         floor: data.floor || null,
+        address: data.address || null,
         description: data.description || null,
         updatedAt: new Date(),
       })
