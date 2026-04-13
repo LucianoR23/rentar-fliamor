@@ -83,7 +83,7 @@ function UnitDoc({ data }: { data: UnitReportData }) {
   const unitMeta = [TYPE_LABEL[data.unit.type] ?? data.unit.type, data.unit.floor ? `Piso ${data.unit.floor}` : null].filter(Boolean).join(' · ')
   return (
     <Document title={`Historial — ${data.unit.identifier}`} author="RentAR">
-      <Page size="A4" style={s.page}>
+      <Page size="A4" orientation="landscape" style={s.page}>
         <View style={s.header}>
           <View>
             <Text style={s.brandName}>RentAR</Text>

@@ -70,7 +70,7 @@ function MonthlyDoc({ data }: { data: MonthlyReportData }) {
 
   return (
     <Document title={`Reporte Mensual — ${period}`} author="RentAR">
-      <Page size="A4" style={s.page}>
+      <Page size="A4" orientation="landscape" style={s.page}>
         <View style={s.header}>
           <View>
             <Text style={s.brandName}>RentAR</Text>
