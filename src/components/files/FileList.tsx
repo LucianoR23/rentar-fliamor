@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { FileText, Image, Trash2, ExternalLink } from 'lucide-react'
+import { FileText, Image as ImageIcon, Trash2, ExternalLink } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
@@ -29,7 +29,7 @@ function formatBytes(bytes: number) {
 }
 
 function FileIcon({ mimeType }: { mimeType: string }) {
-  if (mimeType.startsWith('image/')) return <Image aria-hidden className="h-4 w-4 text-primary shrink-0" />
+  if (mimeType.startsWith('image/')) return <ImageIcon className="h-4 w-4 text-primary shrink-0" />
   return <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
 }
 
