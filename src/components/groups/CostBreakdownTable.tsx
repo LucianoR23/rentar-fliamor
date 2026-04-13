@@ -1,6 +1,5 @@
 'use client'
 
-import { useMemo } from 'react'
 import {
   Table,
   TableBody,
@@ -22,12 +21,9 @@ interface CostBreakdownTableProps {
 }
 
 export function CostBreakdownTable({ amount, units, costConfig }: CostBreakdownTableProps) {
-  const distribution = useMemo(
-    () => (amount > 0 ? calculateGroupExpenseDistribution(amount, units, costConfig) : []),
-    [amount, units, costConfig]
-  )
+  const distribution = amount > 0 ? calculateGroupExpenseDistribution(amount, units, costConfig) : []
 
-  const byType = useMemo(() => {
+  const byType = (() => {
     const map = new Map<UnitType, { label: string; count: number; perUnitPct: number; subtotal: number }>()
     for (const r of distribution) {
       const prev = map.get(r.type)
@@ -44,9 +40,9 @@ export function CostBreakdownTable({ amount, units, costConfig }: CostBreakdownT
       }
     }
     return [...map.entries()]
-  }, [distribution])
+  })()
 
-  const total = useMemo(() => distribution.reduce((s, r) => s + r.amount, 0), [distribution])
+  const total = distribution.reduce((s, r) => s + r.amount, 0)
 
   if (amount <= 0 || units.length === 0) {
     return (

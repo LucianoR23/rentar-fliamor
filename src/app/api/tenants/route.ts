@@ -36,6 +36,7 @@ export async function POST(request: NextRequest) {
         guarantorPhone: data.guarantorPhone || null,
         guarantorCuitDni: data.guarantorCuitDni || null,
         notes: data.notes || null,
+        taxCondition: data.taxCondition || null,
       })
       .returning()
 

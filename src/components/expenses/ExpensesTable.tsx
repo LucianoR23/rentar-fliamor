@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { type ColumnDef } from '@tanstack/react-table'
@@ -27,14 +27,12 @@ export function ExpensesTable({ data, userRole }: { data: Expense[]; userRole: U
   const [dateTo, setDateTo] = useState('')
   const [categoryFilter, setCategoryFilter] = useState('')
 
-  const filtered = useMemo(() => {
-    return data.filter((row) => {
-      if (dateFrom && row.expenseDate < dateFrom) return false
-      if (dateTo && row.expenseDate > dateTo) return false
-      if (categoryFilter && !(row.category ?? '').toLowerCase().includes(categoryFilter.toLowerCase())) return false
-      return true
-    })
-  }, [data, dateFrom, dateTo, categoryFilter])
+  const filtered = data.filter((row) => {
+    if (dateFrom && row.expenseDate < dateFrom) return false
+    if (dateTo && row.expenseDate > dateTo) return false
+    if (categoryFilter && !(row.category ?? '').toLowerCase().includes(categoryFilter.toLowerCase())) return false
+    return true
+  })
 
   async function handleArchive() {
     if (!archiveId) return

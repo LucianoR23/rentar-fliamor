@@ -10,6 +10,8 @@ import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription } from '@/components/ui/alert'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { TAX_CONDITION_LABELS } from '@/lib/validations/invoice'
 import { toast } from 'sonner'
 
 interface TenantFormProps {
@@ -43,11 +45,15 @@ export function TenantForm({ defaultValues, tenantId }: TenantFormProps) {
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<TenantFormData>({
     resolver: zodResolver(tenantSchema),
     defaultValues,
   })
+
+  const taxCondition = watch('taxCondition')
 
   async function onSubmit(data: TenantFormData) {
     setServerError(null)
@@ -89,6 +95,22 @@ export function TenantForm({ defaultValues, tenantId }: TenantFormProps) {
         </div>
         <Field label="CUIT/CUIL/DNI *" error={errors.cuitDni?.message}>
           <Input {...register('cuitDni')} placeholder="20123456789" className="max-w-48" inputMode="numeric" pattern="\d*" onKeyDown={(e) => { if (!/\d|Backspace|Tab|ArrowLeft|ArrowRight|Delete/.test(e.key)) e.preventDefault() }} />
+        </Field>
+        <Field label="Condición fiscal" error={errors.taxCondition?.message}>
+          <Select
+            value={taxCondition ?? '__none__'}
+            onValueChange={(v) => setValue('taxCondition', v === '__none__' ? undefined : v as NonNullable<TenantFormData['taxCondition']>, { shouldValidate: true })}
+          >
+            <SelectTrigger className="max-w-64">
+              <SelectValue placeholder="Seleccionar (opcional)" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="__none__">Sin especificar</SelectItem>
+              {Object.entries(TAX_CONDITION_LABELS).map(([value, label]) => (
+                <SelectItem key={value} value={value}>{label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </Field>
       </section>
 

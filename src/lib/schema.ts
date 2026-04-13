@@ -21,6 +21,8 @@ export const contractStatusEnum = pgEnum('contract_status', ['active', 'expired'
 export const paymentStatusEnum = pgEnum('payment_status', ['pending', 'paid', 'partial', 'overdue', 'cancelled'])
 export const paymentLineTypeEnum = pgEnum('payment_line_type', ['rent', 'vat', 'group_expense', 'manual_charge'])
 export const fileEntityEnum = pgEnum('file_entity', ['unit', 'contract', 'expense', 'group_expense'])
+export const taxConditionEnum = pgEnum('tax_condition', ['monotributista', 'responsable_inscripto', 'consumidor_final', 'exento'])
+export const invoiceTypeEnum = pgEnum('invoice_type', ['A', 'B'])
 
 export const users = pgTable('users', {
   id: text('id').primaryKey(),
@@ -88,6 +90,7 @@ export const tenants = pgTable('tenants', {
   guarantorPhone: varchar('guarantor_phone', { length: 30 }),
   guarantorCuitDni: varchar('guarantor_cuit_dni', { length: 20 }),
   notes: text('notes'),
+  taxCondition: taxConditionEnum('tax_condition'),
   active: boolean('active').default(true).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
@@ -271,6 +274,46 @@ export const paymentLineItems = pgTable('payment_line_items', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
 })
 
+export const invoices = pgTable('invoices', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  contractId: uuid('contract_id')
+    .references(() => contracts.id, { onDelete: 'restrict' })
+    .notNull(),
+  invoiceType: invoiceTypeEnum('invoice_type').notNull(),
+  cbteTipo: smallint('cbte_tipo').notNull(),
+  puntoVenta: smallint('punto_venta').notNull(),
+  cbteNro: integer('cbte_nro').notNull(),
+  cae: varchar('cae', { length: 20 }).notNull(),
+  caeFchVto: varchar('cae_fch_vto', { length: 10 }).notNull(),
+  cbteFch: varchar('cbte_fch', { length: 10 }).notNull(),
+  impNeto: decimal('imp_neto', { precision: 12, scale: 2 }).notNull(),
+  impIva: decimal('imp_iva', { precision: 12, scale: 2 }).notNull(),
+  impOpEx: decimal('imp_op_ex', { precision: 12, scale: 2 }).notNull(),
+  impTotal: decimal('imp_total', { precision: 12, scale: 2 }).notNull(),
+  docTipo: smallint('doc_tipo').notNull(),
+  docNro: varchar('doc_nro', { length: 20 }).notNull(),
+  recipientName: varchar('recipient_name', { length: 255 }).notNull(),
+  recipientTaxCondition: taxConditionEnum('recipient_tax_condition').notNull(),
+  condicionIvaReceptorId: smallint('condicion_iva_receptor_id').notNull(),
+  periodMonth: smallint('period_month').notNull(),
+  periodYear: smallint('period_year').notNull(),
+  fchServDesde: varchar('fch_serv_desde', { length: 10 }).notNull(),
+  fchServHasta: varchar('fch_serv_hasta', { length: 10 }).notNull(),
+  description: text('description').notNull(),
+  unitType: unitTypeEnum('unit_type').notNull(),
+  issuedBy: text('issued_by')
+    .references(() => users.id)
+    .notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+})
+
+export const invoiceTemplates = pgTable('invoice_templates', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  unitType: unitTypeEnum('unit_type').notNull().unique(),
+  template: text('template').notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+})
+
 // Relations
 export const usersRelations = relations(users, () => ({}))
 
@@ -299,6 +342,7 @@ export const contractsRelations = relations(contracts, ({ one, many }) => ({
   tenant: one(tenants, { fields: [contracts.tenantId], references: [tenants.id] }),
   payments: many(payments),
   updates: many(contractUpdates),
+  invoices: many(invoices),
 }))
 
 export const contractUpdatesRelations = relations(contractUpdates, ({ one }) => ({
@@ -328,4 +372,9 @@ export const paymentLineItemsRelations = relations(paymentLineItems, ({ one }) =
   payment: one(payments, { fields: [paymentLineItems.paymentId], references: [payments.id] }),
   groupExpense: one(groupExpenses, { fields: [paymentLineItems.groupExpenseId], references: [groupExpenses.id] }),
   manualCharge: one(manualCharges, { fields: [paymentLineItems.manualChargeId], references: [manualCharges.id] }),
+}))
+
+export const invoicesRelations = relations(invoices, ({ one }) => ({
+  contract: one(contracts, { fields: [invoices.contractId], references: [contracts.id] }),
+  issuer: one(users, { fields: [invoices.issuedBy], references: [users.id] }),
 }))

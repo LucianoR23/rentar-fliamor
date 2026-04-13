@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -59,10 +59,7 @@ export function GroupExpenseForm({ groupId, activeUnits, costConfig }: GroupExpe
 
   const amount = Number(watch('amount')) || 0
 
-  const filteredUnits = useMemo(
-    () => (allSelected ? activeUnits : activeUnits.filter((u) => selectedUnitIds.has(u.id))),
-    [activeUnits, selectedUnitIds, allSelected]
-  )
+  const filteredUnits = allSelected ? activeUnits : activeUnits.filter((u) => selectedUnitIds.has(u.id))
 
   function toggleUnit(unitId: string) {
     setSelectedUnitIds((prev) => {
