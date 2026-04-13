@@ -100,7 +100,7 @@ export function ExpensesTable({ data, userRole }: { data: Expense[]; userRole: U
       accessorKey: 'notes',
       cell: ({ row }) =>
         row.original.notes ? (
-          <span className="text-sm text-muted-foreground truncate max-w-[200px] block">
+          <span className="text-sm text-muted-foreground truncate max-w-50 block">
             {row.original.notes}
           </span>
         ) : null,

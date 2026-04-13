@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useForm, Controller } from 'react-hook-form'
+import { useForm, useWatch, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
@@ -45,7 +45,6 @@ export function GroupExpenseForm({ groupId, activeUnits, costConfig }: GroupExpe
   const {
     register,
     handleSubmit,
-    watch,
     control,
     formState: { errors, isSubmitting },
   } = useForm<GroupExpenseFormData>({
@@ -57,7 +56,7 @@ export function GroupExpenseForm({ groupId, activeUnits, costConfig }: GroupExpe
     },
   })
 
-  const amount = Number(watch('amount')) || 0
+  const amount = Number(useWatch({ control, name: 'amount' })) || 0
 
   const filteredUnits = allSelected ? activeUnits : activeUnits.filter((u) => selectedUnitIds.has(u.id))
 

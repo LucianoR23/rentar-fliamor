@@ -1,4 +1,4 @@
-import { desc, eq, and, isNull } from 'drizzle-orm'
+import { eq, and, isNull } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { units, tenants, contracts } from '@/lib/schema'
 import { PageHeader } from '@/components/shared/PageHeader'

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { eq } from 'drizzle-orm'
 import { db } from '@/lib/db'
-import { invoices, contracts, tenants, settings } from '@/lib/schema'
+import { invoices, settings } from '@/lib/schema'
 import { requireRole } from '@/lib/auth'
 import { generateInvoicePdf, type InvoicePdfData } from '@/lib/pdf/invoice'
 import { isExempt } from '@/lib/afip'

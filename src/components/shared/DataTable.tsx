@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import { Fragment, useState } from 'react'
 import {
   useReactTable,
   getCoreRowModel,
@@ -35,7 +35,7 @@ interface DataTableProps<TData> {
   columns: ColumnDef<TData>[]
   data: TData[]
   searchPlaceholder?: string
-  renderSubRow?: (row: TData) => React.ReactNode
+  renderSubRow?: (row: TData) => import('react').ReactNode
 }
 
 export function DataTable<TData>({
@@ -127,7 +127,7 @@ export function DataTable<TData>({
               table.getRowModel().rows.map((row) => {
                 const subContent = renderSubRow?.(row.original)
                 return (
-                  <React.Fragment key={row.id}>
+                  <Fragment key={row.id}>
                     <TableRow
                       className="h-10 border-b border-border last:border-0 hover:bg-muted/50 transition-colors"
                     >
@@ -144,7 +144,7 @@ export function DataTable<TData>({
                         </TableCell>
                       </TableRow>
                     )}
-                  </React.Fragment>
+                  </Fragment>
                 )
               })
             ) : (

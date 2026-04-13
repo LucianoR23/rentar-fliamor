@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { and, desc, eq, inArray } from 'drizzle-orm'
+import { desc, eq, inArray } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { contracts, contractUpdates, groups, payments, tenants, units } from '@/lib/schema'
 import { requireRole } from '@/lib/auth'

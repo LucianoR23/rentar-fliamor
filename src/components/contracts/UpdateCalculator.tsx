@@ -45,7 +45,7 @@ export function UpdateCalculator({
   // Calculate how many updates are overdue
   const pendingCount = (() => {
     const today = new Date()
-    let d = new Date(nextUpdateDate + 'T00:00:00')
+    const d = new Date(nextUpdateDate + 'T00:00:00')
     let count = 0
     while (d <= today) {
       count++

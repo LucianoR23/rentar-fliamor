@@ -46,7 +46,7 @@ export function MonthPicker({ month, year, status }: MonthPickerProps) {
       <Button variant="ghost" size="icon-sm" onClick={prev} aria-label="Mes anterior">
         <ChevronLeft className="h-4 w-4" />
       </Button>
-      <span className="font-medium text-sm min-w-[150px] text-center tabular-nums">
+      <span className="font-medium text-sm min-w-37.5 text-center tabular-nums">
         {MONTHS[month - 1]} {year}
       </span>
       <Button variant="ghost" size="icon-sm" onClick={next} aria-label="Mes siguiente">
