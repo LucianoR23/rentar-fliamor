@@ -121,6 +121,7 @@ export const units = pgTable('units', {
   type: unitTypeEnum('type').notNull(),
   identifier: varchar('identifier', { length: 100 }).notNull(),
   floor: varchar('floor', { length: 20 }),
+  address: text('address'),
   description: text('description'),
   active: boolean('active').default(true).notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),

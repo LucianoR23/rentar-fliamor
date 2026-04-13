@@ -63,6 +63,14 @@ export function UnitsTable({ data, userRole }: { data: UnitRow[]; userRole: User
       },
     },
     {
+      accessorKey: 'address',
+      header: 'Dirección',
+      cell: ({ getValue }) => {
+        const v = getValue<string | null>()
+        return v ? <span className="text-sm">{v}</span> : <span className="text-muted-foreground">—</span>
+      },
+    },
+    {
       id: 'group',
       header: 'Grupo',
       accessorFn: (row) => row.group?.name ?? '',

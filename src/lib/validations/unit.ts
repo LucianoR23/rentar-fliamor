@@ -17,6 +17,7 @@ export const unitSchema = z.object({
     .or(z.literal(''))
     .transform((v) => (v === '' ? undefined : v)),
   floor: z.string().optional(),
+  address: z.string().optional(),
   description: z.string().optional(),
 })
 

@@ -33,6 +33,7 @@ export default async function EditUnitPage({ params }: Props) {
           identifier: unit.identifier,
           groupId: unit.groupId ?? '',
           floor: unit.floor ?? '',
+          address: unit.address ?? '',
           description: unit.description ?? '',
         }}
       />

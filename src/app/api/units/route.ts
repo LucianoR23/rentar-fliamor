@@ -30,6 +30,7 @@ export async function POST(request: NextRequest) {
         identifier: data.identifier,
         groupId: data.groupId ?? null,
         floor: data.floor || null,
+        address: data.address || null,
         description: data.description || null,
       })
       .returning()

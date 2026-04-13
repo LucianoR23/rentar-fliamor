@@ -146,6 +146,10 @@ export function UnitForm({ defaultValues, unitId, groups }: UnitFormProps) {
           </Field>
         </div>
 
+        <Field label="Dirección" error={errors.address?.message}>
+          <Input {...register('address')} placeholder="Ej: Av. Corrientes 1234, CABA" />
+        </Field>
+
         <Field label="Descripción" error={errors.description?.message}>
           <Textarea
             {...register('description')}
