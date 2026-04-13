@@ -171,7 +171,7 @@ export default async function DashboardPage() {
         />
         {commissionRate > 0 && (
           <KpiCard
-            title="Comisión del mes"
+            title="Comisión inmobiliaria"
             value={formatCurrency(totalCommission)}
             description={`${commissionRate}% sobre alquileres cobrados`}
             icon={Percent}
