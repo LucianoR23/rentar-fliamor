@@ -40,9 +40,9 @@ const s = StyleSheet.create({
   summaryLabel: { fontSize: 6.5, color: '#71717A', marginBottom: 3, letterSpacing: 0.6 },
   summaryValue: { fontSize: 12, fontFamily: 'Helvetica-Bold', color: '#7C3AED' },
   sectionTitle: { fontSize: 7.5, fontFamily: 'Helvetica-Bold', color: '#7C3AED', letterSpacing: 1.2, marginBottom: 5, marginTop: 14, paddingBottom: 3, borderBottomWidth: 0.5, borderBottomColor: '#E4E4E7' },
-  tHead: { flexDirection: 'row', backgroundColor: '#F5F0FF', paddingVertical: 5, paddingHorizontal: 6, borderRadius: 3, marginBottom: 1 },
-  tRow: { flexDirection: 'row', paddingVertical: 4, paddingHorizontal: 6, borderBottomWidth: 0.3, borderBottomColor: '#E4E4E7' },
-  tRowAlt: { flexDirection: 'row', paddingVertical: 4, paddingHorizontal: 6, borderBottomWidth: 0.3, borderBottomColor: '#E4E4E7', backgroundColor: '#FAFAFA' },
+  tHead: { flexDirection: 'row', backgroundColor: '#F5F0FF', paddingVertical: 5, paddingHorizontal: 6, borderRadius: 3, marginBottom: 1, columnGap: 8 },
+  tRow: { flexDirection: 'row', paddingVertical: 4, paddingHorizontal: 6, borderBottomWidth: 0.3, borderBottomColor: '#E4E4E7', columnGap: 8 },
+  tRowAlt: { flexDirection: 'row', paddingVertical: 4, paddingHorizontal: 6, borderBottomWidth: 0.3, borderBottomColor: '#E4E4E7', backgroundColor: '#FAFAFA', columnGap: 8 },
   th: { fontSize: 7, fontFamily: 'Helvetica-Bold', color: '#7C3AED' },
   td: { fontSize: 8, color: '#1a1a1a' },
   tdSub: { fontSize: 7, color: '#71717A' },
@@ -62,7 +62,7 @@ function CompleteDoc({ data }: { data: CompleteReportData }) {
       <Page size="A4" orientation="landscape" style={s.page}>
         <View style={s.header}>
           <View>
-            <Text style={s.brandName}>RentAR</Text>
+            <Text style={s.brandName}>Rentar Fliamor</Text>
             <Text style={s.brandSub}>Sistema de Gestión de Alquileres</Text>
           </View>
           <View>
@@ -117,64 +117,64 @@ function CompleteDoc({ data }: { data: CompleteReportData }) {
         <Text style={s.sectionTitle}>UNIDADES POR TIPO</Text>
         <View style={s.tHead}>
           <Text style={{ ...s.th, flex: 1 }}>Tipo</Text>
-          <Text style={{ ...s.th, width: 60, textAlign: 'right' }}>Total</Text>
-          <Text style={{ ...s.th, width: 60, textAlign: 'right' }}>Ocupadas</Text>
-          <Text style={{ ...s.th, width: 60, textAlign: 'right' }}>Disponibles</Text>
+          <Text style={{ ...s.th, width: 90, textAlign: 'right' }}>Total</Text>
+          <Text style={{ ...s.th, width: 90, textAlign: 'right' }}>Ocupadas</Text>
+          <Text style={{ ...s.th, width: 90, textAlign: 'right' }}>Disponibles</Text>
         </View>
         {data.unitsByType.map((row, i) => (
           <View key={i} style={i % 2 === 0 ? s.tRow : s.tRowAlt} wrap={false}>
             <Text style={{ ...s.td, flex: 1 }}>{TYPE_LABEL[row.type] ?? row.type}</Text>
-            <Text style={{ ...s.td, width: 60, textAlign: 'right' }}>{row.total}</Text>
-            <Text style={{ ...s.td, width: 60, textAlign: 'right' }}>{row.occupied}</Text>
-            <Text style={{ ...s.td, width: 60, textAlign: 'right' }}>{row.total - row.occupied}</Text>
+            <Text style={{ ...s.td, width: 90, textAlign: 'right' }}>{row.total}</Text>
+            <Text style={{ ...s.td, width: 90, textAlign: 'right' }}>{row.occupied}</Text>
+            <Text style={{ ...s.td, width: 90, textAlign: 'right' }}>{row.total - row.occupied}</Text>
           </View>
         ))}
 
         {/* Active contracts */}
         <Text style={s.sectionTitle}>CONTRATOS ACTIVOS</Text>
         <View style={s.tHead}>
-          <Text style={{ ...s.th, width: 62 }}>Unidad</Text>
-          <Text style={{ ...s.th, width: 120 }}>Inquilino</Text>
-          <Text style={{ ...s.th, width: 80, textAlign: 'right' }}>Precio actual</Text>
-          <Text style={{ ...s.th, width: 62 }}>Próx. actualiz.</Text>
-          <Text style={{ ...s.th, width: 62 }}>Vencimiento</Text>
+          <Text style={{ ...s.th, width: 100 }}>Unidad</Text>
+          <Text style={{ ...s.th, flex: 1 }}>Inquilino</Text>
+          <Text style={{ ...s.th, width: 120, textAlign: 'right' }}>Precio actual</Text>
+          <Text style={{ ...s.th, width: 100 }}>Próx. actualiz.</Text>
+          <Text style={{ ...s.th, width: 100 }}>Vencimiento</Text>
         </View>
         {data.activeContracts.length === 0 ? (
           <Text style={{ fontSize: 8, color: '#71717A', paddingLeft: 6, paddingTop: 8 }}>Sin contratos activos.</Text>
         ) : data.activeContracts.map((row, i) => (
           <View key={i} style={i % 2 === 0 ? s.tRow : s.tRowAlt} wrap={false}>
-            <Text style={{ ...s.td, width: 62 }}>{row.unit}</Text>
-            <Text style={{ ...s.td, width: 120 }}>{row.tenant}</Text>
-            <Text style={{ ...s.td, width: 80, textAlign: 'right' }}>{ars(row.currentPrice)}</Text>
-            <Text style={{ ...s.tdSub, width: 62 }}>{fmtDate(row.nextUpdateDate)}</Text>
-            <Text style={{ ...s.tdSub, width: 62 }}>{fmtDate(row.endDate)}</Text>
+            <Text style={{ ...s.td, width: 100 }}>{row.unit}</Text>
+            <Text style={{ ...s.td, flex: 1 }}>{row.tenant}</Text>
+            <Text style={{ ...s.td, width: 120, textAlign: 'right' }}>{ars(row.currentPrice)}</Text>
+            <Text style={{ ...s.tdSub, width: 100 }}>{fmtDate(row.nextUpdateDate)}</Text>
+            <Text style={{ ...s.tdSub, width: 100 }}>{fmtDate(row.endDate)}</Text>
           </View>
         ))}
 
         {/* Monthly payments */}
         <Text style={s.sectionTitle}>PAGOS DEL PERÍODO — {period}</Text>
         <View style={s.tHead}>
-          <Text style={{ ...s.th, width: hasComm ? 50 : 60 }}>Unidad</Text>
-          <Text style={{ ...s.th, width: hasComm ? 80 : 110 }}>Inquilino</Text>
-          <Text style={{ ...s.th, width: hasComm ? 58 : 70, textAlign: 'right' }}>Alquiler</Text>
-          <Text style={{ ...s.th, width: hasComm ? 44 : 52, textAlign: 'right' }}>IVA</Text>
-          <Text style={{ ...s.th, width: hasComm ? 58 : 70, textAlign: 'right' }}>Cobrado</Text>
-          {hasComm && <Text style={{ ...s.th, width: 44, textAlign: 'right' }}>Comisión</Text>}
-          {hasComm && <Text style={{ ...s.th, width: 56, textAlign: 'right' }}>Neto</Text>}
-          <Text style={{ ...s.th, flex: 1 }}>Estado</Text>
+          <Text style={{ ...s.th, width: hasComm ? 72 : 80 }}>Unidad</Text>
+          <Text style={{ ...s.th, flex: 1 }}>Inquilino</Text>
+          <Text style={{ ...s.th, width: hasComm ? 85 : 100, textAlign: 'right' }}>Alquiler</Text>
+          <Text style={{ ...s.th, width: hasComm ? 68 : 80, textAlign: 'right' }}>IVA</Text>
+          <Text style={{ ...s.th, width: hasComm ? 85 : 100, textAlign: 'right' }}>Cobrado</Text>
+          {hasComm && <Text style={{ ...s.th, width: 68, textAlign: 'right' }}>Comisión</Text>}
+          {hasComm && <Text style={{ ...s.th, width: 85, textAlign: 'right' }}>Neto</Text>}
+          <Text style={{ ...s.th, width: hasComm ? 65 : 70 }}>Estado</Text>
         </View>
         {data.monthPayments.length === 0 ? (
           <Text style={{ fontSize: 8, color: '#71717A', paddingLeft: 6, paddingTop: 8 }}>Sin pagos registrados para el período.</Text>
         ) : data.monthPayments.map((row, i) => (
           <View key={i} style={i % 2 === 0 ? s.tRow : s.tRowAlt} wrap={false}>
-            <Text style={{ ...s.td, width: hasComm ? 50 : 60 }}>{row.unit}</Text>
-            <Text style={{ ...s.td, width: hasComm ? 80 : 110 }}>{row.tenant}</Text>
-            <Text style={{ ...s.td, width: hasComm ? 58 : 70, textAlign: 'right' }}>{ars(row.amountDue)}</Text>
-            <Text style={{ ...s.tdSub, width: hasComm ? 44 : 52, textAlign: 'right' }}>{row.vatAmount > 0 ? ars(row.vatAmount) : '—'}</Text>
-            <Text style={{ ...s.td, width: hasComm ? 58 : 70, textAlign: 'right' }}>{ars(row.amountPaid)}</Text>
-            {hasComm && <Text style={{ ...s.tdSub, width: 44, textAlign: 'right' }}>{row.commissionAmount > 0 ? ars(row.commissionAmount) : '—'}</Text>}
-            {hasComm && <Text style={{ ...s.td, width: 56, textAlign: 'right' }}>{row.netAmount != null ? ars(row.netAmount) : '—'}</Text>}
-            <Text style={{ ...s.td, flex: 1 }}>{STATUS_LABEL[row.status] ?? row.status}</Text>
+            <Text style={{ ...s.td, width: hasComm ? 72 : 80 }}>{row.unit}</Text>
+            <Text style={{ ...s.td, flex: 1 }}>{row.tenant}</Text>
+            <Text style={{ ...s.td, width: hasComm ? 85 : 100, textAlign: 'right' }}>{ars(row.amountDue)}</Text>
+            <Text style={{ ...s.tdSub, width: hasComm ? 68 : 80, textAlign: 'right' }}>{row.vatAmount > 0 ? ars(row.vatAmount) : '—'}</Text>
+            <Text style={{ ...s.td, width: hasComm ? 85 : 100, textAlign: 'right' }}>{ars(row.amountPaid)}</Text>
+            {hasComm && <Text style={{ ...s.tdSub, width: 68, textAlign: 'right' }}>{row.commissionAmount > 0 ? ars(row.commissionAmount) : '—'}</Text>}
+            {hasComm && <Text style={{ ...s.td, width: 85, textAlign: 'right' }}>{row.netAmount != null ? ars(row.netAmount) : '—'}</Text>}
+            <Text style={{ ...s.td, width: hasComm ? 65 : 70 }}>{STATUS_LABEL[row.status] ?? row.status}</Text>
           </View>
         ))}
 
@@ -198,7 +198,7 @@ function CompleteDoc({ data }: { data: CompleteReportData }) {
         )}
 
         <View style={s.footer} fixed>
-          <Text style={s.footerText}>RentAR — Sistema de Gestión de Alquileres</Text>
+          <Text style={s.footerText}>Rentar Fliamor — Sistema de Gestión de Alquileres</Text>
           <Text style={s.footerText}>Generado el {new Date().toLocaleDateString('es-AR')}</Text>
         </View>
       </Page>

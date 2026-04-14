@@ -51,9 +51,9 @@ const s = StyleSheet.create({
   summaryLabel: { fontSize: 6.5, color: '#71717A', marginBottom: 3, letterSpacing: 0.6 },
   summaryValue: { fontSize: 11, fontFamily: 'Helvetica-Bold', color: '#7C3AED' },
   sectionTitle: { fontSize: 7.5, fontFamily: 'Helvetica-Bold', color: '#7C3AED', letterSpacing: 1.2, marginBottom: 5, paddingBottom: 3, borderBottomWidth: 0.5, borderBottomColor: '#E4E4E7' },
-  tHead: { flexDirection: 'row', backgroundColor: '#F5F0FF', paddingVertical: 5, paddingHorizontal: 6, borderRadius: 3, marginBottom: 1 },
-  tRow: { flexDirection: 'row', paddingVertical: 4, paddingHorizontal: 6, borderBottomWidth: 0.3, borderBottomColor: '#E4E4E7' },
-  tRowAlt: { flexDirection: 'row', paddingVertical: 4, paddingHorizontal: 6, borderBottomWidth: 0.3, borderBottomColor: '#E4E4E7', backgroundColor: '#FAFAFA' },
+  tHead: { flexDirection: 'row', backgroundColor: '#F5F0FF', paddingVertical: 5, paddingHorizontal: 6, borderRadius: 3, marginBottom: 1, columnGap: 8 },
+  tRow: { flexDirection: 'row', paddingVertical: 4, paddingHorizontal: 6, borderBottomWidth: 0.3, borderBottomColor: '#E4E4E7', columnGap: 8 },
+  tRowAlt: { flexDirection: 'row', paddingVertical: 4, paddingHorizontal: 6, borderBottomWidth: 0.3, borderBottomColor: '#E4E4E7', backgroundColor: '#FAFAFA', columnGap: 8 },
   th: { fontSize: 7, fontFamily: 'Helvetica-Bold', color: '#7C3AED' },
   td: { fontSize: 8, color: '#1a1a1a' },
   tdSub: { fontSize: 7, color: '#71717A' },
@@ -65,15 +65,15 @@ function MonthlyDoc({ data }: { data: MonthlyReportData }) {
   const period = `${MONTHS[data.period.month - 1]} ${data.period.year}`
   const hasComm = data.commissionRate > 0
   const W = hasComm
-    ? { unit: 50, tenant: 80, amtDue: 56, vat: 44, amtPaid: 56, comm: 44, net: 56, status: 42, date: 42 }
-    : { unit: 60, tenant: 100, amtDue: 66, vat: 52, amtPaid: 66, comm: 0, net: 0, status: 50, date: 48 }
+    ? { unit: 72, amtDue: 85, vat: 68, amtPaid: 85, comm: 68, net: 85, status: 60, date: 68 }
+    : { unit: 80, amtDue: 100, vat: 80, amtPaid: 100, comm: 0, net: 0, status: 70, date: 75 }
 
   return (
     <Document title={`Reporte Mensual — ${period}`} author="RentAR">
       <Page size="A4" orientation="landscape" style={s.page}>
         <View style={s.header}>
           <View>
-            <Text style={s.brandName}>RentAR</Text>
+            <Text style={s.brandName}>Rentar Fliamor</Text>
             <Text style={s.brandSub}>Sistema de Gestión de Alquileres</Text>
           </View>
           <View>
@@ -133,7 +133,7 @@ function MonthlyDoc({ data }: { data: MonthlyReportData }) {
 
         <View style={s.tHead}>
           <Text style={{ ...s.th, width: W.unit }}>Unidad</Text>
-          <Text style={{ ...s.th, width: W.tenant }}>Inquilino</Text>
+          <Text style={{ ...s.th, flex: 1 }}>Inquilino</Text>
           <Text style={{ ...s.th, width: W.amtDue, textAlign: 'right' }}>Alquiler</Text>
           <Text style={{ ...s.th, width: W.vat, textAlign: 'right' }}>IVA</Text>
           <Text style={{ ...s.th, width: W.amtPaid, textAlign: 'right' }}>Cobrado</Text>
@@ -153,7 +153,7 @@ function MonthlyDoc({ data }: { data: MonthlyReportData }) {
               <Text style={s.td}>{row.unit.identifier}{row.unit.floor ? ` (${row.unit.floor})` : ''}</Text>
               <Text style={s.tdSub}>{TYPE_SHORT[row.unit.type] ?? row.unit.type}</Text>
             </View>
-            <Text style={{ ...s.td, width: W.tenant }}>{row.tenant.lastName}, {row.tenant.firstName}</Text>
+            <Text style={{ ...s.td, flex: 1 }}>{row.tenant.lastName}, {row.tenant.firstName}</Text>
             <Text style={{ ...s.td, width: W.amtDue, textAlign: 'right' }}>{ars(row.amountDue)}</Text>
             <Text style={{ ...s.tdSub, width: W.vat, textAlign: 'right' }}>{row.vatAmount > 0 ? ars(row.vatAmount) : '—'}</Text>
             <Text style={{ ...s.td, width: W.amtPaid, textAlign: 'right' }}>{ars(row.amountPaid)}</Text>
@@ -165,7 +165,7 @@ function MonthlyDoc({ data }: { data: MonthlyReportData }) {
         ))}
 
         <View style={s.footer} fixed>
-          <Text style={s.footerText}>RentAR — Sistema de Gestión de Alquileres</Text>
+          <Text style={s.footerText}>Rentar Fliamor — Sistema de Gestión de Alquileres</Text>
           <Text style={s.footerText}>Generado el {new Date().toLocaleDateString('es-AR')}</Text>
         </View>
       </Page>
