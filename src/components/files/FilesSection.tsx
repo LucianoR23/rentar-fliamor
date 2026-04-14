@@ -7,7 +7,7 @@ import { Card } from '@/components/ui/card'
 import { FileUpload } from './FileUpload'
 import { FileList } from './FileList'
 
-type EntityType = 'unit' | 'contract' | 'expense' | 'group_expense'
+type EntityType = 'unit' | 'contract' | 'expense' | 'group_expense' | 'material' | 'repair'
 
 interface FileRecord {
   id: string

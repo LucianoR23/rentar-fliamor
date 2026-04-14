@@ -5,7 +5,7 @@ import { Upload, Loader2, CheckCircle2, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
 
-type EntityType = 'unit' | 'contract' | 'expense' | 'group_expense'
+type EntityType = 'unit' | 'contract' | 'expense' | 'group_expense' | 'material' | 'repair'
 
 interface FileUploadProps {
   entityType: EntityType

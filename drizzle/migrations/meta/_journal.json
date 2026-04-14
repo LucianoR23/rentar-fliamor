@@ -64,6 +64,13 @@
       "when": 1776138028165,
       "tag": "0008_regular_midnight",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1776167026755,
+      "tag": "0009_handy_talkback",
+      "breakpoints": true
     }
   ]
 }

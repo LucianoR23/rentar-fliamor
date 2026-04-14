@@ -11,7 +11,9 @@
       "Bash(ls:*)",
       "Bash(find:*)",
       "WebFetch(domain:ui.shadcn.com)",
-      "Bash(pnpm dlx:*)"
+      "Bash(pnpm dlx:*)",
+      "Bash(mkdir -p \"C:/Users/lr231/Desktop/next/rentar-admin/src/app/api/materials/[id]\")",
+      "Bash(mkdir -p \"C:/Users/lr231/Desktop/next/rentar-admin/src/app/api/repairs/[id]\")"
     ]
   },
   "enabledPlugins": {

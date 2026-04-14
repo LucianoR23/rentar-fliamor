@@ -16,6 +16,10 @@ import type {
   expenses,
   invoices,
   invoiceTemplates,
+  materials,
+  repairs,
+  repairMaterials,
+  stockLogs,
 } from '@/lib/schema'
 
 // Select types (lectura)
@@ -35,6 +39,10 @@ export type PaymentLineItem = InferSelectModel<typeof paymentLineItems>
 export type ManualCharge = InferSelectModel<typeof manualCharges>
 export type Invoice = InferSelectModel<typeof invoices>
 export type InvoiceTemplate = InferSelectModel<typeof invoiceTemplates>
+export type Material = InferSelectModel<typeof materials>
+export type Repair = InferSelectModel<typeof repairs>
+export type RepairMaterial = InferSelectModel<typeof repairMaterials>
+export type StockLog = InferSelectModel<typeof stockLogs>
 
 // Insert types (escritura)
 export type NewUser = InferInsertModel<typeof users>
@@ -53,6 +61,10 @@ export type NewPaymentLineItem = InferInsertModel<typeof paymentLineItems>
 export type NewManualCharge = InferInsertModel<typeof manualCharges>
 export type NewInvoice = InferInsertModel<typeof invoices>
 export type NewInvoiceTemplate = InferInsertModel<typeof invoiceTemplates>
+export type NewMaterial = InferInsertModel<typeof materials>
+export type NewRepair = InferInsertModel<typeof repairs>
+export type NewRepairMaterial = InferInsertModel<typeof repairMaterials>
+export type NewStockLog = InferInsertModel<typeof stockLogs>
 
 // Enum types
 export type UserRole = User['role']
@@ -64,6 +76,8 @@ export type FileEntityType = File['entityType']
 export type PaymentLineType = PaymentLineItem['type']
 export type TaxCondition = NonNullable<Tenant['taxCondition']>
 export type InvoiceType = Invoice['invoiceType']
+export type UnitOfMeasure = Material['unitOfMeasure']
+export type StockChangeReason = StockLog['reason']
 
 // Tipos con relaciones (para queries con joins)
 export type UnitWithGroup = Unit & { group: Group | null }
@@ -77,4 +91,9 @@ export type PaymentWithContract = Payment & {
 export type GroupWithUnits = Group & {
   units: Unit[]
   costConfig: GroupCostConfig[]
+}
+export type RepairWithRelations = Repair & {
+  unit: Unit
+  contract: Contract | null
+  repairMaterials: (RepairMaterial & { material: Material })[]
 }
