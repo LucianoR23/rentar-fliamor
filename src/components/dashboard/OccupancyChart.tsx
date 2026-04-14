@@ -89,13 +89,13 @@ export function OccupancyChart({ data, className }: OccupancyChartProps) {
           </Pie>
           <Tooltip
             contentStyle={{
-              background: '#18181B',
-              border: '1px solid #27272A',
+              background: 'var(--card)',
+              border: '1px solid var(--border)',
               borderRadius: '6px',
               fontSize: '12px',
             }}
-            labelStyle={{ color: '#FAFAFA' }}
-            itemStyle={{ color: '#A1A1AA' }}
+            labelStyle={{ color: 'var(--foreground)' }}
+            itemStyle={{ color: 'var(--muted-foreground)' }}
             formatter={(value, name) => [value as number, name as string]}
           />
         </PieChart>
