@@ -20,7 +20,9 @@ export const updateTypeEnum = pgEnum('update_type', ['icl', 'ipc', 'fixed_amount
 export const contractStatusEnum = pgEnum('contract_status', ['active', 'expired', 'terminated'])
 export const paymentStatusEnum = pgEnum('payment_status', ['pending', 'paid', 'partial', 'overdue', 'cancelled'])
 export const paymentLineTypeEnum = pgEnum('payment_line_type', ['rent', 'vat', 'group_expense', 'manual_charge'])
-export const fileEntityEnum = pgEnum('file_entity', ['unit', 'contract', 'expense', 'group_expense'])
+export const fileEntityEnum = pgEnum('file_entity', ['unit', 'contract', 'expense', 'group_expense', 'material', 'repair'])
+export const unitOfMeasureEnum = pgEnum('unit_of_measure', ['unit', 'meter', 'kilogram', 'liter'])
+export const stockChangeReasonEnum = pgEnum('stock_change_reason', ['manual_edit', 'repair_usage', 'initial'])
 export const taxConditionEnum = pgEnum('tax_condition', ['monotributista', 'responsable_inscripto', 'consumidor_final', 'exento'])
 export const invoiceTypeEnum = pgEnum('invoice_type', ['A', 'B'])
 
@@ -316,6 +318,56 @@ export const invoiceTemplates = pgTable('invoice_templates', {
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
 
+// Maintenance tables
+export const materials = pgTable('materials', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  name: varchar('name', { length: 255 }).notNull(),
+  stock: integer('stock').notNull(),
+  unitOfMeasure: unitOfMeasureEnum('unit_of_measure').notNull(),
+  unitCost: decimal('unit_cost', { precision: 12, scale: 2 }),
+  observations: text('observations'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+})
+
+export const repairs = pgTable('repairs', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  unitId: uuid('unit_id')
+    .references(() => units.id, { onDelete: 'restrict' })
+    .notNull(),
+  contractId: uuid('contract_id')
+    .references(() => contracts.id, { onDelete: 'set null' }),
+  description: text('description').notNull(),
+  repairDate: date('repair_date').notNull(),
+  laborCost: decimal('labor_cost', { precision: 12, scale: 2 }),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+})
+
+export const repairMaterials = pgTable('repair_materials', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  repairId: uuid('repair_id')
+    .references(() => repairs.id, { onDelete: 'cascade' })
+    .notNull(),
+  materialId: uuid('material_id')
+    .references(() => materials.id, { onDelete: 'restrict' })
+    .notNull(),
+  quantity: integer('quantity').notNull(),
+  unitCostSnapshot: decimal('unit_cost_snapshot', { precision: 12, scale: 2 }),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+})
+
+export const stockLogs = pgTable('stock_logs', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  materialId: uuid('material_id')
+    .references(() => materials.id, { onDelete: 'cascade' })
+    .notNull(),
+  previousStock: integer('previous_stock').notNull(),
+  newStock: integer('new_stock').notNull(),
+  reason: stockChangeReasonEnum('reason').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+})
+
 // Relations
 export const usersRelations = relations(users, () => ({}))
 
@@ -337,6 +389,7 @@ export const unitsRelations = relations(units, ({ one, many }) => ({
   group: one(groups, { fields: [units.groupId], references: [groups.id] }),
   contracts: many(contracts),
   manualCharges: many(manualCharges),
+  repairs: many(repairs),
 }))
 
 export const contractsRelations = relations(contracts, ({ one, many }) => ({
@@ -379,4 +432,24 @@ export const paymentLineItemsRelations = relations(paymentLineItems, ({ one }) =
 export const invoicesRelations = relations(invoices, ({ one }) => ({
   contract: one(contracts, { fields: [invoices.contractId], references: [contracts.id] }),
   issuer: one(users, { fields: [invoices.issuedBy], references: [users.id] }),
+}))
+
+export const materialsRelations = relations(materials, ({ many }) => ({
+  repairMaterials: many(repairMaterials),
+  stockLogs: many(stockLogs),
+}))
+
+export const repairsRelations = relations(repairs, ({ one, many }) => ({
+  unit: one(units, { fields: [repairs.unitId], references: [units.id] }),
+  contract: one(contracts, { fields: [repairs.contractId], references: [contracts.id] }),
+  repairMaterials: many(repairMaterials),
+}))
+
+export const repairMaterialsRelations = relations(repairMaterials, ({ one }) => ({
+  repair: one(repairs, { fields: [repairMaterials.repairId], references: [repairs.id] }),
+  material: one(materials, { fields: [repairMaterials.materialId], references: [materials.id] }),
+}))
+
+export const stockLogsRelations = relations(stockLogs, ({ one }) => ({
+  material: one(materials, { fields: [stockLogs.materialId], references: [materials.id] }),
 }))
