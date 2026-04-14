@@ -28,6 +28,7 @@ export interface InvoicePdfData {
   impOpEx: number
   impTotal: number
   exempt: boolean
+  paymentMethod: string
 }
 
 const MONTHS = [
@@ -362,7 +363,7 @@ function InvoiceDocument({ data }: { data: InvoicePdfData }) {
           </View>
           <View style={s.recipientRow}>
             <Text style={s.recipientLabel}>Condición de venta</Text>
-            <Text style={s.recipientValue}>Cuenta Corriente</Text>
+            <Text style={s.recipientValue}>{data.paymentMethod}</Text>
           </View>
         </View>
 

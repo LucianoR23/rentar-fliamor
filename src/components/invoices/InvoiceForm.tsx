@@ -11,7 +11,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 import { InvoiceTypeBadge } from './InvoiceTypeBadge'
-import { TAX_CONDITION_LABELS } from '@/lib/validations/invoice'
+import { TAX_CONDITION_LABELS, PAYMENT_METHOD_OPTIONS } from '@/lib/validations/invoice'
 import { formatCurrency } from '@/lib/utils'
 import type { Contract, Unit, Tenant, InvoiceTemplate } from '@/types'
 
@@ -67,6 +67,7 @@ export function InvoiceForm({ contracts, templates }: InvoiceFormProps) {
   const [periodMonth, setPeriodMonth] = useState(String(now.getMonth() + 1))
   const [periodYear, setPeriodYear] = useState(String(now.getFullYear()))
   const [description, setDescription] = useState('')
+  const [paymentMethod, setPaymentMethod] = useState('Contado')
   const [preview, setPreview] = useState<PreviewData | null>(null)
   const [serverError, setServerError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
@@ -149,6 +150,7 @@ export function InvoiceForm({ contracts, templates }: InvoiceFormProps) {
           periodMonth: Number(periodMonth),
           periodYear: Number(periodYear),
           description,
+          paymentMethod,
         }),
       })
 
@@ -303,6 +305,20 @@ export function InvoiceForm({ contracts, templates }: InvoiceFormProps) {
             className="resize-none h-20"
             placeholder="Descripción del servicio facturado..."
           />
+        </div>
+
+        <div className="space-y-1.5">
+          <Label className="text-sm font-medium">Forma de pago</Label>
+          <Select value={paymentMethod} onValueChange={setPaymentMethod}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {PAYMENT_METHOD_OPTIONS.map((option) => (
+                <SelectItem key={option} value={option}>{option}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </section>
 

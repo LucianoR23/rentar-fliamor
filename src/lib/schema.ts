@@ -301,6 +301,7 @@ export const invoices = pgTable('invoices', {
   fchServDesde: varchar('fch_serv_desde', { length: 10 }).notNull(),
   fchServHasta: varchar('fch_serv_hasta', { length: 10 }).notNull(),
   description: text('description').notNull(),
+  paymentMethod: varchar('payment_method', { length: 50 }).default('Contado').notNull(),
   unitType: unitTypeEnum('unit_type').notNull(),
   issuedBy: text('issued_by')
     .references(() => users.id)

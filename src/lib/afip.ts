@@ -109,6 +109,7 @@ interface BuildVoucherParams {
   periodYear: number
   puntoVenta: number
   cbteNro: number
+  paymentMethod?: string
 }
 
 export interface VoucherAmounts {
@@ -137,12 +138,14 @@ export function calculateInvoiceAmounts(
     return { impNeto: amount, impIva, impOpEx: 0, impTotal: amount + impIva }
   }
 
-  // Factura B + local: IVA incluido, no discriminado
-  return { impNeto: amount, impIva: 0, impOpEx: 0, impTotal: amount }
+  // Factura B + local: IVA incluido en el monto, se extrae para AFIP
+  const impNeto = Math.round((amount / (1 + VAT_RATE)) * 100) / 100
+  const impIva = Math.round((amount - impNeto) * 100) / 100
+  return { impNeto, impIva, impOpEx: 0, impTotal: amount }
 }
 
 export function buildVoucherData(params: BuildVoucherParams) {
-  const { amount, taxCondition, unitType, cuitDni, periodMonth, periodYear, puntoVenta, cbteNro } = params
+  const { amount, taxCondition, unitType, cuitDni, periodMonth, periodYear, puntoVenta, cbteNro, paymentMethod } = params
   const { cbteTipo } = resolveInvoiceType(taxCondition)
   const condicionIvaReceptorId = getCondicionIvaReceptorId(taxCondition)
   const { docTipo, docNro } = resolveDocType(taxCondition, cuitDni)
@@ -163,7 +166,7 @@ export function buildVoucherData(params: BuildVoucherParams) {
     CbteHasta: cbteNro,
     CbteFch: cbteFch,
     ImpTotal: impTotal,
-    ImpTotConc: 0,
+    ImpTotConc: Math.round((impTotal - impNeto - impOpEx - impIva) * 100) / 100,
     ImpNeto: impNeto,
     ImpOpEx: impOpEx,
     ImpTrib: 0,
@@ -176,8 +179,8 @@ export function buildVoucherData(params: BuildVoucherParams) {
     CondicionIVAReceptorId: condicionIvaReceptorId,
   }
 
-  // Solo agregar array de IVA para Factura A + gravado (local)
-  if (cbteTipo === 1 && !isExempt(unitType)) {
+  // Agregar array de IVA solo cuando hay IVA discriminado (Factura A gravada)
+  if (impIva > 0) {
     data.Iva = [
       {
         Id: VAT_AFIP_ID,
@@ -186,6 +189,7 @@ export function buildVoucherData(params: BuildVoucherParams) {
       },
     ]
   }
+
 
   return {
     data,
@@ -210,6 +214,8 @@ interface AfipErrorWithResponse {
 export function getAfipErrorMessage(error: unknown): string {
   if (typeof error === 'object' && error !== null) {
     const err = error as AfipErrorWithResponse
+    // Log full error for debugging
+    console.error('AFIP error full object:', JSON.stringify(error, Object.getOwnPropertyNames(error as object), 2))
     if (err.response?.data) return JSON.stringify(err.response.data, null, 2)
     if (typeof err.message === 'string') return err.message
   }
