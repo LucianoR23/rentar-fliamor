@@ -41,40 +41,40 @@ export function IncomeChart({ data, className }: IncomeChartProps) {
       </p>
       <ResponsiveContainer width="100%" height={440}>
         <BarChart data={data} barGap={4} barCategoryGap="32%">
-          <CartesianGrid vertical={false} stroke="#27272A" strokeDasharray="3 3" />
+          <CartesianGrid vertical={false} stroke="var(--border)" strokeDasharray="3 3" />
           <XAxis
             dataKey="label"
-            tick={{ fill: '#A1A1AA', fontSize: 12 }}
+            tick={{ fill: 'var(--muted-foreground)', fontSize: 12 }}
             axisLine={false}
             tickLine={false}
           />
           <YAxis
             tickFormatter={formatYAxis}
-            tick={{ fill: '#A1A1AA', fontSize: 11 }}
+            tick={{ fill: 'var(--muted-foreground)', fontSize: 11 }}
             axisLine={false}
             tickLine={false}
             width={48}
           />
           <Tooltip
             contentStyle={{
-              background: '#18181B',
-              border: '1px solid #27272A',
+              background: 'var(--card)',
+              border: '1px solid var(--border)',
               borderRadius: '6px',
               fontSize: '12px',
             }}
-            labelStyle={{ color: '#FAFAFA', marginBottom: '4px' }}
-            itemStyle={{ color: '#A1A1AA' }}
+            labelStyle={{ color: 'var(--foreground)', marginBottom: '4px' }}
+            itemStyle={{ color: 'var(--muted-foreground)' }}
             formatter={(value, name) => [
               formatTooltipCurrency(Number(value ?? 0)),
               name === 'projected' ? 'Proyectado' : 'Cobrado',
             ]}
           />
           <Legend
-            wrapperStyle={{ fontSize: '12px', color: '#A1A1AA', paddingTop: '8px' }}
+            wrapperStyle={{ fontSize: '12px', color: 'var(--muted-foreground)', paddingTop: '8px' }}
             formatter={(value: string) => (value === 'projected' ? 'Proyectado' : 'Cobrado')}
           />
-          <Bar dataKey="projected" fill="#7C3AED" radius={[3, 3, 0, 0]} maxBarSize={44} />
-          <Bar dataKey="collected" fill="#10B981" radius={[3, 3, 0, 0]} maxBarSize={44} />
+          <Bar dataKey="projected" fill="var(--primary)" radius={[3, 3, 0, 0]} maxBarSize={44} />
+          <Bar dataKey="collected" fill="var(--success)" radius={[3, 3, 0, 0]} maxBarSize={44} />
         </BarChart>
       </ResponsiveContainer>
     </Card>

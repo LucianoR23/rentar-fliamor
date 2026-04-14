@@ -129,7 +129,7 @@ export function DataTable<TData>({
                 return (
                   <Fragment key={row.id}>
                     <TableRow
-                      className="h-10 border-b border-border last:border-0 hover:bg-muted/50 transition-colors"
+                      className="h-10 border-b border-border last:border-0 even:bg-muted/5 hover:bg-muted/50 transition-colors duration-75"
                     >
                       {row.getVisibleCells().map((cell) => (
                         <TableCell key={cell.id} className="py-0 text-sm">
