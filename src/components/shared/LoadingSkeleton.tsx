@@ -69,11 +69,11 @@ export function DashboardSkeleton() {
       <div className="mt-4 grid gap-4 lg:grid-cols-5">
         <div className="lg:col-span-2 rounded-lg border border-border bg-card p-5">
           <Skeleton className="h-4 w-32 mb-4" />
-          <Skeleton className="h-[300px] w-full rounded-lg" />
+          <Skeleton className="h-75 w-full rounded-lg" />
         </div>
         <div className="lg:col-span-3 rounded-lg border border-border bg-card p-5">
           <Skeleton className="h-4 w-40 mb-4" />
-          <Skeleton className="h-[300px] w-full rounded-lg" />
+          <Skeleton className="h-75 w-full rounded-lg" />
         </div>
       </div>
     </div>
@@ -111,7 +111,7 @@ export function DetailSkeleton() {
         </div>
         <div className="rounded-lg border border-border bg-card p-5">
           <Skeleton className="h-4 w-36 mb-4" />
-          <Skeleton className="h-[280px] w-full rounded-lg" />
+          <Skeleton className="h-70 w-full rounded-lg" />
         </div>
       </div>
     </div>

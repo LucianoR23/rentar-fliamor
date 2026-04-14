@@ -65,7 +65,7 @@ export function RepairsTable({ data, repairFiles, userRole }: RepairsTableProps)
       accessorKey: 'description',
       header: 'Descripción',
       cell: ({ row }) => (
-        <span className="max-w-[250px] truncate block">{row.original.description}</span>
+        <span className="max-w-62.5 truncate block">{row.original.description}</span>
       ),
     },
     {
