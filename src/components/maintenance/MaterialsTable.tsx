@@ -74,7 +74,7 @@ export function MaterialsTable({ data, userRole }: MaterialsTableProps) {
       header: 'Observaciones',
       cell: ({ row }) =>
         row.original.observations ? (
-          <span className="max-w-[200px] truncate block">{row.original.observations}</span>
+          <span className="max-w-50 truncate block">{row.original.observations}</span>
         ) : (
           <span className="text-muted-foreground">—</span>
         ),

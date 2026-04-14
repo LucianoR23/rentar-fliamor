@@ -145,7 +145,7 @@ export function calculateInvoiceAmounts(
 }
 
 export function buildVoucherData(params: BuildVoucherParams) {
-  const { amount, taxCondition, unitType, cuitDni, periodMonth, periodYear, puntoVenta, cbteNro, paymentMethod } = params
+  const { amount, taxCondition, unitType, cuitDni, periodMonth, periodYear, puntoVenta, cbteNro } = params
   const { cbteTipo } = resolveInvoiceType(taxCondition)
   const condicionIvaReceptorId = getCondicionIvaReceptorId(taxCondition)
   const { docTipo, docNro } = resolveDocType(taxCondition, cuitDni)
