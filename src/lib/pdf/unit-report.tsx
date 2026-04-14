@@ -68,9 +68,9 @@ const s = StyleSheet.create({
   infoLabel: { width: 100, fontSize: 8, color: '#71717A' },
   infoValue: { flex: 1, fontSize: 8, color: '#1a1a1a' },
   subTitle: { fontSize: 7, fontFamily: 'Helvetica-Bold', color: '#7C3AED', letterSpacing: 1, marginTop: 8, marginBottom: 3, paddingBottom: 2, borderBottomWidth: 0.4, borderBottomColor: '#E4E4E7' },
-  tHead: { flexDirection: 'row', backgroundColor: '#F5F0FF', paddingVertical: 4, paddingHorizontal: 5, borderRadius: 2, marginBottom: 1 },
-  tRow: { flexDirection: 'row', paddingVertical: 3, paddingHorizontal: 5, borderBottomWidth: 0.3, borderBottomColor: '#E4E4E7' },
-  tRowAlt: { flexDirection: 'row', paddingVertical: 3, paddingHorizontal: 5, borderBottomWidth: 0.3, borderBottomColor: '#E4E4E7', backgroundColor: '#FAFAFA' },
+  tHead: { flexDirection: 'row', backgroundColor: '#F5F0FF', paddingVertical: 4, paddingHorizontal: 5, borderRadius: 2, marginBottom: 1, columnGap: 8 },
+  tRow: { flexDirection: 'row', paddingVertical: 3, paddingHorizontal: 5, borderBottomWidth: 0.3, borderBottomColor: '#E4E4E7', columnGap: 8 },
+  tRowAlt: { flexDirection: 'row', paddingVertical: 3, paddingHorizontal: 5, borderBottomWidth: 0.3, borderBottomColor: '#E4E4E7', backgroundColor: '#FAFAFA', columnGap: 8 },
   th: { fontSize: 7, fontFamily: 'Helvetica-Bold', color: '#7C3AED' },
   td: { fontSize: 8, color: '#1a1a1a' },
   tdSub: { fontSize: 7, color: '#71717A' },
@@ -86,7 +86,7 @@ function UnitDoc({ data }: { data: UnitReportData }) {
       <Page size="A4" orientation="landscape" style={s.page}>
         <View style={s.header}>
           <View>
-            <Text style={s.brandName}>RentAR</Text>
+            <Text style={s.brandName}>Rentar Fliamor</Text>
             <Text style={s.brandSub}>Sistema de Gestión de Alquileres</Text>
           </View>
           <View>
@@ -142,25 +142,25 @@ function UnitDoc({ data }: { data: UnitReportData }) {
               <>
                 <Text style={s.subTitle}>PAGOS ({c.payments.length})</Text>
                 <View style={s.tHead}>
-                  <Text style={{ ...s.th, width: 52 }}>Período</Text>
-                  <Text style={{ ...s.th, width: 54 }}>Vencimiento</Text>
-                  <Text style={{ ...s.th, width: 66, textAlign: 'right' }}>Alquiler</Text>
-                  <Text style={{ ...s.th, width: 66, textAlign: 'right' }}>Cobrado</Text>
-                  {hasComm && <Text style={{ ...s.th, width: 44, textAlign: 'right' }}>Comisión</Text>}
-                  {hasComm && <Text style={{ ...s.th, width: 56, textAlign: 'right' }}>Neto</Text>}
-                  <Text style={{ ...s.th, width: 50 }}>Estado</Text>
-                  <Text style={{ ...s.th, width: 50 }}>Pago</Text>
+                  <Text style={{ ...s.th, width: 72 }}>Período</Text>
+                  <Text style={{ ...s.th, width: 80 }}>Vencimiento</Text>
+                  <Text style={{ ...s.th, flex: 1, textAlign: 'right' }}>Alquiler</Text>
+                  <Text style={{ ...s.th, flex: 1, textAlign: 'right' }}>Cobrado</Text>
+                  {hasComm && <Text style={{ ...s.th, flex: 1, textAlign: 'right' }}>Comisión</Text>}
+                  {hasComm && <Text style={{ ...s.th, flex: 1, textAlign: 'right' }}>Neto</Text>}
+                  <Text style={{ ...s.th, width: 68 }}>Estado</Text>
+                  <Text style={{ ...s.th, width: 75 }}>Pago</Text>
                 </View>
                 {c.payments.map((p, pi) => (
                   <View key={pi} style={pi % 2 === 0 ? s.tRow : s.tRowAlt} wrap={false}>
-                    <Text style={{ ...s.td, width: 52 }}>{fmtPeriod(p.periodMonth, p.periodYear)}</Text>
-                    <Text style={{ ...s.tdSub, width: 54 }}>{fmtDate(p.dueDate)}</Text>
-                    <Text style={{ ...s.td, width: 66, textAlign: 'right' }}>{ars(p.amountDue)}</Text>
-                    <Text style={{ ...s.td, width: 66, textAlign: 'right' }}>{ars(p.amountPaid)}</Text>
-                    {hasComm && <Text style={{ ...s.tdSub, width: 44, textAlign: 'right' }}>{p.commissionAmount > 0 ? ars(p.commissionAmount) : '—'}</Text>}
-                    {hasComm && <Text style={{ ...s.td, width: 56, textAlign: 'right' }}>{p.netAmount != null ? ars(p.netAmount) : '—'}</Text>}
-                    <Text style={{ ...s.td, width: 50 }}>{STATUS_LABEL[p.status] ?? p.status}</Text>
-                    <Text style={{ ...s.tdSub, width: 50 }}>{fmtDate(p.paymentDate)}</Text>
+                    <Text style={{ ...s.td, width: 72 }}>{fmtPeriod(p.periodMonth, p.periodYear)}</Text>
+                    <Text style={{ ...s.tdSub, width: 80 }}>{fmtDate(p.dueDate)}</Text>
+                    <Text style={{ ...s.td, flex: 1, textAlign: 'right' }}>{ars(p.amountDue)}</Text>
+                    <Text style={{ ...s.td, flex: 1, textAlign: 'right' }}>{ars(p.amountPaid)}</Text>
+                    {hasComm && <Text style={{ ...s.tdSub, flex: 1, textAlign: 'right' }}>{p.commissionAmount > 0 ? ars(p.commissionAmount) : '—'}</Text>}
+                    {hasComm && <Text style={{ ...s.td, flex: 1, textAlign: 'right' }}>{p.netAmount != null ? ars(p.netAmount) : '—'}</Text>}
+                    <Text style={{ ...s.td, width: 68 }}>{STATUS_LABEL[p.status] ?? p.status}</Text>
+                    <Text style={{ ...s.tdSub, width: 75 }}>{fmtDate(p.paymentDate)}</Text>
                   </View>
                 ))}
               </>
@@ -170,19 +170,19 @@ function UnitDoc({ data }: { data: UnitReportData }) {
               <>
                 <Text style={s.subTitle}>ACTUALIZACIONES DE PRECIO ({c.updates.length})</Text>
                 <View style={s.tHead}>
-                  <Text style={{ ...s.th, width: 68 }}>Fecha</Text>
-                  <Text style={{ ...s.th, width: 94, textAlign: 'right' }}>Precio anterior</Text>
-                  <Text style={{ ...s.th, width: 94, textAlign: 'right' }}>Nuevo precio</Text>
-                  <Text style={{ ...s.th, width: 72 }}>Tipo</Text>
-                  <Text style={{ ...s.th, width: 62, textAlign: 'right' }}>Índice/Valor</Text>
+                  <Text style={{ ...s.th, width: 90 }}>Fecha</Text>
+                  <Text style={{ ...s.th, flex: 1, textAlign: 'right' }}>Precio anterior</Text>
+                  <Text style={{ ...s.th, flex: 1, textAlign: 'right' }}>Nuevo precio</Text>
+                  <Text style={{ ...s.th, width: 100 }}>Tipo</Text>
+                  <Text style={{ ...s.th, width: 90, textAlign: 'right' }}>Índice/Valor</Text>
                 </View>
                 {c.updates.map((u, ui) => (
                   <View key={ui} style={ui % 2 === 0 ? s.tRow : s.tRowAlt} wrap={false}>
-                    <Text style={{ ...s.td, width: 68 }}>{fmtDate(u.updateDate)}</Text>
-                    <Text style={{ ...s.td, width: 94, textAlign: 'right' }}>{ars(u.previousPrice)}</Text>
-                    <Text style={{ ...s.td, width: 94, textAlign: 'right' }}>{ars(u.newPrice)}</Text>
-                    <Text style={{ ...s.td, width: 72 }}>{UPDATE_LABEL[u.updateType] ?? u.updateType}</Text>
-                    <Text style={{ ...s.tdSub, width: 62, textAlign: 'right' }}>{u.indexValue ?? '—'}</Text>
+                    <Text style={{ ...s.td, width: 90 }}>{fmtDate(u.updateDate)}</Text>
+                    <Text style={{ ...s.td, flex: 1, textAlign: 'right' }}>{ars(u.previousPrice)}</Text>
+                    <Text style={{ ...s.td, flex: 1, textAlign: 'right' }}>{ars(u.newPrice)}</Text>
+                    <Text style={{ ...s.td, width: 100 }}>{UPDATE_LABEL[u.updateType] ?? u.updateType}</Text>
+                    <Text style={{ ...s.tdSub, width: 90, textAlign: 'right' }}>{u.indexValue ?? '—'}</Text>
                   </View>
                 ))}
               </>
@@ -191,7 +191,7 @@ function UnitDoc({ data }: { data: UnitReportData }) {
         ))}
 
         <View style={s.footer} fixed>
-          <Text style={s.footerText}>RentAR — Sistema de Gestión de Alquileres</Text>
+          <Text style={s.footerText}>Rentar Fliamor — Sistema de Gestión de Alquileres</Text>
           <Text style={s.footerText}>Generado el {new Date().toLocaleDateString('es-AR')}</Text>
         </View>
       </Page>
