@@ -1,0 +1,1 @@
+ALTER TABLE "invoices" ADD COLUMN "payment_method" varchar(50) DEFAULT 'Contado' NOT NULL;

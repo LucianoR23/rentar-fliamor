@@ -7,6 +7,18 @@ export const TAX_CONDITION_LABELS = {
   exento: 'Exento',
 } as const
 
+export const PAYMENT_METHOD_OPTIONS = [
+  'Contado',
+  'Tarjeta de Débito',
+  'Tarjeta de Crédito',
+  'Cuenta Corriente',
+  'Cheque',
+  'Transferencia Bancaria',
+  'Otra',
+] as const
+
+export type PaymentMethod = typeof PAYMENT_METHOD_OPTIONS[number]
+
 export const createInvoiceSchema = z.object({
   contractId: z.string().uuid('Contrato inválido'),
   amount: z.coerce.number().positive('El monto debe ser positivo'),
@@ -16,6 +28,7 @@ export const createInvoiceSchema = z.object({
   taxCondition: z.enum(['monotributista', 'responsable_inscripto', 'consumidor_final', 'exento'], {
     required_error: 'La condición fiscal es requerida',
   }),
+  paymentMethod: z.enum(PAYMENT_METHOD_OPTIONS).default('Contado'),
 })
 
 export type CreateInvoiceFormData = z.infer<typeof createInvoiceSchema>

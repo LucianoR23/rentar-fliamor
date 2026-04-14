@@ -64,6 +64,7 @@ export async function GET(_req: NextRequest, { params }: Params) {
       impOpEx: Number(invoice.impOpEx),
       impTotal: Number(invoice.impTotal),
       exempt: isExempt(invoice.unitType as UnitType),
+      paymentMethod: invoice.paymentMethod ?? 'Contado',
     }
 
     const buffer = await generateInvoicePdf(pdfData)

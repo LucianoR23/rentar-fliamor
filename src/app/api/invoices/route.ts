@@ -94,8 +94,10 @@ export async function POST(request: NextRequest) {
       periodYear: data.periodYear,
       puntoVenta: ptoVta,
       cbteNro,
+      paymentMethod: data.paymentMethod,
     })
 
+    console.log('AFIP voucher data:', JSON.stringify(voucher.data, null, 2))
     const res = await afip.ElectronicBilling.createVoucher(voucher.data)
 
     // Save to database
@@ -124,6 +126,7 @@ export async function POST(request: NextRequest) {
         fchServDesde: voucher.fchServDesde,
         fchServHasta: voucher.fchServHasta,
         description: data.description,
+        paymentMethod: data.paymentMethod,
         unitType,
         issuedBy: user.id,
       })
