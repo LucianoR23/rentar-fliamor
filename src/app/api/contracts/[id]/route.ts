@@ -79,7 +79,6 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
     await requireRole('admin')
     const { id } = await params
 
-    // Cancel pending payments (overdue stay for manual resolution)
     await db
       .update(payments)
       .set({

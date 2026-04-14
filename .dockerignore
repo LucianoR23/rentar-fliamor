@@ -13,3 +13,9 @@ PLAN_IVA.md
 rentar-admin-blueprint.md
 SECURITY-FIXES.md
 SETUP_MONITORING.md
+privada
+*.crt
+*.key
+*.pem
+.claude/
+CLAUDE.md

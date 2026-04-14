@@ -49,7 +49,6 @@ export async function POST(request: NextRequest) {
       })
       .returning()
 
-    // Recalculate affected payments
     await recalculatePaymentsForUnit(data.unitId, data.periodMonth, data.periodYear)
 
     return NextResponse.json(created, { status: 201 })

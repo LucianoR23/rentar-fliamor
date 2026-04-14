@@ -71,7 +71,9 @@ export function UnitForm({ defaultValues, unitId, groups }: UnitFormProps) {
 
     if (!res.ok) {
       const json = await res.json().catch(() => ({})) as { error?: string }
-      setServerError(json.error ?? 'Ocurrió un error')
+      const msg = json.error ?? 'Ocurrió un error'
+      setServerError(msg)
+      toast.error(msg)
       return
     }
 

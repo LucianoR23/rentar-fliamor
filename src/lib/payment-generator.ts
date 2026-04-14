@@ -45,24 +45,19 @@ export async function generatePaymentWithLineItems(
   const price = Number(contract.currentPrice)
   const vat = calculateVat(price, contract.appliesVat, Number(contract.vatPercentage))
 
-  // Collect line items
   const lines: Omit<NewPaymentLineItem, 'paymentId'>[] = []
 
-  // 1. Rent
   lines.push({ type: 'rent', description: 'Alquiler', amount: String(price) })
 
-  // 2. VAT
   if (vat.vat > 0) {
     lines.push({ type: 'vat', description: `IVA 21% (sobre ${contract.vatPercentage}%)`, amount: String(vat.vat) })
   }
 
-  // 3. Group expenses
   if (unit.groupId) {
     const groupExpenseLines = await getGroupExpenseLinesForUnit(unit, month, year)
     lines.push(...groupExpenseLines)
   }
 
-  // 4. Manual charges
   const chargeRows = await db
     .select()
     .from(manualCharges)
@@ -82,11 +77,9 @@ export async function generatePaymentWithLineItems(
     })
   }
 
-  // Calculate total
   const total = lines.reduce((sum, l) => sum + Number(l.amount), 0)
   const dueDate = `${year}-${String(month).padStart(2, '0')}-05`
 
-  // Insert payment
   const [payment] = await db
     .insert(payments)
     .values({
@@ -101,7 +94,6 @@ export async function generatePaymentWithLineItems(
     })
     .returning()
 
-  // Insert line items
   if (lines.length > 0) {
     await db.insert(paymentLineItems).values(
       lines.map((l) => ({ ...l, paymentId: payment.id })),
@@ -122,7 +114,6 @@ export async function recalculatePaymentTotal(paymentId: string): Promise<void> 
   if (!payment) return
   if (payment.status !== 'pending' && payment.status !== 'overdue') return
 
-  // Get the contract and unit
   const [row] = await db
     .select({ contract: contracts, unit: units })
     .from(contracts)
@@ -131,7 +122,6 @@ export async function recalculatePaymentTotal(paymentId: string): Promise<void> 
     .limit(1)
   if (!row) return
 
-  // Delete existing extra line items (keep rent + vat)
   await db
     .delete(paymentLineItems)
     .where(
@@ -143,7 +133,6 @@ export async function recalculatePaymentTotal(paymentId: string): Promise<void> 
 
   const newLines: Omit<NewPaymentLineItem, 'paymentId'>[] = []
 
-  // Recalculate group expenses
   if (row.unit.groupId) {
     const groupExpenseLines = await getGroupExpenseLinesForUnit(
       row.unit as UnitForPayment,
@@ -153,7 +142,6 @@ export async function recalculatePaymentTotal(paymentId: string): Promise<void> 
     newLines.push(...groupExpenseLines)
   }
 
-  // Recalculate manual charges
   const chargeRows = await db
     .select()
     .from(manualCharges)
@@ -173,14 +161,12 @@ export async function recalculatePaymentTotal(paymentId: string): Promise<void> 
     })
   }
 
-  // Insert new extra line items
   if (newLines.length > 0) {
     await db.insert(paymentLineItems).values(
       newLines.map((l) => ({ ...l, paymentId })),
     )
   }
 
-  // Recalculate total from all line items
   const allLines = await db
     .select()
     .from(paymentLineItems)
@@ -229,13 +215,11 @@ export async function recalculatePaymentsForGroupExpense(
   month: number,
   year: number,
 ): Promise<void> {
-  // Find all units in this group
   const groupUnits = await db
     .select({ id: units.id })
     .from(units)
     .where(eq(units.groupId, groupId))
 
-  // Check if expense is scoped to specific units
   const scopedUnits = await db
     .select({ unitId: groupExpenseUnits.unitId })
     .from(groupExpenseUnits)
@@ -259,7 +243,6 @@ async function getGroupExpenseLinesForUnit(
 ): Promise<Omit<NewPaymentLineItem, 'paymentId'>[]> {
   if (!unit.groupId) return []
 
-  // Get group expenses for this period
   const expenses = await db
     .select()
     .from(groupExpenses)
@@ -273,13 +256,11 @@ async function getGroupExpenseLinesForUnit(
 
   if (expenses.length === 0) return []
 
-  // Get cost config for the group
   const costConfig = await db
     .select()
     .from(groupCostConfig)
     .where(eq(groupCostConfig.groupId, unit.groupId))
 
-  // Get all units in the group for distribution calculation
   const groupUnits = await db
     .select({ id: units.id, identifier: units.identifier, type: units.type })
     .from(units)
@@ -288,7 +269,6 @@ async function getGroupExpenseLinesForUnit(
   const lines: Omit<NewPaymentLineItem, 'paymentId'>[] = []
 
   for (const expense of expenses) {
-    // Check if this expense is scoped to specific units
     const scoped = await db
       .select({ unitId: groupExpenseUnits.unitId })
       .from(groupExpenseUnits)
@@ -298,10 +278,8 @@ async function getGroupExpenseLinesForUnit(
       ? groupUnits.filter((u) => scoped.some((s) => s.unitId === u.id))
       : groupUnits
 
-    // Check if this unit is in the applicable list
     if (!applicableUnits.some((u) => u.id === unit.id)) continue
 
-    // Calculate distribution
     const config = costConfig.map((c) => ({
       unitType: c.unitType,
       percentage: Number(c.percentage),

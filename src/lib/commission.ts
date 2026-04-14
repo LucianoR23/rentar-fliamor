@@ -2,7 +2,6 @@ import { eq } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { settings } from '@/lib/schema'
 
-// Re-export pure calculation function for convenience in server code
 export { calculateCommission, type CommissionBreakdown } from '@/lib/commission-calc'
 
 /**

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { toast } from 'sonner'
 import { CheckCircle2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -39,10 +40,13 @@ export function ExpenseForm() {
     })
     if (res.ok) {
       const created = (await res.json()) as { id: string }
+      toast.success('Gasto registrado')
       setCreatedId(created.id)
     } else {
       const json = (await res.json()) as { error?: string }
-      setServerError(json.error ?? 'Error al guardar')
+      const msg = json.error ?? 'Error al guardar'
+      setServerError(msg)
+      toast.error(msg)
     }
   }
 

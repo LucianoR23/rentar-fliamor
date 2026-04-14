@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { toast } from 'sonner'
 import {
   Dialog,
   DialogContent,
@@ -59,10 +60,13 @@ export function AdminResetPasswordDialog({
 
     if (!res.ok) {
       const body = await res.json().catch(() => ({}))
-      setServerError(body.error ?? 'Error al cambiar la contraseña')
+      const msg = body.error ?? 'Error al cambiar la contraseña'
+      setServerError(msg)
+      toast.error(msg)
       return
     }
 
+    toast.success('Contraseña cambiada')
     handleClose()
   }
 

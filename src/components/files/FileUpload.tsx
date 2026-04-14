@@ -1,6 +1,7 @@
 'use client'
 
 import { useRef, useState } from 'react'
+import { toast } from 'sonner'
 import { Upload, Loader2, CheckCircle2, AlertCircle } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
@@ -33,13 +34,17 @@ export function FileUpload({ entityType, entityId, onUploaded, accept = DEFAULT_
 
   async function uploadFile(file: File) {
     if (!ACCEPTED_MIME[file.type]) {
-      setError('Tipo de archivo no permitido. Solo JPG, PNG, WEBP y PDF.')
+      const msg = 'Tipo de archivo no permitido. Solo JPG, PNG, WEBP y PDF.'
+      setError(msg)
       setState('error')
+      toast.error(msg)
       return
     }
     if (file.size > 10 * 1024 * 1024) {
-      setError('El archivo supera el límite de 10 MB.')
+      const msg = 'El archivo supera el límite de 10 MB.'
+      setError(msg)
       setState('error')
+      toast.error(msg)
       return
     }
 
@@ -61,8 +66,10 @@ export function FileUpload({ entityType, entityId, onUploaded, accept = DEFAULT_
 
     if (!uploadRes.ok) {
       const json = await uploadRes.json().catch(() => ({})) as { error?: string }
-      setError(json.error ?? 'Error al iniciar la subida')
+      const msg = json.error ?? 'Error al iniciar la subida'
+      setError(msg)
       setState('error')
+      toast.error(msg)
       return
     }
 
@@ -82,6 +89,7 @@ export function FileUpload({ entityType, entityId, onUploaded, accept = DEFAULT_
     if (!putRes.ok) {
       setError('Error al subir el archivo a R2')
       setState('error')
+      toast.error('Error al subir el archivo')
       return
     }
 
@@ -103,10 +111,12 @@ export function FileUpload({ entityType, entityId, onUploaded, accept = DEFAULT_
     if (!confirmRes.ok) {
       setError('Error al confirmar el archivo')
       setState('error')
+      toast.error('Error al confirmar el archivo')
       return
     }
 
     setState('success')
+    toast.success('Archivo subido')
     onUploaded?.()
 
     setTimeout(() => setState('idle'), 2000)

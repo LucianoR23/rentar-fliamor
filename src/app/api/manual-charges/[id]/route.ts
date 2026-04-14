@@ -50,11 +50,9 @@ export async function PUT(request: NextRequest, { params }: Params) {
       .where(eq(manualCharges.id, id))
       .returning()
 
-    // Recalculate old period if it changed
     if (existing.periodMonth !== data.periodMonth || existing.periodYear !== data.periodYear || existing.unitId !== data.unitId) {
       await recalculatePaymentsForUnit(existing.unitId, existing.periodMonth, existing.periodYear)
     }
-    // Recalculate new/current period
     await recalculatePaymentsForUnit(data.unitId, data.periodMonth, data.periodYear)
 
     return NextResponse.json(updated)
@@ -78,7 +76,6 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
 
     await db.delete(manualCharges).where(eq(manualCharges.id, id))
 
-    // Recalculate affected payments
     await recalculatePaymentsForUnit(existing.unitId, existing.periodMonth, existing.periodYear)
 
     return new NextResponse(null, { status: 204 })

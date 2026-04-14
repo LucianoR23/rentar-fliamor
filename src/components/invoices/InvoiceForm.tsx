@@ -156,7 +156,9 @@ export function InvoiceForm({ contracts, templates }: InvoiceFormProps) {
 
       if (!res.ok) {
         const json = await res.json().catch(() => ({})) as { error?: string; details?: string }
-        setServerError(json.details ?? json.error ?? 'Error al facturar')
+        const msg = json.details ?? json.error ?? 'Error al facturar'
+        setServerError(msg)
+        toast.error(msg)
         return
       }
 
@@ -166,6 +168,7 @@ export function InvoiceForm({ contracts, templates }: InvoiceFormProps) {
       router.refresh()
     } catch {
       setServerError('Error de conexión')
+      toast.error('Error de conexión')
     } finally {
       setSubmitting(false)
       setConfirmOpen(false)

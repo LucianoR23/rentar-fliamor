@@ -23,7 +23,6 @@ export async function POST(request: NextRequest) {
       })
       .returning()
 
-    // If specific units were selected, save the associations
     if (data.unitIds && data.unitIds.length > 0) {
       await db.insert(groupExpenseUnits).values(
         data.unitIds.map((unitId) => ({
@@ -33,7 +32,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Recalculate pending/overdue payments affected by this expense
     await recalculatePaymentsForGroupExpense(created.id, data.groupId, data.periodMonth, data.periodYear)
 
     return NextResponse.json(created, { status: 201 })

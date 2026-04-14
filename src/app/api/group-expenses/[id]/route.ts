@@ -19,7 +19,6 @@ export async function DELETE(_req: NextRequest, { params }: Params) {
 
     await db.delete(groupExpenses).where(eq(groupExpenses.id, id))
 
-    // Recalculate affected payments after deletion
     await recalculatePaymentsForGroupExpense(id, existing.groupId, existing.periodMonth, existing.periodYear)
 
     return new NextResponse(null, { status: 204 })

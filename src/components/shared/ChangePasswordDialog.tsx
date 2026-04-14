@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { toast } from 'sonner'
 import {
   Dialog,
   DialogContent,
@@ -52,14 +53,15 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
     })
 
     if (error) {
-      setServerError(
-        error.code === 'INVALID_PASSWORD'
-          ? 'La contraseña actual es incorrecta'
-          : error.message ?? 'Error al cambiar la contraseña'
-      )
+      const msg = error.code === 'INVALID_PASSWORD'
+        ? 'La contraseña actual es incorrecta'
+        : error.message ?? 'Error al cambiar la contraseña'
+      setServerError(msg)
+      toast.error(msg)
       return
     }
 
+    toast.success('Contraseña cambiada')
     handleClose()
   }
 

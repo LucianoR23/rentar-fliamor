@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { useTheme } from 'next-themes'
@@ -65,6 +65,20 @@ export function UpdateCalculator({
   const [applied, setApplied] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // When nextUpdateDate changes (after router.refresh() brings new props),
+  // reset state so the button reappears if there are still pending updates
+  useEffect(() => {
+    if (applied && pendingCount > 0) {
+      setApplied(false)
+      setOpen(false)
+      setCalculated(false)
+      setNewPrice('')
+      setError(null)
+      setPriceInput(String(currentPrice))
+      setIndexInput(isIndex ? '' : String(updateValue ?? 0))
+    }
+  }, [nextUpdateDate]) // eslint-disable-line react-hooks/exhaustive-deps
+
   function handleCalculate() {
     setError(null)
     const price = Number(priceInput)
@@ -72,10 +86,13 @@ export function UpdateCalculator({
 
     if (!price || price <= 0) {
       setError('Ingresá un precio actual válido')
+      toast.error('Ingresá un precio actual válido')
       return
     }
     if (isIndex && (!value || value <= 0)) {
-      setError(`Ingresá el valor del índice ${updateType.toUpperCase()}`)
+      const msg = `Ingresá el valor del índice ${updateType.toUpperCase()}`
+      setError(msg)
+      toast.error(msg)
       return
     }
 
@@ -94,6 +111,7 @@ export function UpdateCalculator({
     const finalPrice = Number(newPrice)
     if (!finalPrice || finalPrice <= 0) {
       setError('El nuevo precio debe ser mayor a 0')
+      toast.error('El nuevo precio debe ser mayor a 0')
       return
     }
 

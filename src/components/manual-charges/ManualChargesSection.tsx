@@ -35,7 +35,6 @@ export function ManualChargesSection({ unitId, unitIdentifier }: ManualChargesSe
   const [editing, setEditing] = useState<ManualCharge | null>(null)
   const [deleting, setDeleting] = useState<string | null>(null)
 
-  // Form state
   const [description, setDescription] = useState('')
   const [amount, setAmount] = useState('')
   const [periodMonth, setPeriodMonth] = useState(new Date().getMonth() + 1)
@@ -74,9 +73,9 @@ export function ManualChargesSection({ unitId, unitIdentifier }: ManualChargesSe
   }
 
   async function handleSave() {
-    if (!description.trim()) { setError('La descripción es requerida'); return }
+    if (!description.trim()) { setError('La descripción es requerida'); toast.error('La descripción es requerida'); return }
     const numAmount = parseFloat(amount)
-    if (!numAmount || numAmount <= 0) { setError('El monto debe ser mayor a 0'); return }
+    if (!numAmount || numAmount <= 0) { setError('El monto debe ser mayor a 0'); toast.error('El monto debe ser mayor a 0'); return }
 
     setSaving(true)
     setError(null)
@@ -96,7 +95,9 @@ export function ManualChargesSection({ unitId, unitIdentifier }: ManualChargesSe
       })
       if (!res.ok) {
         const data = await res.json()
-        setError(data.error ?? 'Error al guardar')
+        const msg = data.error ?? 'Error al guardar'
+        setError(msg)
+        toast.error(msg)
         return
       }
       const saved = await res.json()

@@ -20,7 +20,6 @@ function formatDate(dateStr: string) {
 }
 
 export function ContractTimeline({ contract, updates }: ContractTimelineProps) {
-  // Sort newest first
   const sorted = [...updates].sort(
     (a, b) => new Date(b.updateDate).getTime() - new Date(a.updateDate).getTime()
   )

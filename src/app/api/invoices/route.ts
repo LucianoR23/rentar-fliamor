@@ -45,7 +45,6 @@ export async function POST(request: NextRequest) {
     const body: unknown = await request.json()
     const data = createInvoiceSchema.parse(body)
 
-    // Fetch contract with unit and tenant
     const contract = await db.query.contracts.findFirst({
       where: eq(contracts.id, data.contractId),
       with: { unit: true, tenant: true },
@@ -59,7 +58,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'El contrato no está activo' }, { status: 400 })
     }
 
-    // Check for duplicate invoice (same contract + period)
     const existing = await db.query.invoices.findFirst({
       where: and(
         eq(invoices.contractId, data.contractId),
@@ -79,12 +77,10 @@ export async function POST(request: NextRequest) {
     const unitType = contract.unit.type as UnitType
     const { invoiceType, cbteTipo } = resolveInvoiceType(taxCondition)
 
-    // Create AFIP client and get next voucher number
     const { afip, ptoVta } = createAfipClient()
     const lastVoucher = await afip.ElectronicBilling.getLastVoucher(ptoVta, cbteTipo)
     const cbteNro = lastVoucher + 1
 
-    // Build and send voucher
     const voucher = buildVoucherData({
       amount: data.amount,
       taxCondition,
@@ -97,10 +93,8 @@ export async function POST(request: NextRequest) {
       paymentMethod: data.paymentMethod,
     })
 
-    console.log('AFIP voucher data:', JSON.stringify(voucher.data, null, 2))
     const res = await afip.ElectronicBilling.createVoucher(voucher.data)
 
-    // Save to database
     const [invoice] = await db
       .insert(invoices)
       .values({

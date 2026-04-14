@@ -12,7 +12,13 @@ export const auth = betterAuth({
       role: { type: 'string', defaultValue: 'viewer', input: false },
     },
   },
-  session: { modelName: 'sessions' },
+  session: {
+    modelName: 'sessions',
+    cookieCache: {
+      enabled: true,
+      maxAge: 60 * 60 * 24, // 24 horas — el rol casi nunca cambia
+    },
+  },
   account: { modelName: 'accounts' },
   verification: { modelName: 'verifications' },
   emailAndPassword: {

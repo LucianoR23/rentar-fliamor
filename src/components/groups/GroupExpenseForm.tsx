@@ -93,7 +93,9 @@ export function GroupExpenseForm({ groupId, activeUnits, costConfig }: GroupExpe
       router.refresh()
     } else {
       const json = (await res.json()) as { error?: string }
-      setServerError(json.error ?? 'Error al guardar')
+      const msg = json.error ?? 'Error al guardar'
+      setServerError(msg)
+      toast.error(msg)
     }
   }
 

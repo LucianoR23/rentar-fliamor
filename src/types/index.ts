@@ -22,7 +22,6 @@ import type {
   stockLogs,
 } from '@/lib/schema'
 
-// Select types (lectura)
 export type User = InferSelectModel<typeof users>
 export type Tenant = InferSelectModel<typeof tenants>
 export type Group = InferSelectModel<typeof groups>
@@ -44,7 +43,6 @@ export type Repair = InferSelectModel<typeof repairs>
 export type RepairMaterial = InferSelectModel<typeof repairMaterials>
 export type StockLog = InferSelectModel<typeof stockLogs>
 
-// Insert types (escritura)
 export type NewUser = InferInsertModel<typeof users>
 export type NewTenant = InferInsertModel<typeof tenants>
 export type NewGroup = InferInsertModel<typeof groups>
@@ -66,7 +64,6 @@ export type NewRepair = InferInsertModel<typeof repairs>
 export type NewRepairMaterial = InferInsertModel<typeof repairMaterials>
 export type NewStockLog = InferInsertModel<typeof stockLogs>
 
-// Enum types
 export type UserRole = User['role']
 export type UnitType = Unit['type']
 export type UpdateType = Contract['updateType']
@@ -79,7 +76,6 @@ export type InvoiceType = Invoice['invoiceType']
 export type UnitOfMeasure = Material['unitOfMeasure']
 export type StockChangeReason = StockLog['reason']
 
-// Tipos con relaciones (para queries con joins)
 export type UnitWithGroup = Unit & { group: Group | null }
 export type ContractWithRelations = Contract & {
   unit: UnitWithGroup

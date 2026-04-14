@@ -214,8 +214,6 @@ interface AfipErrorWithResponse {
 export function getAfipErrorMessage(error: unknown): string {
   if (typeof error === 'object' && error !== null) {
     const err = error as AfipErrorWithResponse
-    // Log full error for debugging
-    console.error('AFIP error full object:', JSON.stringify(error, Object.getOwnPropertyNames(error as object), 2))
     if (err.response?.data) return JSON.stringify(err.response.data, null, 2)
     if (typeof err.message === 'string') return err.message
   }

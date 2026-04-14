@@ -81,7 +81,9 @@ function MaterialFormContent({ material, onClose }: { material?: Material | null
       }
     } else {
       const json = (await res.json().catch(() => ({}))) as { error?: string }
-      setServerError(json.error ?? 'Error al guardar')
+      const msg = json.error ?? 'Error al guardar'
+      setServerError(msg)
+      toast.error(msg)
     }
   }
 

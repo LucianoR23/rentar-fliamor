@@ -34,7 +34,6 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    // Set our custom role in the DB
     const [dbUser] = await db
       .update(users)
       .set({ role: data.role })

@@ -84,7 +84,9 @@ function RepairFormContent({
       setCreatedId(result.id)
     } else {
       const json = (await res.json().catch(() => ({}))) as { error?: string }
-      setServerError(json.error ?? 'Error al guardar')
+      const msg = json.error ?? 'Error al guardar'
+      setServerError(msg)
+      toast.error(msg)
     }
   }
 
@@ -127,7 +129,7 @@ function RepairFormContent({
                   <SelectValue placeholder="Seleccionar unidad" />
                 </SelectTrigger>
                 <SelectContent>
-                  {units.map((u) => (
+                  {[...units].sort((a, b) => a.identifier.localeCompare(b.identifier)).map((u) => (
                     <SelectItem key={u.id} value={u.id}>
                       {u.identifier}
                     </SelectItem>

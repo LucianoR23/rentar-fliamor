@@ -75,7 +75,9 @@ export function ContractForm({ defaultValues, contractId, units, tenants }: Cont
 
     if (!res.ok) {
       const json = await res.json().catch(() => ({})) as { error?: string }
-      setServerError(json.error ?? 'Ocurrió un error')
+      const msg = json.error ?? 'Ocurrió un error'
+      setServerError(msg)
+      toast.error(msg)
       return
     }
 
@@ -96,7 +98,7 @@ export function ContractForm({ defaultValues, contractId, units, tenants }: Cont
               <Select value={field.value ?? ''} onValueChange={field.onChange}>
                 <SelectTrigger className='cursor-pointer'><SelectValue placeholder="Seleccionar unidad" /></SelectTrigger>
                 <SelectContent>
-                  {units.map((u) => (
+                  {[...units].sort((a, b) => a.identifier.localeCompare(b.identifier)).map((u) => (
                     <SelectItem key={u.id} value={u.id}>
                       {u.identifier} — {UNIT_TYPE_LABELS[u.type as keyof typeof UNIT_TYPE_LABELS] ?? u.type}
                     </SelectItem>
@@ -111,7 +113,7 @@ export function ContractForm({ defaultValues, contractId, units, tenants }: Cont
               <Select value={field.value ?? ''} onValueChange={field.onChange}>
                 <SelectTrigger className='cursor-pointer'><SelectValue placeholder="Seleccionar inquilino" /></SelectTrigger>
                 <SelectContent>
-                  {tenants.map((t) => (
+                  {[...tenants].sort((a, b) => `${a.lastName}, ${a.firstName}`.localeCompare(`${b.lastName}, ${b.firstName}`)).map((t) => (
                     <SelectItem key={t.id} value={t.id}>
                       {t.lastName}, {t.firstName}
                     </SelectItem>

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { toast } from 'sonner'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 
@@ -28,10 +29,13 @@ export function CommissionForm({ defaultPercentage, canEdit }: CommissionFormPro
 
     if (res.ok) {
       setSaved(true)
+      toast.success('Comisión guardada')
       setTimeout(() => setSaved(false), 2000)
     } else {
       const body = (await res.json()) as { error?: string }
-      setError(body.error ?? 'Error al guardar')
+      const msg = body.error ?? 'Error al guardar'
+      setError(msg)
+      toast.error(msg)
     }
     setSaving(false)
   }
