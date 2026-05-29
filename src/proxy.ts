@@ -5,7 +5,10 @@ export async function proxy(request: NextRequest) {
   const session = await auth.api.getSession({ headers: request.headers })
 
   const { pathname } = request.nextUrl
-  const isPublic = pathname.startsWith('/sign-in')
+  const isPublic =
+    pathname.startsWith('/sign-in') ||
+    pathname.startsWith('/forgot-password') ||
+    pathname.startsWith('/reset-password')
   const isAuthApi = pathname.startsWith('/api/auth')
   const isCronApi = pathname.startsWith('/api/cron')
   if (!isPublic && !isAuthApi && !isCronApi && !session) {

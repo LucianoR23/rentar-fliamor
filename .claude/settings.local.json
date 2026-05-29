@@ -19,5 +19,8 @@
   },
   "enabledPlugins": {
     "vercel@claude-plugins-official": true
-  }
+  },
+  "enabledMcpjsonServers": [
+    "code-review-graph"
+  ]
 }
